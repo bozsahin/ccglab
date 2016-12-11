@@ -1,0 +1,85 @@
+<html>
+<head>
+<link rel="shortcut icon" href="ccglab2.ico" />
+<title>CCGlab: Lisp for CCG</title>
+<meta name="keywords" content="categorial grammar,grammar,cognitive science,linguistics"> 
+</head>
+
+<body TEXT="#ffffff" BGCOLOR="#709090" LINK="#ccbb66" VLINK="#444444">
+<big><big><code><b>CCGlab</b></code></big></big>
+<br>
+<hr>
+<font face="Times New Roman">
+Lisp code for the masses, for something not so massive.
+<hr>
+
+<p>
+<big><code>CCGlab</code></big> is a tool to experiment with  Combinatory Categorial Grammar (CCG).
+
+<p> We write <big><code>CCGlab</code></big> grammars as we do in CCG papers, and look at the output
+in almost paper format (ok, almost).
+
+<p> 
+It implements all known combinators of CCG, and then some, in all variants and powers.
+Lexical rules, slash modalities,
+and meta-categories such as (X\X)/X have been implemented. The manual
+describes the range of possible <big><code>CCGlab</code></big> grammars.
+
+<p>It also implements probabilistic CCG, aka PCCG. In its tool-supplied form, only lexical features are used, which you can amend.
+Parameter estimation and update are provided.
+Therefore model training is possible.
+Models and grammars use the same format.
+
+<p> In deduction mode, <code>CCGlab</code> gives you all parses of a string, along with logical forms.
+In induction mode, it gives you the most likely LF for a string, its most likely derivation, and the most likely derivation for any LF
+for the string. Both are based on the same CKY parse engine and the same grammar format.
+
+<p> The main features of <code>CCGlab</code> which distinguish it from other publicly available CCG code:
+<ul>
+<li> The logical form is associated with the entire category, via self-contained and lisp-free lambda-calculus.
+<li> Unification plays no linguistic role; basic categories and their atomic features are matched for term consistency only.
+<li> All combinators are available all the time, in their powers (linear, quadratic, cubic). 
+<li> Type-raising is not built-in, because it does not combine. Facilities are provided for it, such as 
+lexical rules and morpholexical generalizations.
+<li> We can do deduction on a statistically-trained grammar, and induction on a linguistically-motivated grammar, because the grammar 
+format is the same, and feature counts are always calculated by CKY independent of mode of use. The first one is helpful in fine-tuning a model. The second one is helpful in prioritizing the lexical assumptions.
+</ul>
+
+<p> 
+<code>CCGlab</code> is designed with linguists, cognitive scientists, and computational linguists
+in mind. 
+You can use it for quick check of CCG ideas, or for large-scale development
+of grammars and models.  We use it for <a href="https://dl.dropboxusercontent.com/u/65145236/CCGlab/cook.ccg">cooking</a> too.
+<hr>
+
+<h4><big><code>CCGlab</code></big> resources</h4>
+<table border="0">
+	<tr><td> <a href="https://github.com/bozsahin/ccglab">Repository</a></td><td> Github repo (repo is just a pointer to dropbox files, and the webhost)</td></tr>
+<tr> <td> <a href="https://dl.dropboxusercontent.com/u/65145236/CCGlab/CCGlab-manual.pdf">Manual</a></td>
+     <td> Latest manual. For reference, and for sneak preview.</td></tr>
+<tr> <td> <a href="downloads.html">Download/install</a></td>
+	<td> Single zip file for <code>CCGlab</code> versions; 
+		it unfolds to a subdirectory named <big><code>CCGlab</code></big>.
+Easy installer.</td></tr>
+<tr> <td> <a href="upgrades.html">Upgrades</a></td>
+	<td> Minor revisions which do not need install or reinstall.</td></tr>
+<tr> <td> <a href="http://www.gnu.org/licenses/gpl">License</a> </td>
+     <td> Publicly available software, with GNU General Public License. One day it will be hardware.
+</tr>
+<tr><td><a href="https://dl.dropboxusercontent.com/u/65145236/CCGlab/ecsotm.ccg">Example</a></td>
+	<td> The linguist's equivalent of "hello, world!". And a <a href="https://www.dropbox.com/s/37bzqsq0yhhs1rv/2016-09-23%2021.52.28.jpg?dl=0">world</a> in which the ivory tower linguistic example comes to life.</td></tr>
+<tr><td><a href="grammars.html">Unplugged</a></td>
+<td> Some grammars as a grammarian would write them, which you can plug in to <big><code>CCGlab</code></big>.</td></tr>
+<tr>
+<td> <a href="releases.html">Release notes</a></td>
+<td>What's new in <code>CCGlab</code> versions</td></tr>
+<td> <a href="tips.html">Tips</a></td>
+<td>Practical information about writing <code>.ccg </code> grammars, working with projects, updates, the meaning of life etc.</td></tr>
+</table>
+<hr>
+<p>disclaimer: We're not related to any real lab. We dwell
+in cyberspace, which is currently dropbox's public space and github.
+<hr>
+</font>
+</body>
+</html>
