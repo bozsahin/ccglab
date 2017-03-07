@@ -8,4 +8,6 @@ If you already have an ANSI Common Lisp, it can work with it too.
 
 Right now, the git repo is just a pointer to the latest in CCGlab at dropbox.
 
+Current version is 3.0, use (which-ccglab) in your system to find out if you've got the latest.
+
 --Cem Bozsahin
