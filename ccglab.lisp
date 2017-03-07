@@ -1,2 +1,2 @@
 (defun which-ccglab ()
-  "CCGlab version 2.0, upgrade 2")
+  "CCGlab version 3.0")
