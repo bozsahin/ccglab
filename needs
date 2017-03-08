@@ -1,0 +1,11 @@
+You need a linux/unix system, either real or in a virtual box such as Oracle's.
+That will give you what CCGlab needs for fully automatic install:
+====================
+bash (shell for linux)
+apt-get or brew (installers for linux or MacOS systems)
+wget (downloader)
+zip (compressor/decompressor)
+=====================
+
+They come mostly standard in many linuxes. To make sure, do 'which apt-get' etc to find out.
+You need them before CCGlab install.
