@@ -1,0 +1,21 @@
+=================================
+For version 3.0  -- March 2017
+=================================
+
+Changes from the previous version:
+
+1. Hash table defaults are now much larger, for long training sessions.
+2. Supervision files need not be coded by hand. There is now a converter
+   from a high-level sentence : LF syntax to low-level .sup file.
+3. You can z-score the parameters to see how far they deviate
+   from the mean in terms of std deviation.
+4. The rules can be controlled by switches.
+5. Saving a training session is now less threatening to original
+   grammar.
+6. suptokens bash script is added to implement #2.
+7. Some shortcuts are added for top level functions. See the end of
+   ccg.lisp. Some session saves in contrib/ use them.
+8. You can control LF display of a derivation using show-lf and hide-lf.
+
+Thanks for using CCGlab.
+-cem bozsahin
