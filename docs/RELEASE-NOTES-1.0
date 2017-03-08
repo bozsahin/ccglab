@@ -1,0 +1,29 @@
+=================================
+For version 1.0  -- February 2016
+=================================
+
+CCGlab has been released in this version with the deductive component tested
+thoroughly, and the modeling component partially.
+
+The modeling component cannot be fully automated. It provides
+a functionality which seems difficult and perhaps redundant for
+models to develop individually: checking for LF equivalence by
+reducing the final LFs two ways: i) normal-order and applicative-order
+evaluation, which is used for partial verification of derived LFs,
+ii) checking for alpha-equivalence of LFs.
+
+These are crucial for training with sentence fragments, 
+and with sentences with inner lambdas, such as those with
+relative clauses or coordination in them. 
+We thought the modeler wouldn't want to reinvent
+beta-normalization and alpha-equivalence of lambda-calculus.
+They are also crucial to get your parse ranking right (see formula 1
+in the manual). This much is already built-in.
+
+I intend to add inside-outside algorithm for CCG and gradient ascent 
+to further help with the modeling part. 
+
+The plan is to make them usable off-the-shelf if you only have 
+lexical features (i.e if the only model parameters are lexical elements).
+
+-cem bozsahin
