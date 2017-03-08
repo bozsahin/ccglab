@@ -1,7 +1,7 @@
 You need a linux/unix system, either real or in a virtual box such as Oracle's.
 A virtual box can be installed in Windows, which effectively gives CCGlab in Windows.
 Linuxes and MacOSs are native environments for CCGlab.
-You might need to install brew in a Mac. Others and standard.
+You might need to install brew in a Mac. Others are standard.
 
 That will give you what CCGlab needs for fully automatic install:
 ====================
