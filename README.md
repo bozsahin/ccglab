@@ -8,4 +8,23 @@ If you already have an ANSI Common Lisp, it can work with it too.
 
 Current version is 3.0, use (which-ccglab) in your system to find out whether you've got the latest.
 
+SOFTWARE REQUIREMENTS:
+
+You need a linux/unix system, either real or in a virtual box such as Oracle's.
+A virtual box can be installed in Windows, which effectively gives CCGlab in Windows.
+Linuxes and MacOSs are native environments for CCGlab.
+You might need to install brew in a Mac. Others are standard.
+
+That will give you what CCGlab needs for fully automatic install:
+====================
+bash (shell for linux)
+sed (stream editor)
+apt-get or brew (installers for linux or MacOS systems)
+wget (downloader)
+zip (compressor/decompressor)
+=====================
+
+They come mostly standard in many linuxes. To make sure, do 'which apt-get' etc to find out.
+You need them before CCGlab install.
+
 --Cem Bozsahin
