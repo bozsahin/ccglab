@@ -1,6 +1,5 @@
-% - Cem Bozsahin 2015, Ankara, Lisbon
-% This file contains the CCG categories in Steedman & Bozsahin PFTL paper.
-% References in comments are to version 6.10
+% - Cem Bozsahin & Mark Steedman 2015-2017, Ankara, Lisbon, Edinburgh
+% This file contains the CCG categories in Steedman & Bozsahin PFTL paper and its supplement.
 
 wall n := N : \x. !wall x;
 company n := N : \x. !company x;
