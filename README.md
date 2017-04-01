@@ -6,6 +6,8 @@ All you need is the easy-install.zip. Unzip it in a directory. When you run the 
 This is Common Lisp code. Easy-installer installs a CL for you (SBCL), and downloads and installs all necesssary files.
 If you already have an ANSI Common Lisp, it can work with it too.
 
+(The main reason for not gitting the repo is automatic install gets various software from various sources.)
+
 Current version is 3.1, use (which-ccglab) in your system to find out whether you've got the latest.
 
 SOFTWARE REQUIREMENTS:
