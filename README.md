@@ -3,7 +3,8 @@ Combinatory Categorial Grammar (CCG): All combinators, native input format, pars
 
 All you need is the easy-install.zip. You can get it by download or git clone; it doesn't matter.
 
-Unzip it in a directory. When you run the revealed script you will get CCGlab/ in that directory if it is a fresh install. Otherwise it will ask you how to upgrade an old CCGlab.
+Unzip it in a directory. When you run the revealed script you will get CCGlab/ in that directory if it is a fresh install. Otherwise it will ask you how to upgrade an old CCGlab. (You need to be able to <code>sudo</code> on your machine
+if you want the installer to install Lisp and rlwrap for you.)
 
 This is Common Lisp code. Easy-installer installs a CL for you (SBCL), and downloads and installs all necesssary files.
 If you already have an ANSI Common Lisp, it can work with it too.
