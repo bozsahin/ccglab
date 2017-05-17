@@ -32,6 +32,8 @@ wget (downloader)
 
 zip (compressor/decompressor)
 
+sudo (if you want the installer to install SBCL and rlwrap for you--recommended)
+
 They come mostly standard in many linuxes. To make sure, do 'which apt-get' etc to find out.
 You need them before CCGlab install.
 
