@@ -25,7 +25,7 @@ Linuxes and MacOSs are native environments for CCGlab.
 
 That will give you what CCGlab needs for fully automatic install:
 
-<code>bash, sed, apt-get/brew, wget, sudo </code>(you need the last one only if you want the installer to install SBCL and rlwrap for you--highly recommended)
+<code>bash, sed, apt-get/brew, wget, sudo </code>(you need the last one only if you want the installer to install SBCL Lisp and <code>rlwrap</code> for you--highly recommended)
 
 With the exception of <code>apt-get/brew</code> the rest is already available in most if not all linuxes. 
 To make sure, do e.g. <code>which apt-get</code> to find out.
