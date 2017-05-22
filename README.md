@@ -1,15 +1,12 @@
 # ccglab
 Combinatory Categorial Grammar (CCG): All combinators, native input format, parsing to logical form (aka semantic parsing), parameter estimation for probabilistic CCG.
 
-All you need is the easy-install.zip. You can get it by download or git clone; it doesn't matter.
+This branch is for gitters. Clone this branch only and run the run-to-complete-install to get the extras needed, and set up
+the paths so that CCGlab is usable from anywhere on your machine.
 
-Unzip it in a directory. When you run the revealed script you will get CCGlab/ in that directory if it is a fresh install. Otherwise it will ask you how to upgrade an old CCGlab. (You need to be able to <code>sudo</code> on your machine
-if you want the installer to install Lisp and rlwrap for you.)
+You need to be able to <code>sudo</code> on your machine if you want the installer to install Lisp and rlwrap for you.
 
-This is Common Lisp code. Easy-installer installs a CL for you (SBCL), and downloads and installs all necesssary files.
-If you already have an ANSI Common Lisp, it can work with it too.
-
-(The main reason for not gitting the repo is automatic install gets various software from various sources.)
+This is Common Lisp code. If you already have an ANSI Common Lisp, it can work with it too.
 
 Current version is 3.1, use (which-ccglab) in your system to find out whether you've got the latest.
 
@@ -30,11 +27,9 @@ apt-get or brew (installers for linux or MacOS systems)
 
 wget (downloader)
 
-zip (compressor/decompressor)
-
 sudo (if you want the installer to install SBCL and rlwrap for you--recommended)
 
-They come mostly standard in many linuxes. To make sure, do 'which apt-get' etc to find out.
-You need them before CCGlab install.
+With the exception of apt-get/brew the rest is already available in most if not all linuxes. 
+To make sure, do 'which apt-get' etc to find out.
 
 --Cem Bozsahin
