@@ -12,19 +12,22 @@ Current version is 3.1, use (which-ccglab) in your system to find out whether yo
 SOFTWARE REQUIREMENTS:
 
 You need a linux/unix system, either real or in a virtual box such as Oracle's: https://www.virtualbox.org/.
-That will give you <code>apt-get</code> (the most common package installer).
+
+If you want the installer to install a Common Lisp and <code>rlwrap</code> for you, you need either
+<ul>
+<li> <code>apt-get</code> (the most common package installer for all linuxes).
+<li> <code>brew</code> https://brew.sh/ (a common installer for MacOS)
+</ul>
 
 A virtual box can be installed in Windows, which effectively gives CCGlab in Windows.
 
 Linuxes and MacOSs are native environments for CCGlab.
 
-You need to install brew in a Mac: https://brew.sh/.
-
 That will give you what CCGlab needs for fully automatic install:
 
 <code>bash, sed, apt-get/brew, wget, sudo </code>(you need the last one only if you want the installer to install SBCL and rlwrap for you--highly recommended)
 
-With the exception of apt-get/brew the rest is already available in most if not all linuxes. 
+With the exception of <code>apt-get/brew</code> the rest is already available in most if not all linuxes. 
 To make sure, do e.g. <code>which apt-get</code> to find out.
 
 --Cem Bozsahin
