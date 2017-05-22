@@ -24,9 +24,9 @@ You might need to install brew in a Mac: https://brew.sh/.
 
 That will give you what CCGlab needs for fully automatic install:
 
-<code>bash, sed, apt-get/brew, wget, sudo </code>(if you want the installer to install SBCL and rlwrap for you--recommended)
+<code>bash, sed, apt-get/brew, wget, sudo </code>(you need the last one only if you want the installer to install SBCL and rlwrap for you--highly recommended)
 
 With the exception of apt-get/brew the rest is already available in most if not all linuxes. 
-To make sure, do e.g. 'which apt-get' to find out.
+To make sure, do e.g. <code>which apt-get</code> to find out.
 
 --Cem Bozsahin
