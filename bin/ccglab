@@ -1,0 +1,2 @@
+#!/bin/bash
+$RLWRAP $CCGLAB_LISP --load $LALR_HOME/lalrparser.lisp --load $CCGLAB_HOME/bin/ccg.lisp --eval '(reset-globals)' --eval '(welcome)'
