@@ -41,13 +41,13 @@ if [ ! -v CCGLAB_HOME ] && [ ! -v CCGLAB_LISP ] && [ ! -v LALR_HOME ]; then
   read -p "...CCGlab install: What is the full path of your preferred Lisp executable? " locallisp
   if [ -f $locallisp ]; then 
     echo "...CCGlab install: Local lisp found. Downloading and installing lalrparser.lisp"
-    read -p "...CCGlab install: lalrparser.lisp package is external to CCGlab but required.\n   Where do you want to install it?" lalr
-    if [ -d $lalr ] && [ -w $lalr]; then
-    	cd $lalr
-      	wget -v --no-check-certificate --backups=3 http://web.science.mq.edu.au/~mjohnson/code/lalrparser.lisp
+    read -p "...CCGlab install: lalrparser.lisp package is external to CCGlab but required. Where do you want to install it? " lalr
+    if [ -d $lalr ] && [ -w $lalr ]; then
+      cd $lalr
+      wget -v --no-check-certificate --backups=3 http://web.science.mq.edu.au/~mjohnson/code/lalrparser.lisp
     else
-	echo "$lalr: No such writable directory! Re-run this script to finish the partial install."
-	exit -1
+      echo "$lalr: No such writable directory! Re-run this script to finish the partial install."
+      exit -1
     fi
     printf '%s\n' '# stuff added by CCGlab installer' >> ~/.bashrc
     printf '%s\n%s\n%s\n%s\n' "export CCGLAB_HOME=$ccglabdir" "export CCGLAB_LISP=$locallisp" "export LALR_HOME=$lalr" "export PATH=\$CCGLAB_HOME/bin:\$PATH" >> ~/.bashrc
@@ -82,10 +82,10 @@ else
   else
     read -p "   What is the new location for CCGlab home ? " newloc
     if [ -d $newloc ] && [ -w $newloc ]; then
-	cd $newloc
+      cd $newloc
     else
-	echo "$newloc: Not a writable directory. Re-run this script to finish the partial install"
-	exit -1
+      echo "$newloc: Not a writable directory. Re-run this script to finish the partial install"
+      exit -1
     fi
     printf '%s\n' '# stuff added by CCGlab installer' >> ~/.bashrc
     printf '%s\n' "export CCGLAB_HOME=`pwd`/ccglab" >> ~/.bashrc
