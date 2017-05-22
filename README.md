@@ -1,11 +1,9 @@
 # ccglab
 Combinatory Categorial Grammar (CCG): All combinators, native input format, parsing to logical form (aka semantic parsing), parameter estimation for probabilistic CCG.
 
-This branch is for gitters. Choose a directory, then clone this branch only as below, and run the <code>run-to-complete-ccglab-install</code> to get the extras needed, and to set up the paths so that CCGlab is usable from anywhere in your user account.
+This branch is for gitters. Choose a directory, then clone this branch only, as shown below, and run the <code>run-to-complete-ccglab-install</code> in the repo to get the extras needed, and to set up the paths so that CCGlab is usable from anywhere in your user account.
 
 <code>git clone -b git-install --single-branch git://github.com/bozsahin/ccglab.git</code>
-
-You need to be able to <code>sudo</code> on your machine if you want the installer to install Lisp and rlwrap for you.
 
 This is Common Lisp code. If you already have an ANSI Common Lisp, it can work with it too.
 
@@ -20,7 +18,7 @@ A virtual box can be installed in Windows, which effectively gives CCGlab in Win
 
 Linuxes and MacOSs are native environments for CCGlab.
 
-You might need to install brew in a Mac: https://brew.sh/.
+You need to install brew in a Mac: https://brew.sh/.
 
 That will give you what CCGlab needs for fully automatic install:
 
