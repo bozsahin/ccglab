@@ -23,7 +23,7 @@ A virtual box can be installed in Windows, which effectively gives CCGlab in Win
 
 Linuxes and MacOSs are native environments for CCGlab.
 
-That will give you what CCGlab needs for fully automatic install:
+That will give you what CCGlab needs for fully automatic install and run:
 
 <code>bash, sed, apt-get/brew, wget, sudo </code>(you need the last one only if you want the installer to install SBCL Lisp and <code>rlwrap</code> for you--highly recommended)
 
