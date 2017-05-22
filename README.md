@@ -3,7 +3,7 @@ Combinatory Categorial Grammar (CCG): All combinators, native input format, pars
 
 This branch is for gitters. Clone this branch only as below, and run the run-to-complete-ccglab-install to get the extras needed, and to set up the paths so that CCGlab is usable from anywhere in your user account.
 
-git clone -b git-install --single-branch git://github.com/bozsahin/ccglab.git
+<code>git clone -b git-install --single-branch git://github.com/bozsahin/ccglab.git</code>
 
 You need to be able to <code>sudo</code> on your machine if you want the installer to install Lisp and rlwrap for you.
 
