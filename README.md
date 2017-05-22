@@ -1,7 +1,7 @@
 # ccglab
 Combinatory Categorial Grammar (CCG): All combinators, native input format, parsing to logical form (aka semantic parsing), parameter estimation for probabilistic CCG.
 
-This branch is for gitters. Clone this branch only as below, and run the <code>run-to-complete-ccglab-install</code> to get the extras needed, and to set up the paths so that CCGlab is usable from anywhere in your user account.
+This branch is for gitters. Choose a directory, then clone this branch only as below, and run the <code>run-to-complete-ccglab-install</code> to get the extras needed, and to set up the paths so that CCGlab is usable from anywhere in your user account.
 
 <code>git clone -b git-install --single-branch git://github.com/bozsahin/ccglab.git</code>
 
