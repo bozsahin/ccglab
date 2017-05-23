@@ -25,7 +25,7 @@ else
 fi
 # check to see if lalr has been installed before
 if [ ! -v LALR_HOME ]; then
-  read -p $'..CCGlab install: lalrparser.lisp package is external to CCGlab but required.\n   Where do you want to install it? ' lalr
+  read -p $'...CCGlab install: lalrparser.lisp package is external to CCGlab but required.\n   Where do you want to install it? ' lalr
   if [ -d $lalr ] && [ -w $lalr ]; then
     cd $lalr
     wget -v --no-check-certificate --backups=3 http://web.science.mq.edu.au/~mjohnson/code/lalrparser.lisp
@@ -101,4 +101,5 @@ printf '%s\n' 'if [ -f ~/.bashrc ]; then source ~/.bashrc; fi' >> ~/.bash_profil
 echo "   Don't forget to look at git repo once in a while for updates. Install is easier next time."
 echo "...CCGlab install: completed."
 echo "To run, first open a fresh terminal, or logout and login. Then do"
+echo " "
 echo '"$ ccglab" at command line $ '
