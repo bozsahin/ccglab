@@ -18,7 +18,6 @@ else
 fi
 if [ -v locallisp ] && [ -f $locallisp ]; then 
   echo "...CCGlab install: got it."
-  ccglabdir=$locallisp
 else
   echo "...CCGlab install: There is no such local Lisp."
   unset CCGLAB_LISP
@@ -77,14 +76,12 @@ if [ -v CCGLAB_HOME ]; then
     read -p "   What is the new location for CCGlab home ? " newloc
     if [ -d $newloc ] && [ -w $newloc ]; then
       ccglabdir=$newloc
-      echo "...OK. I assume $ccglabdir has a copy of CCGlab since install no longer downloads but uses git"
+      echo "...OK. I assume $ccglabdir has a copy of ccglab since install no longer downloads but uses git"
     else
       echo "$newloc: Not a writable directory. Re-run this script to finish the partial install"
       exit -1
     fi
   fi
-else
-  ccglabdir=`pwd`
 fi
 printf '%s\n' '# stuff added by CCGlab installer' >> ~/.bashrc
 if [ -f /usr/local/bin/rlwrap ] || [ -f /usr/bin/rlwrap ] || [ -f /sw/bin/rlwrap ] || [ -f /sw/local/bin/rlwrap ]; then
@@ -101,5 +98,4 @@ printf '%s\n' 'if [ -f ~/.bashrc ]; then source ~/.bashrc; fi' >> ~/.bash_profil
 echo "   Don't forget to look at git repo once in a while for updates. Install is easier next time."
 echo "...CCGlab install: completed."
 echo "To run, first open a fresh terminal, or logout and login. Then do"
-echo " "
-echo '"$ ccglab" at command line $ '
+echo 'ccglab'
