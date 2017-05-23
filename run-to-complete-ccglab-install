@@ -9,7 +9,7 @@ echo '   You can execute "which sbcl" or "which ccl" etc in another terminal to 
 if [ -f /usr/local/bin/sbcl ] || [ -f /usr/bin/sbcl ] || [ -f /usr/local/bin/ccl ] || [ -f /usr/bin/ccl ]; then
   echo "...CCGlab install: An installed ANSI Common Lisp is found"
   echo "   If you do not want to use an existing Lisp reply NONE"
-  read -p "   : What is the full path of your preferred Lisp executable? " locallisp
+  read -p "   What is the full path of your preferred Lisp executable? " locallisp
 else
   unset locallisp
   echo '...CCGlab install: SBCL or CCL not found in /usr/bin or /usr/local/bin'
@@ -20,6 +20,7 @@ if [ -v locallisp ] && [ -f $locallisp ]; then
   echo "...CCGlab install: got it."
 else
   echo "...CCGlab install: There is no such local Lisp."
+  echo '   I leave the Lisp installation to you. Set the CCGLAB_LISP variable in .bashrc to your binary'
   unset CCGLAB_LISP
 fi
 # check to see if lalr has been installed before
@@ -76,7 +77,7 @@ if [ -v CCGLAB_HOME ]; then
     read -p "   What is the new location for CCGlab home ? " newloc
     if [ -d $newloc ] && [ -w $newloc ]; then
       ccglabdir=$newloc
-      echo "...OK. I assume $ccglabdir has a copy of ccglab since install no longer downloads but uses git"
+      echo "...OK. Make sure $ccglabdir has a copy of ccglab since install no longer downloads but uses git"
     else
       echo "$newloc: Not a writable directory. Re-run this script to finish the partial install"
       exit -1
