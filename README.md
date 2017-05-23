@@ -30,9 +30,10 @@ That will give you what CCGlab needs for fully automatic install and run:
 With the exception of <code>apt-get/brew</code> the rest is available out-of-the-box in most if not all linuxes. 
 To make sure, do e.g. <code>which apt-get</code> to find out. If you don't get a response, you don't have it.
 
-NO NEED FOR REINSTALL: If you already have a git-installed CCGlab, just do the following for updates:
+<em>NO NEED FOR REINSTALL:</em> If you already have a git-installed CCGlab, just do the following for updates:
 
 <code>cd $CCGLAB_HOME</code>
+
 <code>git pull</code>
 
 enjoy.
