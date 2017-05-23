@@ -11,11 +11,12 @@ if [ -f /usr/local/bin/sbcl ] || [ -f /usr/bin/sbcl ] || [ -f /usr/local/bin/ccl
   echo "                   If you do not want to use an existing Lisp reply NONE"
   read -p "                 : What is the full path of your preferred Lisp executable? " locallisp
 else
+  unset locallisp
   echo '...CCGlab install: SBCL or CCL not found in /usr/bin or /usr/local/bin'
   echo '                   SBCL cite: www.sbcl.org  CCL cite: ccl.clozure.com'
   echo '                   Both are free and very good Common Lisps'
 fi
-if [ -f $locallisp ]; then 
+if [ -v locallisp ] && [ -f $locallisp ]; then 
   echo "...CCGlab install: got it."
   ccglabdir=$locallisp
 else
