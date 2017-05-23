@@ -8,13 +8,13 @@ echo "   Looking for SBCL or CCL Common Lisp in your machine"
 echo '   You can execute "which sbcl" or "which ccl" etc in another terminal to find out the full path'
 if [ -f /usr/local/bin/sbcl ] || [ -f /usr/bin/sbcl ] || [ -f /usr/local/bin/ccl ] || [ -f /usr/bin/ccl ]; then
   echo "...CCGlab install: An installed ANSI Common Lisp is found"
-  echo "                   If you do not want to use an existing Lisp reply NONE"
-  read -p "                 : What is the full path of your preferred Lisp executable? " locallisp
+  echo "   If you do not want to use an existing Lisp reply NONE"
+  read -p "   : What is the full path of your preferred Lisp executable? " locallisp
 else
   unset locallisp
   echo '...CCGlab install: SBCL or CCL not found in /usr/bin or /usr/local/bin'
-  echo '                   SBCL cite: www.sbcl.org  CCL cite: ccl.clozure.com'
-  echo '                   Both are free and very good Common Lisps'
+  echo '   SBCL cite: www.sbcl.org  CCL cite: ccl.clozure.com'
+  echo '   Both are free and very good Common Lisps'
 fi
 if [ -v locallisp ] && [ -f $locallisp ]; then 
   echo "...CCGlab install: got it."
@@ -31,7 +31,7 @@ if [ ! -v LALR_HOME ]; then
     wget -v --no-check-certificate --backups=3 http://web.science.mq.edu.au/~mjohnson/code/lalrparser.lisp
     lalr=`pwd`
   else
-    echo "$lalr: No such writable directory! Re-run this script to finish the partial install."
+    echo "   $lalr: No such writable directory! Re-run this script to finish the partial install."
     exit -1
   fi
 else
@@ -48,14 +48,14 @@ if [ ! -v CCGLAB_LISP ]; then
   fi
   if test $packager != ":" ; then
 	echo "...CCGLAB install: you have an installer for standard packages"
-	echo "                   I can install SBCL and rlwrap from standard repositories"
-	read -p '                   Do you want to install SBCL [y/n]? ' auxinstall
+	echo "   I can install SBCL and rlwrap from standard repositories"
+	read -p '   Do you want to install SBCL [y/n]? ' auxinstall
 	if test $auxinstall = "y" ; then
 		echo "...CCGlab install: WARNING: you need sudo access now"
 		sudo $packager install sbcl
 		locallisp=/usr/bin/sbcl
 	fi
-	read -p '                   Do you want to install rlwrap [y/n]? ' auxinstall
+	read -p '   Do you want to install rlwrap [y/n]? ' auxinstall
 	if test $auxinstall = "y" ; then
 		echo "...CCGlab install: WARNING: you need sudo access now"
 		sudo $packager install rlwrap
@@ -77,6 +77,7 @@ if [ -v CCGLAB_HOME ]; then
     read -p "   What is the new location for CCGlab home ? " newloc
     if [ -d $newloc ] && [ -w $newloc ]; then
       ccglabdir=$newloc
+      echo "...OK. I assume $ccglabdir has a copy of CCGlab since install no longer downloads but uses git"
     else
       echo "$newloc: Not a writable directory. Re-run this script to finish the partial install"
       exit -1
@@ -98,6 +99,6 @@ printf '%s\n' '# end of stuff added by CCGlab installer' >> ~/.bashrc
 printf '%s\n' '# stuff added by CCGlab installer' >> ~/.bash_profile
 printf '%s\n' 'if [ -f ~/.bashrc ]; then source ~/.bashrc; fi' >> ~/.bash_profile
 echo "   Don't forget to look at git repo once in a while for updates. Install is easier next time."
-echo "To run, first open a fresh terminal, or logout and login. Then do"
-echo '   "$ ccglab" at command line $ '
 echo "...CCGlab install: completed."
+echo "To run, first open a fresh terminal, or logout and login. Then do"
+echo '"$ ccglab" at command line $ '
