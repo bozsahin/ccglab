@@ -20,7 +20,7 @@ if [ -v locallisp ] && [ -f $locallisp ]; then
   echo "...CCGlab install: got it."
 else
   echo "...CCGlab install: There is no such local Lisp."
-  echo '   I leave the Lisp installation to you. Set the CCGLAB_LISP variable in .bashrc to your binary'
+  echo '   I might leave the Lisp installation to you after another try. Set the CCGLAB_LISP variable in .bashrc to your binary'
   unset CCGLAB_LISP
 fi
 # check to see if lalr has been installed before
@@ -77,7 +77,7 @@ if [ -v CCGLAB_HOME ]; then
     read -p "   What is the new location for CCGlab home ? " newloc
     if [ -d $newloc ] && [ -w $newloc ]; then
       ccglabdir=$newloc
-      echo "...OK. Make sure $ccglabdir has a copy of ccglab since install no longer downloads but uses git"
+      echo "...OK. Make sure $ccglabdir has a copy of ccglab since install no longer downloads it but uses git"
     else
       echo "$newloc: Not a writable directory. Re-run this script to finish the partial install"
       exit -1
