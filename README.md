@@ -9,6 +9,7 @@ This branch is for gitters. FOR FIRST TIME INSTALL:
 <br>This will create the repo in <code>h/ccglab</code>
 <li> <code>cd h/ccglab</code>
 <li> <code>run-to-complete-ccglab-install</code> in the repo to get the extras needed, and to set up the paths so that CCGlab is usable from anywhere in your user account.
+<li> Open a new bash terminal and run <code>ccglab</code> from anywhere.
 </ol>
 
 This is Common Lisp code. If you already have an ANSI Common Lisp, it can work with it too.
