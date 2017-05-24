@@ -38,8 +38,9 @@ To make sure, do e.g. <code>which apt-get</code> to find out. If you don't get a
 
 <em>NO NEED TO REINSTALL:</em> If you already have a git-installed up-and-running CCGlab, just do the following for updates:
 
-<code>cd $CCGLAB_HOME</code>
-
-<code>git pull</code>
+<ol>
+<li><code>cd $CCGLAB_HOME</code>
+<li><code>git pull</code>
+</ol>
 
 enjoy.--Cem Bozsahin
