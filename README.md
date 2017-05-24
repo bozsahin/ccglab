@@ -43,4 +43,4 @@ To make sure, do e.g. <code>which apt-get</code> to find out. If you don't get a
 <code>git pull</code>
 
 enjoy.
---Cem Bozsahin
+--Cem Boz&scedil ahin
