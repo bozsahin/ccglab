@@ -12,6 +12,8 @@ This branch is for gitters. FOR FIRST TIME INSTALL:
 <li> Open a new bash terminal and run <code>ccglab</code> script from anywhere.
 </ol>
 
+Please read the rest of this document before you run the script.
+
 This is Common Lisp code. If you already have an ANSI Common Lisp, it can work with it too.
 
 Current version is 3.1, use (which-ccglab) in your system to find out whether you've got the latest.
