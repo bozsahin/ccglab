@@ -4,7 +4,7 @@ Combinatory Categorial Grammar (CCG): All combinators, native input format, pars
 This branch is for gitters. FOR FIRST TIME INSTALL:
 
 <ol>
-<li> <code>cd <h></code>, where <code><h></code> is your chosen home for CCGlab.
+<li> <code>cd h</code>, where <code>h</code> is your chosen home for CCGlab.
 <li> <code>git clone -b git-install --single-branch git://github.com/bozsahin/ccglab</code>
 <br>This will create the repo in <code>h/ccglab</code>
 <li> <code>cd h/ccglab</code>
