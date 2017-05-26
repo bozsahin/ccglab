@@ -46,4 +46,20 @@ To make sure, do e.g. <code>which apt-get</code> to find out. If you don't get a
 <li><code>git pull</code>
 </ol>
 
+<em>Other linuxes and install:</em>
+
+<ul>
+<li> The installer script works for Debian-based linuxes (ubuntu, debian etc.) and MacOS.
+<li> If you have another linux, just clone this repo, get <a href="http://web.science.mq.edu.au/~mjohnson/code/lalrparser.lisp">lalr</a>
+somewhere in your machine, and set and <code>export</code> the bash variables 
+<ol>
+<li><code>CCGLAB_HOME</code> to where the <code>ccglab</code> repo is
+<li><code>LALR_HOME</code> to where you saved lalrparser.lisp
+<li><code>CCGLAB_LISP</code> to full path of your ANSI Common Lisp binary
+<li><code>RLWRAP</code> to path of rlwrap if you have it, otherwise nil, i.e. <code>RLWRAP=</code>
+<li><code>PATH=$CCGLAB_HOME/bin:$PATH</code> to overrride earlier installs of ccglab.
+<li> Then open a new <code>bash</code> terminal and run <code>ccglab</code>
+</ol>
+</ul>
+
 enjoy.--Cem Bozsahin
