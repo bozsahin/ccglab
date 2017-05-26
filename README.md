@@ -67,14 +67,13 @@ Here is my local set up in <code>.bashrc</code>:
 
 <code>
 
-export CCGLAB_HOME=$HOME/mysrc/CCGlab/commonlisp
+export CCGLAB_HOME=$HOME/mysrc/myrepos/ccglab
 
 export LALR_HOME=$HOME/mysrc/lisp
 
 export CCGLAB_LISP=/usr/local/bin/sbcl
 
-export RLWRAP=rlwrap
-
+export RLWRAP=rlwrap <br>
 export PATH=:.:$CCGLAB_HOME/bin:$PATH
 </code>
 
