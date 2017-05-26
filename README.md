@@ -67,9 +67,13 @@ Here is my local set up:
 
 <code>
 export CCGLAB_HOME=$HOME/mysrc/CCGlab/commonlisp
+
 export LALR_HOME=$HOME/mysrc/lisp
+
 export CCGLAB_LISP=/usr/local/bin/sbcl
+
 export RLWRAP=rlwrap
+
 export PATH=:.:$CCGLAB_HOME/bin:$PATH
 </code>
 enjoy.--Cem Bozsahin
