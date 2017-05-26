@@ -63,7 +63,7 @@ somewhere in your machine, and set and <code>export</code> the bash variables:
 </ol>
 </ul>
 
-Here is my local set up:
+Here is my local set up in <code>.bashrc</code>:
 
 <code>
 
