@@ -50,9 +50,9 @@ To make sure, do e.g. <code>which apt-get</code> to find out. If you don't get a
 
 <ul>
 <li> The installer script works for Debian-based linuxes (ubuntu, debian etc.) and MacOS.
-<li> If you use Windows, install virtualbox, set an Ubuntu machine (easiest one) and follow the instructions above for install.
-<li> If you have another linux, just clone this repo, get <a href="http://web.science.mq.edu.au/~mjohnson/code/lalrparser.lisp">lalr</a>
-somewhere in your machine, and set and <code>export</code> the bash variables 
+<li> If you use Windows, install virtualbox, set an Ubuntu machine (easiest one), and follow the instructions above for install.
+<li> If you have another linux (arch, fedora, suse etc.), just clone this repo, get <a href="http://web.science.mq.edu.au/~mjohnson/code/lalrparser.lisp">lalr</a>
+somewhere in your machine, and set and <code>export</code> the bash variables:
 <ol>
 <li><code>CCGLAB_HOME</code> to where the <code>ccglab</code> repo is
 <li><code>LALR_HOME</code> to where you saved lalrparser.lisp
