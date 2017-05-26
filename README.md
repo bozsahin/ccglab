@@ -1,7 +1,7 @@
 # ccglab
 Combinatory Categorial Grammar (CCG): All combinators, native input format, parsing to logical form (aka semantic parsing), parameter estimation for probabilistic CCG.
 
-This branch is for gitters. FOR FIRST TIME INSTALL:
+This branch is for gitters. <em>FOR FIRST TIME INSTALL:</em>
 
 <ol>
 <li> <code>cd h</code>, where <code>h</code> is your chosen home for CCGlab.
@@ -46,7 +46,7 @@ To make sure, do e.g. <code>which apt-get</code> to find out. If you don't get a
 <li><code>git pull</code>
 </ol>
 
-<em>Other linuxes and install:</em>
+<em>OTHER LINUXES AND INSTALL:</em>
 
 <ul>
 <li> The installer script works for Debian-based linuxes (ubuntu, debian etc.) and MacOS.
