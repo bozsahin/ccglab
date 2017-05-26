@@ -64,17 +64,11 @@ somewhere in your machine, and set and <code>export</code> the bash variables:
 </ul>
 
 Here is my local set up in <code>.bashrc</code>:
-
 <code>
-
-export CCGLAB_HOME=$HOME/mysrc/CCGlab/commonlisp
-
-export LALR_HOME=$HOME/mysrc/lisp
-
-export CCGLAB_LISP=/usr/local/bin/sbcl
-
-export RLWRAP=rlwrap
-
-export PATH=:.:$CCGLAB_HOME/bin:$PATH
+<br>export CCGLAB_HOME=$HOME/mysrc/CCGlab/commonlisp
+<br>export LALR_HOME=$HOME/mysrc/lisp
+<br>export CCGLAB_LISP=/usr/local/bin/sbcl
+<br>export RLWRAP=rlwrap
+<br>export PATH=:.:$CCGLAB_HOME/bin:$PATH
 </code>
 enjoy.--Cem Bozsahin
