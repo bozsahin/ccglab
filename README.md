@@ -64,8 +64,8 @@ somewhere in your machine, and set and <code>export</code> the bash variables:
 </ul>
 
 Here is my local set up in <code>.bashrc</code>:
-<code>
 
+<code>
 export CCGLAB_HOME=$HOME/mysrc/CCGlab/commonlisp
 
 export LALR_HOME=$HOME/mysrc/lisp
