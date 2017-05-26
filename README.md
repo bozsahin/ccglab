@@ -73,8 +73,10 @@ export LALR_HOME=$HOME/mysrc/lisp
 
 export CCGLAB_LISP=/usr/local/bin/sbcl
 
-export RLWRAP=rlwrap <br>
+export RLWRAP=rlwrap
+
 export PATH=:.:$CCGLAB_HOME/bin:$PATH
+
 </code>
 
 enjoy.--Cem Bozsahin
