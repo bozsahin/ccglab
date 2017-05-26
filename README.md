@@ -79,4 +79,18 @@ export PATH=:.:$CCGLAB_HOME/bin:$PATH
 
 </code>
 
+And here is my <code>.bash_profile</code>
+
+<code>
+
+f [ -f ~/.bashrc ]; then
+
+           source ~/.bashrc
+
+fi
+
+</code>
+
+For your info: that's what the installer does, from fetching lalrparser.lisp to setting variables, paths and bash files.
+
 enjoy.--Cem Bozsahin
