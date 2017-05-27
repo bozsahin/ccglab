@@ -64,15 +64,19 @@ somewhere in your machine, and set and <code>export</code> the following bash va
 </ul>
 
 Here is my local set up in <code>.bashrc</code>:
+
            export CCGLAB_HOME=$HOME/mysrc/myrepos/ccglab
            export LALR_HOME=$HOME/mysrc/lisp
            export CCGLAB_LISP=/usr/local/bin/sbcl
            export RLWRAP=rlwrap
            export PATH=:.:$CCGLAB_HOME/bin:$PATH 
+           
 And here is my <code>.bash_profile</code>
+
            if [ -f ~/.bashrc ]; then
                       source ~/.bashrc
            fi
+
 The installer does all that and more, from fetching lalrparser.lisp to setting variables, paths and bash files and installing
 SBCL and rlwrap.
 
