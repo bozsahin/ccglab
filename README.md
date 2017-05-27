@@ -63,7 +63,7 @@ somewhere in your machine, and set and <code>export</code> the following bash va
 </ol>
 </ul>
 
-Here is my local set up in <code>.bashrc</code>:
+Here is my local set up in <code>~/.bashrc</code> file (create one if you don't have it):
 
            export CCGLAB_HOME=$HOME/mysrc/myrepos/ccglab
            export LALR_HOME=$HOME/mysrc/lisp
