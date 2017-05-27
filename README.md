@@ -64,19 +64,12 @@ somewhere in your machine, and set and <code>export</code> the following bash va
 </ul>
 
 Here is my local set up in <code>.bashrc</code>:
-<code>
 
-export CCGLAB_HOME=$HOME/mysrc/myrepos/ccglab
-
-export LALR_HOME=$HOME/mysrc/lisp
-
-export CCGLAB_LISP=/usr/local/bin/sbcl
-
-export RLWRAP=rlwrap
-
-export PATH=:.:$CCGLAB_HOME/bin:$PATH
-
-</code>
+           export CCGLAB_HOME=$HOME/mysrc/myrepos/ccglab
+           export LALR_HOME=$HOME/mysrc/lisp
+           export CCGLAB_LISP=/usr/local/bin/sbcl
+           export RLWRAP=rlwrap
+           export PATH=:.:$CCGLAB_HOME/bin:$PATH
 
 And here is my <code>.bash_profile</code>
 
