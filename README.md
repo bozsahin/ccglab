@@ -89,6 +89,7 @@ fi
 
 </code>
 
-That's what the installer does, from fetching lalrparser.lisp to setting variables, paths and bash files.
+The installer does all that and more, from fetching lalrparser.lisp to setting variables, paths and bash files and installing
+SBCL and rlwrap.
 
 enjoy.--Cem Bozsahin
