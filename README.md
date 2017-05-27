@@ -63,7 +63,7 @@ somewhere in your machine, and set and <code>export</code> the following bash va
 </ol>
 </ul>
 
-Here is my local set up in <code>~/.bashrc</code> file (create one if you don't have it):
+Here is my local setup in <code>~/.bashrc</code> file (create one if you don't have it):
 
            export CCGLAB_HOME=$HOME/mysrc/myrepos/ccglab
            export LALR_HOME=$HOME/mysrc/lisp
@@ -71,7 +71,7 @@ Here is my local set up in <code>~/.bashrc</code> file (create one if you don't 
            export RLWRAP=rlwrap
            export PATH=:.:$CCGLAB_HOME/bin:$PATH 
            
-And here is my <code>.bash_profile</code>
+And here is my <code>~/.bash_profile</code>
 
            if [ -f ~/.bashrc ]; then
                       source ~/.bashrc
