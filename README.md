@@ -79,15 +79,10 @@ export PATH=:.:$CCGLAB_HOME/bin:$PATH
 </code>
 
 And here is my <code>.bash_profile</code>
-<code>
 
-if [ -f ~/.bashrc ]; then
-
-           source ~/.bashrc
-
-fi
-
-</code>
+           if [ -f ~/.bashrc ]; then
+                      source ~/.bashrc
+           fi
 
 The installer does all that and more, from fetching lalrparser.lisp to setting variables, paths and bash files and installing
 SBCL and rlwrap.
