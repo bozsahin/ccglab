@@ -71,7 +71,7 @@ Here is my local setup in <code>~/.bashrc</code> file (create one if you don't h
            export RLWRAP=rlwrap
            export PATH=:.:$CCGLAB_HOME/bin:$PATH 
            
-And here is my <code>~/.bash_profile</code>
+And here is my <code>~/.bash_profile</code> file (create one if you don't have it---bash may or may not use both):
 
            if [ -f ~/.bashrc ]; then
                       source ~/.bashrc
