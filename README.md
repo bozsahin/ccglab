@@ -16,7 +16,7 @@ Please read the rest of this document before you run the script.
 
 This is Common Lisp code. If you already have an ANSI Common Lisp, it can work with it too.
 
-Current version is 3.1, use (which-ccglab) in your system to find out whether you've got the latest.
+Current version is 3.1, use <code>(which-ccglab)</code> in your system to find out whether you've got the latest.
 
 SOFTWARE REQUIREMENTS:
 
