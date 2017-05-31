@@ -39,12 +39,12 @@ That will give you what CCGlab needs for fully automatic install and run:
 With the exception of <code>apt-get/brew</code> the rest is available out-of-the-box in most if not all linuxes. 
 To make sure, do e.g. <code>which apt-get</code> to find out. If you don't get a response, you don't have it.
 
-<em>NEW TO UBUNTU/DEBIAN?</em>
+<em>NEW TO UBUNTU?</em>
 
-These systems have built-in packages for SBCL and rlwrap, which <code>apt-get</code> in the ccglab install script
+Ubuntu has built-in packages for SBCL and rlwrap, which <code>apt-get</code> in the ccglab install script
 can install very easily. 
 
-It's just that Ubuntu/Debian starts with non-basic packages turned off so that they can't seem to find SBCL/rlwrap
+It's just that Ubuntu starts with non-basic packages turned off so that it can't seem to find SBCL/rlwrap
 in the beginning. Do the following to enable them before running
 the ccglab install script.
 
