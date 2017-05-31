@@ -41,10 +41,10 @@ To make sure, do e.g. <code>which apt-get</code> to find out. If you don't get a
 
 <em>NEW TO UBUNTU/DEBIAN?</em>
 
-These systems have built-in packges for SBCL and rlwrap, which <code>apt-get</code> in the ccglab install script
+These systems have built-in packages for SBCL and rlwrap, which <code>apt-get</code> in the ccglab install script
 can install very easily. 
 
-It's just that Ubuntu/Debian starts with non-basic packages turned off so that they can't seem to find sbcl/rlwrap
+It's just that Ubuntu/Debian starts with non-basic packages turned off so that they can't seem to find SBCL/rlwrap
 in the beginning. Do the following to enable them before running
 the ccglab install script.
 
