@@ -48,7 +48,7 @@ can install very easily.
 
 It's just that Ubuntu starts with non-basic packages turned off so that it can't seem to find SBCL/rlwrap
 in the beginning. Do the following to enable them before running
-the ccglab install script.
+the ccglab install completion script.
 
            sudo add-apt-repository universe
            sudo add-apt-repository multiverse
