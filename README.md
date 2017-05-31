@@ -59,6 +59,10 @@ the ccglab install script.
 <li><code>git pull</code>
 </ol>
 
+<em>INSTALLING with LEGACY ccglab</em>
+
+If you have a pre-git CCGlab installed, the new install script will ask whether you want to upgrade that one.
+
 <em>OTHER LINUXES AND INSTALL:</em>
 
 <ul>
