@@ -311,7 +311,7 @@
   (format t "  Most weighted derivation  : ~A ~%" *cky-max*))
 
 (defun which-ccglab ()
-  "CCGlab, version 3.1")
+  "CCGlab, version 3.3")
 
 (defun welcome()
   (format t "~%===================================================")
@@ -826,7 +826,8 @@
     (cond ((load lfile :verbose t :if-does-not-exist nil) ; this will set the *ccg-grammar* list 
 	   (setf *lex-rules-table* nil)
 	   (setf *loaded-grammar* lfile)
-	   (dolist (l *ccg-grammar*)(and (not (lexp l)) (push-t (hash-lexrule l) *lex-rules-table*)))
+	   (dolist (l *ccg-grammar*)(and (not (lexp l)) (push-t (hash-lexrule l) *lex-rules-table*))) ; we get reversed list of rules
+	   (setf *lex-rules-table* (reverse *lex-rules-table*)) ; it is important that the rules apply in the order specified
 	   (format t "~%Project [~A] is assumed to consist of" pname)
            (format t "~%-----------------------------------------------------------------------------")
 	   (format t "~%  CCG grammar source : ~A $" sname)
@@ -2185,38 +2186,39 @@
       (and *b-apply* (b-special ht1 ht2))))
 
 (defun apply-unary-rules (i j m)
-  "applies all the lex rules to the result in CKY cell i j k, where k=1,...m.
+  "applies all the unary rules to the result in CKY cell i j k, where k=1,...m.
   Creates more types of same length in the cell i j starting with m+1.
+  NB. A later rule can see results of earlier rules; the loop goes up to r, not m.
   The semantics of lexical rule is application of its 'outsem to lf of current cell.
   Hence lf 'insem is syntactic sugar, a recipe to write lfs of lexical rules compositionally."
-  (cond ((null (gethash (list i j 1) *cky-hashtable*))
+  (cond ((or (null (gethash (list i j 1) *cky-hashtable*)) (null *lex-rules-table*))
 	 (return-from apply-unary-rules nil))
 	(t (let ((r m))
-             (loop for k from 1 to m do
-	       (dolist (lr *lex-rules-table*)
-		 (multiple-value-bind (match b1 b2)
-		   (cat-match (gethash 'SYN (nv-list-val 'SOLUTION (gethash (list i j k) *cky-hashtable*)))
+	     (dolist (lr *lex-rules-table*) ; i use lexical rules as synonymous with unary rules
+	       (loop for k from 1 to r do
+		     (multiple-value-bind (match b1 b2)
+		       (cat-match (gethash 'SYN (nv-list-val 'SOLUTION (gethash (list i j k) *cky-hashtable*)))
 				  (gethash 'INSYN lr))
-		   (and match	   
-			(setf r (+ r 1))
-			  (let ((newht (make-cky-entry-hashtable))
-				(nlr (copy-hashtable (gethash 'OUTSYN lr))))
-			    (setf (gethash 'SEM newht)      
-				  (&a (gethash 'OUTSEM lr)
-				        (gethash 'SEM (nv-list-val 'SOLUTION 
+		       (and match	   
+			    (setf r (+ r 1))
+			    (let ((newht (make-cky-entry-hashtable))
+				  (nlr (copy-hashtable (gethash 'OUTSYN lr))))
+			      (setf (gethash 'SEM newht)      
+				    (&a (gethash 'OUTSEM lr)
+					(gethash 'SEM (nv-list-val 'SOLUTION 
 								   (gethash (list i j k) *cky-hashtable*)))))
-			    (setf (gethash 'PARAM newht) (f-param-inner-prod 
-				      (gethash 'PARAM lr)
-				      (gethash 'PARAM (nv-list-val 'SOLUTION
-							     (gethash (list i j k) *cky-hashtable*)))))
-			    (setf (gethash 'INDEX newht) (gethash 'INDEX lr))
-			    (setf (gethash 'KEY newht) (gethash 'KEY lr))
-			    (setf (gethash 'SYN newht) (realize-binds nlr b2))
-			    (setf (gethash (list i j r) *cky-hashtable*)
+			      (setf (gethash 'PARAM newht) (f-param-inner-prod 
+							     (gethash 'PARAM lr)
+							     (gethash 'PARAM (nv-list-val 'SOLUTION
+							       (gethash (list i j k) *cky-hashtable*)))))
+			      (setf (gethash 'INDEX newht) (gethash 'INDEX lr))
+			      (setf (gethash 'KEY newht) (gethash 'KEY lr))
+			      (setf (gethash 'SYN newht) (realize-binds nlr b2))
+			      (setf (gethash (list i j r) *cky-hashtable*)
 				    (list 
 				      (list 'LEFT (list i j k))
-                                          (list 'RIGHT (list i j k))
-					  (list 'SOLUTION newht)))))))))))
+				      (list 'RIGHT (list i j k))
+				      (list 'SOLUTION newht)))))))))))
   t)
 
 (defun ccg-deduce (itemslist)
@@ -2780,7 +2782,7 @@
   (apply #'cky-pprint-probs args))
 (defun sg (&rest args)
   (apply #'save-grammar args))
-(defun st (&rest args)
+(defun savet (&rest args)
   (apply #'save-training args))
 (defun z (&rest args)
   (apply #'z-score-grammar args))
