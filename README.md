@@ -63,7 +63,7 @@ the ccglab install script.
 
 If you have a pre-git CCGlab installed, the new install script will ask whether you want to upgrade that one.
 
-<em>OTHER LINUXES AND INSTALL:</em>
+<em>OTHER LINUXES AND/OR MANUAL INSTALL:</em>
 
 <ul>
 <li> The installer script works for Debian-based linuxes (ubuntu, debian etc.) and MacOS.
