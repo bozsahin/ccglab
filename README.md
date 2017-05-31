@@ -1,7 +1,9 @@
 # ccglab
 Combinatory Categorial Grammar (CCG): All combinators, native input format, parsing to logical form (aka semantic parsing), parameter estimation for probabilistic CCG.
 
-This branch is for gitters. <em>FOR FIRST TIME INSTALL:</em>
+This branch is for gitters. 
+
+<em>FOR FIRST TIME INSTALL:</em>
 
 <ol>
 <li> <code>cd h</code>, where <code>h</code> is your chosen home for CCGlab.
@@ -18,7 +20,7 @@ This is Common Lisp code. If you already have an ANSI Common Lisp, it can work w
 
 Current version is 3.1, use <code>(which-ccglab)</code> in your system to find out whether you've got the latest.
 
-SOFTWARE REQUIREMENTS:
+<em>SOFTWARE REQUIREMENTS:</em>
 
 You need a linux/unix system, either real or in a virtual box such as Oracle's: https://www.virtualbox.org/.
 
