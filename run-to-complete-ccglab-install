@@ -70,14 +70,14 @@ fi
 # check to see if there is already a ccglab
 if [ -v CCGLAB_HOME ]; then
   echo '...You have a CCGlab system installed.'
-  read -p "   Do you want me to upgrade the one in CCGLAB_HOME = $CCGLAB_HOME [y/n] ? " reinstall
+  read -p "   Do you want me to stay at CCGLAB_HOME = $CCGLAB_HOME [y/n] ? " reinstall
   if test $reinstall = "y" ; then
-    echo '...Using existing system. Best to do a "git pull" to refresh.'
+    echo '...Using existing system. Best to do a "git pull" there to refresh.'
   else
     read -p "   What is the new location for CCGlab home ? " newloc
     if [ -d $newloc ] && [ -w $newloc ]; then
       ccglabdir=$newloc
-      echo "...OK. Make sure $ccglabdir has a copy of ccglab since install no longer downloads it but uses git"
+      echo "...OK. Make sure $ccglabdir has a copy of ccglab repo since install no longer downloads it but uses git"
     else
       echo "$newloc: Not a writable directory. Re-run this script to finish the partial install"
       exit -1
