@@ -3,7 +3,7 @@ Combinatory Categorial Grammar (CCG): All combinators, native input format, pars
 
 This branch is for gitters. 
 
-<em>FOR FIRST TIME INSTALL (assuming you have <code>git</code> :</em>
+<em>FOR FIRST TIME INSTALL (assuming you have <code>git</code>):</em>
 
 <ol>
 <li> <code>cd h</code>, where <code>h</code> is your chosen home for CCGlab.
