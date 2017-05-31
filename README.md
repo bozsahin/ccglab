@@ -18,7 +18,7 @@ This branch is for gitters.
 
 This is Common Lisp code. If you already have an ANSI Common Lisp, it can work with it too.
 
-Current version is 3.1, use <code>(which-ccglab)</code> in your system to find out whether you've got the latest.
+Current version is 3.3, use <code>(which-ccglab)</code> in your system to find out whether you've got the latest.
 
 <em>SOFTWARE REQUIREMENTS:</em>
 
