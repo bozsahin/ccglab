@@ -70,6 +70,8 @@ fi
 # check to see if there is already a ccglab
 if [ -v CCGLAB_HOME ]; then
   echo '...You have a CCGlab system installed.'
+  echo '...If it is not a git repo, then it is legacy CCGlab code'
+  echo '...Consider a new location if it is not a git repo'
   read -p "   Do you want me to stay at CCGLAB_HOME = $CCGLAB_HOME [y/n] ? " reinstall
   if test $reinstall = "y" ; then
     echo '...Using existing system. Best to do a "git pull" there to refresh.'
