@@ -16,6 +16,12 @@ Lisp code for the masses, for something not so massive.
 <p>
 <big><code>CCGlab</code></big> is a tool to experiment with  Combinatory Categorial Grammar (CCG).
 
+ 
+<p> 
+<code>CCGlab</code> is designed with linguists, cognitive scientists, and computational linguists
+in mind. 
+You can use it for quick check of CCG ideas, or for large-scale development
+of grammars and models.
 <p> We write <big><code>CCGlab</code></big> grammars as we do in CCG papers, and look at the output
 in almost paper format (ok, almost).
 
@@ -38,18 +44,14 @@ for the string. Both are based on the same CKY parse engine and the same grammar
 <ul>
 <li> The logical form is associated with the entire category, via self-contained and lisp-free lambda-calculus.
 <li> Unification plays no linguistic role; basic categories and their atomic features are matched for term consistency only.
-<li> All combinators are available all the time, in their powers (linear, quadratic, cubic). 
+<li> By default all combinators are available all the time, in their powers (linear, quadratic, cubic). 
+ They all have on/off switches for experimentation.
 <li> Type-raising is not built-in, because it does not combine. Facilities are provided for it, such as 
 lexical rules and morpholexical generalizations.
 <li> We can do deduction on a statistically-trained grammar, and induction on a linguistically-motivated grammar, because the grammar 
 format is the same, and feature counts are always calculated by CKY independent of mode of use. The first one is helpful in fine-tuning a model. The second one is helpful in prioritizing the lexical assumptions.
 </ul>
 
-<p> 
-<code>CCGlab</code> is designed with linguists, cognitive scientists, and computational linguists
-in mind. 
-You can use it for quick check of CCG ideas, or for large-scale development
-of grammars and models.
 <hr>
 
 <h4><big><code>CCGlab</code></big> resources</h4>
@@ -58,9 +60,10 @@ of grammars and models.
      <td> Latest manual. For reference, and for sneak preview.</td></tr>
 <tr><td> <a href="https://github.com/bozsahin/ccglab">Repository</a></td><td> Github repo (where the easy installer is).
      Also contains sample grammars and release notes.</td></tr>
-     <tr><td>Needs</td><td>Some real linux or MacOS or virtualbox linux for Windows; apt-get or brew, wget, zip, bash, sed.</td></tr>
+     <tr><td>Needs</td><td>Some real linux or MacOS or virtualbox linux for Windows; git, apt-get or brew, sudo, wget, bash, sed.</td></tr>
      
-     <tr><td></td><td>Most of these come standard in linuxes/MacOS. Use <code>which app</code> to check, where app is one of these.</td></tr>
+     <tr><td></td><td>Most of these come standard in linuxes/MacOS. git, apt-get/brew and sudo might need install by you.
+          Use <code>which app</code> to check, where app is one of these.</td></tr>
 <tr> <td> <a href="http://www.gnu.org/licenses/gpl">License</a> </td>
      <td> Publicly available software, with GNU General Public License. One day it will be hardware.
 </tr>
@@ -70,7 +73,7 @@ of grammars and models.
 </table>
 <hr>
 <p>disclaimer: We're not related to any real lab. We dwell
-in cyberspace, which is currently dropbox's public space and github.
+in cyberspace, which is currently github.
 <hr>
 </font>
 </body>
