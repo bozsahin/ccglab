@@ -8,7 +8,7 @@ Combinatory Categorial Grammar (CCG): All combinators, native input format, pars
 <li> <code>git clone git://github.com/bozsahin/ccglab</code>
 <br>This will create the repo in <code>h/ccglab</code>
 <li> <code>cd h/ccglab</code>
-<li> <code>run-to-complete-first-time-install</code> in the repo to get the extras needed, and to set up the paths so that CCGlab is usable from anywhere in your user account.
+<li> Execute <code>run-to-complete-first-time-install</code> bash script in the repo to get the extras needed, and to set up the paths so that CCGlab is usable from anywhere in your user account.
 <li> Open a new bash terminal and run <code>ccglab</code> script from anywhere.
 </ol>
 
