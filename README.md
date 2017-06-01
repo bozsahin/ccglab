@@ -7,7 +7,7 @@ This branch is for gitters.
 
 <ol>
 <li> <code>cd h</code>, where <code>h</code> is your chosen home for CCGlab.
-<li> <code>git clone -b master --single-branch git://github.com/bozsahin/ccglab</code>
+<li> <code>git clone git://github.com/bozsahin/ccglab</code>
 <br>This will create the repo in <code>h/ccglab</code>
 <li> <code>cd h/ccglab</code>
 <li> <code>run-to-complete-ccglab-install</code> in the repo to get the extras needed, and to set up the paths so that CCGlab is usable from anywhere in your user account.
