@@ -6,7 +6,7 @@ This branch is for gitters.
 <em>FOR FIRST TIME INSTALL (assuming you have <code>git</code>):</em>
 
 <ol>
-<li> <code>cd h</code>, where <code>h</code> is your chosen home for CCGlab.
+<li> <code>cd h</code>, where <code>h</code> is your chosen parent directory for CCGlab.
 <li> <code>git clone git://github.com/bozsahin/ccglab</code>
 <br>This will create the repo in <code>h/ccglab</code>
 <li> <code>cd h/ccglab</code>
