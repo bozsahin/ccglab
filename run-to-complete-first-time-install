@@ -103,7 +103,7 @@ if [ -v reinstall ]; then
   echo "! You have re-installed ccglab. Make sure its home is a git repo"
   echo 'For later updates, just cd to that directory and do "git pull"'
 fi
-echo "! Don't forget to look at git repo once in a while for updates"
+echo '! Don't forget to look at git repo once in a while for updates: just do "git pull"'
 echo "CCGlab install: completed."
 echo "To run, first open a fresh terminal, or logout and login. Then do"
 echo 'ccglab'
