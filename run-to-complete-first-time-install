@@ -66,8 +66,7 @@ if [ ! -v locallisp ]; then
 	echo "! apt-get or brew not found. I leave Common Lisp and rlwrap handling to you."
   fi
 else
-  echo "Using the Lisp at $CCGLAB_LISP for CCGlab"
-  locallisp=$CCGLAB_LISP
+  echo "Using the Lisp at $locallisp for CCGlab"
 fi
 # check to see if there is already a ccglab
 if [ -v CCGLAB_HOME ]; then
