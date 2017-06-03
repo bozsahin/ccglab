@@ -19,7 +19,7 @@ if [ -v locallisp ] && [ -f $locallisp ]; then
 else
   echo "! CCGlab install: There is no such local Lisp."
   echo '! Set the CCGLAB_LISP variable in .bashrc to your binary if I cannot install SBCL'
-  unset CCGLAB_LISP
+  unset locallisp
 fi
 # check to see if lalr has been installed before
 if [ ! -v LALR_HOME ]; then
@@ -36,7 +36,7 @@ else
   lalr=$LALR_HOME
 fi
 # check to see if a Lisp for ccglab has been installed before
-if [ ! -v CCGLAB_LISP ]; then
+if [ ! -v locallisp ]; then
   packager=:
   if [ -f /usr/local/bin/brew ] || [ -f /sw/bin/brew ] || [ -f /sw/local/bin/brew ]; then
     	packager=brew
@@ -53,11 +53,15 @@ if [ ! -v CCGLAB_LISP ]; then
 		sudo $packager install sbcl
 		locallisp=/usr/bin/sbcl
 	fi
-	read -p '? Do you want to install rlwrap [y/n]? ' auxinstall
-	if test $auxinstall = "y" ; then
-		echo "CCGlab install: WARNING: you need sudo access now"
+	if [ -f /usr/local/bin/rlwrap ] || [ -f /usr/bin/rlwrap ] || [ -f /sw/bin/rlwrap ] || [ -f /sw/local/bin/rlwrap ]; then
+		echo "Using rlwrap"
+	else 
+           read -p '? Do you want to install rlwrap [y/n]? ' auxinstall
+	   if test $auxinstall = "y" ; then
+		echo "! CCGlab install: WARNING: you need sudo access now"
 		sudo $packager install rlwrap
-	fi
+	   fi
+        fi
   else
 	echo "! apt-get or brew not found. I leave Common Lisp and rlwrap handling to you."
   fi
@@ -87,7 +91,7 @@ fi
 printf '%s\n' '# stuff added by CCGlab installer' >> ~/.bashrc
 if [ -f /usr/local/bin/rlwrap ] || [ -f /usr/bin/rlwrap ] || [ -f /sw/bin/rlwrap ] || [ -f /sw/local/bin/rlwrap ]; then
   printf '%s\n' 'export RLWRAP=rlwrap' >> ~/.bashrc
-  echo "CCGlab install: Found rlwrap. Using it for ccglab"
+  echo "CCGlab install: Got rlwrap. Using it for ccglab"
 else
   printf '%s\n' 'export RLWRAP=' >> ~/.bashrc
   echo '! CCGlab install: rlwrap not found. If installed later, change the RLWRAP variable in .bashrc'
