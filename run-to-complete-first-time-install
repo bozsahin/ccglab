@@ -10,7 +10,7 @@ echo 'You can execute "which sbcl" or "which ccl" etc in another terminal to fin
 if [ -f /usr/local/bin/sbcl ] || [ -f /usr/bin/sbcl ] || [ -f /usr/local/bin/ccl ] || [ -f /usr/bin/ccl ]; then
   echo 'CCGlab install: An installed ANSI Common Lisp is found'
   echo '? If you do not want to use an existing Lisp reply NONE'
-  read -p '? What is the full path of your preferred Lisp executable? ' locallisp
+  read -p "? What is the full path of your preferred Lisp executable? " locallisp
 else
   unset locallisp
 fi
@@ -23,7 +23,7 @@ else
 fi
 # check to see if lalr has been installed before
 if [ ! -v LALR_HOME ]; then
-  read -p $'CCGlab install: lalrparser.lisp package is external to CCGlab but required.\n   Where do you want to install it? ' lalr
+  read -p $"CCGlab install: lalrparser.lisp package is external to CCGlab but required.\n   Where do you want to install it? " lalr
   if [ -d "$lalr" ] && [ -w "$lalr" ]; then
     cd $lalr
     wget -v --no-check-certificate --backups=3 http://web.science.mq.edu.au/~mjohnson/code/lalrparser.lisp
@@ -47,7 +47,7 @@ if [ ! -v locallisp ]; then
   if test $packager != ':' ; then
 	echo 'CCGLAB install: you have an installer for standard packages'
 	echo 'I can install SBCL and rlwrap from standard repositories'
-	read -p '? Do you want to install SBCL [y/n]? ' auxinstall
+	read -p "? Do you want to install SBCL [y/n]? " auxinstall
 	if test $auxinstall = 'y' ; then
 		echo '! CCGlab install: WARNING: you need sudo access now'
 		sudo $packager install sbcl
@@ -56,7 +56,7 @@ if [ ! -v locallisp ]; then
 	if [ -f /usr/local/bin/rlwrap ] || [ -f /usr/bin/rlwrap ] || [ -f /sw/bin/rlwrap ] || [ -f /sw/local/bin/rlwrap ]; then
 		echo 'Using rlwrap'
 	else 
-           read -p '? Do you want to install rlwrap [y/n]? ' auxinstall
+           read -p "? Do you want to install rlwrap [y/n]? " auxinstall
 	   if test $auxinstall = 'y' ; then
 		echo '! CCGlab install: WARNING: you need sudo access now'
 		sudo $packager install rlwrap
@@ -77,7 +77,7 @@ if [ -v CCGLAB_HOME ]; then
   if test $reinstall = 'y' ; then
     echo 'Using existing system. Best to do a "git pull" there to refresh.'
   else
-    read -p '? What is the new location for CCGlab home ? ' newloc
+    read -p "? What is the new location for CCGlab home ? " newloc
     if [ -d "$newloc" ] && [ -w "$newloc" ]; then
       ccglabdir="$newloc"
       echo "OK. Make sure $ccglabdir has a copy of ccglab repo since install no longer downloads it but uses git"
