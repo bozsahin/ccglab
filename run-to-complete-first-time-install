@@ -14,7 +14,7 @@ if [ -f /usr/local/bin/sbcl ] || [ -f /usr/bin/sbcl ] || [ -f /usr/local/bin/ccl
 else
   unset locallisp
 fi
-if [ -v locallisp ] && [ -f "$locallisp" ]; then 
+if [ -v locallisp ] && [ -f $locallisp ]; then 
   echo 'CCGlab install: got it.'
 else
   echo '! CCGlab install: There is no such local Lisp.'
@@ -24,7 +24,7 @@ fi
 # check to see if lalr has been installed before
 if [ ! -v LALR_HOME ]; then
   read -p $'CCGlab install: lalrparser.lisp package is external to CCGlab but required.\n   Where do you want to install it? ' lalr
-  if [ -d "$lalr" ] && [ -w "$lalr" ]; then
+  if [ -d $lalr ] && [ -w $lalr ]; then
     cd $lalr
     wget -v --no-check-certificate --backups=3 http://web.science.mq.edu.au/~mjohnson/code/lalrparser.lisp
     lalr=`pwd`
@@ -78,8 +78,8 @@ if [ -v CCGLAB_HOME ]; then
     echo 'Using existing system. Best to do a "git pull" there to refresh.'
   else
     read -p '? What is the new location for CCGlab home ? ' newloc
-    if [ -d "$newloc" ] && [ -w "$newloc" ]; then
-      ccglabdir="$newloc"
+    if [ -d $newloc ] && [ -w $newloc ]; then
+      ccglabdir=$newloc
       echo "OK. Make sure $ccglabdir has a copy of ccglab repo since install no longer downloads it but uses git"
     else
       echo "! $newloc: Not a writable directory. Re-run this script to finish the partial install"
