@@ -51,16 +51,12 @@ if [ ! -vlocallisp ]; then
 	if test $auxinstall = 'y' ; then
 		echo '! CCGlab install: WARNING: you need sudo access now'
 		sudo $packager install sbcl
-		locallisp=/usr/bin/sbcl
+		locallisp=`which sbcl`
 	fi
 	if [ -f /usr/local/bin/rlwrap ] || [ -f /usr/bin/rlwrap ] || [ -f /sw/bin/rlwrap ] || [ -f /sw/local/bin/rlwrap ]; then
 		echo 'Using rlwrap'
 	else 
-           read -p '? Do you want to install rlwrap [y/n]? ' auxinstall
-	   if test $auxinstall = 'y' ; then
-		echo '! CCGlab install: WARNING: you need sudo access now'
 		sudo $packager install rlwrap
-	   fi
         fi
   else
 	echo '! apt-get or brew not found. I leave Common Lisp and rlwrap handling to you.'
