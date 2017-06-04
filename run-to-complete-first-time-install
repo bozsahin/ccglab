@@ -14,7 +14,7 @@ if [ -f /usr/local/bin/sbcl ] || [ -f /usr/bin/sbcl ] || [ -f /usr/local/bin/ccl
 else
   unset locallisp
 fi
-if [ -vlocallisp ] && [ -f "$locallisp" ]; then 
+if [ -v locallisp ] && [ -f "$locallisp" ]; then 
   echo 'CCGlab install: got it.'
 else
   echo '! CCGlab install: There is no such local Lisp.'
@@ -22,7 +22,7 @@ else
   unset locallisp
 fi
 # check to see if lalr has been installed before
-if [ ! -vLALR_HOME ]; then
+if [ ! -v LALR_HOME ]; then
   read -p $'CCGlab install: lalrparser.lisp package is external to CCGlab but required.\n   Where do you want to install it? ' lalr
   if [ -d "$lalr" ] && [ -w "$lalr" ]; then
     cd $lalr
@@ -36,7 +36,7 @@ else
   lalr=$LALR_HOME
 fi
 # check to see if a Lisp for ccglab has been installed before
-if [ ! -vlocallisp ]; then
+if [ ! -v locallisp ]; then
   packager=:
   if [ -f /usr/local/bin/brew ] || [ -f /sw/bin/brew ] || [ -f /sw/local/bin/brew ]; then
     	packager=brew
@@ -69,7 +69,7 @@ else
   echo "Using the Lisp at $locallisp for CCGlab"
 fi
 # check to see if there is already a ccglab
-if [ -vCCGLAB_HOME ]; then
+if [ -v CCGLAB_HOME ]; then
   echo 'You have a CCGlab system installed.'
   echo 'If it is not a git repo, then it is legacy CCGlab code'
   echo '! Consider a new location if it is not a git repo'
@@ -99,7 +99,7 @@ printf '%s\n%s\n%s\n%s\n' "export CCGLAB_HOME=$ccglabdir" "export CCGLAB_LISP=$l
 printf '%s\n' '# end of stuff added by CCGlab installer' >> ~/.bashrc
 printf '%s\n' '# stuff added by CCGlab installer' >> ~/.bash_profile
 printf '%s\n' 'if [ -f ~/.bashrc ]; then source ~/.bashrc; fi' >> ~/.bash_profile
-if [ -vreinstall ]; then
+if [ -v reinstall ]; then
   echo '! You have re-installed ccglab. Make sure its home is a git repo'
 fi
 echo '! Dont forget to look at git repo once in a while for updates: just do "git pull"'
