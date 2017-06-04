@@ -7,7 +7,7 @@ echo 'CCGlab external resources install and path set up'
 echo '================================================='
 echo 'Looking for SBCL or CCL Common Lisp in your machine'
 echo 'You can execute "which sbcl" or "which ccl" etc in another terminal to find out the full path'
-if [ -f "/usr/local/bin/sbcl" ] || [ -f "/usr/bin/sbcl" ] || [ -f "/usr/local/bin/ccl" ] || [ -f "/usr/bin/ccl" ]; then
+if [ -f /usr/local/bin/sbcl ] || [ -f /usr/bin/sbcl ] || [ -f /usr/local/bin/ccl ] || [ -f /usr/bin/ccl ]; then
   echo 'CCGlab install: An installed ANSI Common Lisp is found'
   echo '? If you do not want to use an existing Lisp reply NONE'
   read -p '? What is the full path of your preferred Lisp executable? ' locallisp
@@ -29,7 +29,7 @@ if [ ! -vLALR_HOME ]; then
     wget -v --no-check-certificate --backups=3 http://web.science.mq.edu.au/~mjohnson/code/lalrparser.lisp
     lalr=`pwd`
   else
-    echo '! $lalr: No such writable directory. Re-run this script to finish the partial install.'
+    echo "! $lalr: No such writable directory. Re-run this script to finish the partial install."
     exit -1
   fi
 else
@@ -38,10 +38,10 @@ fi
 # check to see if a Lisp for ccglab has been installed before
 if [ ! -vlocallisp ]; then
   packager=:
-  if [ -f "/usr/local/bin/brew" ] || [ -f "/sw/bin/brew" ] || [ -f "/sw/local/bin/brew" ]; then
+  if [ -f /usr/local/bin/brew ] || [ -f /sw/bin/brew ] || [ -f /sw/local/bin/brew ]; then
     	packager=brew
   fi
-  if [ -f "/usr/bin/apt-get" ] || [ -f "/usr/local/bin/apt-get" ]; then
+  if [ -f /usr/bin/apt-get ] || [ -f /usr/local/bin/apt-get ]; then
 	packager=apt-get   # overrides brew if you have them both
   fi
   if test $packager != ':' ; then
@@ -53,7 +53,7 @@ if [ ! -vlocallisp ]; then
 		sudo $packager install sbcl
 		locallisp=/usr/bin/sbcl
 	fi
-	if [ -f "/usr/local/bin/rlwrap" ] || [ -f "/usr/bin/rlwrap" ] || [ -f "/sw/bin/rlwrap" ] || [ -f "/sw/local/bin/rlwrap" ]; then
+	if [ -f /usr/local/bin/rlwrap ] || [ -f /usr/bin/rlwrap ] || [ -f /sw/bin/rlwrap ] || [ -f /sw/local/bin/rlwrap ]; then
 		echo 'Using rlwrap'
 	else 
            read -p '? Do you want to install rlwrap [y/n]? ' auxinstall
@@ -88,7 +88,7 @@ if [ -vCCGLAB_HOME ]; then
   fi
 fi
 printf '%s\n' '# stuff added by CCGlab installer' >> ~/.bashrc
-if [ -f "/usr/local/bin/rlwrap" ] || [ -f "/usr/bin/rlwrap" ] || [ -f "/sw/bin/rlwrap" ] || [ -f "/sw/local/bin/rlwrap" ]; then
+if [ -f /usr/local/bin/rlwrap ] || [ -f /usr/bin/rlwrap ] || [ -f /sw/bin/rlwrap ] || [ -f /sw/local/bin/rlwrap ]; then
   printf '%s\n' 'export RLWRAP=rlwrap' >> ~/.bashrc
   echo 'CCGlab install: you have got rlwrap. Using it for ccglab'
 else
