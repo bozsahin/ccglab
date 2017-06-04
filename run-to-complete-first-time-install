@@ -3,23 +3,27 @@
 #  also sets PATH and lisp execs so that ccglab is available from anywhere
 ccglabdir=`pwd`
 locallisp=
-echo 'CCGlab external resources install and path set up'
-echo '================================================='
-echo 'Looking for SBCL or CCL Common Lisp in your machine'
+echo "CCGlab external resources install and path set up"
+echo "================================================="
+echo "Looking for SBCL or CCL Common Lisp in your machine"
 echo 'You can execute "which sbcl" or "which ccl" etc in another terminal to find out the full path'
 if [ -f /usr/local/bin/sbcl ] || [ -f /usr/bin/sbcl ] || [ -f /usr/local/bin/ccl ] || [ -f /usr/bin/ccl ]; then
-  echo 'CCGlab install: An installed ANSI Common Lisp is found'
-  echo '? If you do not want to use an existing Lisp reply NONE'
-  read -p '? What is the full path of your preferred Lisp executable? ' locallisp
+  echo "CCGlab install: An installed ANSI Common Lisp is found"
+  echo "? If you do not want to use an existing Lisp reply NONE"
+  read -p "? What is the full path of your preferred Lisp executable? " locallisp
 else
   unset locallisp
 fi
 if [ -v locallisp ] && [ -f $locallisp ]; then 
+<<<<<<< HEAD
   echo 'CCGlab install: got it.'
+=======
+  echo "CCGlab install: got it."
+>>>>>>> f70459e23d8c25e0e877ba81bb8db69fc530d7b9
 else
-  echo '! CCGlab install: There is no such local Lisp.'
+  echo "! CCGlab install: There is no such local Lisp."
   echo '! Set the CCGLAB_LISP variable in .bashrc to your binary if I cannot install SBCL'
-  unset locallisp
+  unset CCGLAB_LISP
 fi
 # check to see if lalr has been installed before
 if [ ! -v LALR_HOME ]; then
@@ -36,7 +40,7 @@ else
   lalr=$LALR_HOME
 fi
 # check to see if a Lisp for ccglab has been installed before
-if [ ! -v locallisp ]; then
+if [ ! -v CCGLAB_LISP ]; then
   packager=:
   if [ -f /usr/local/bin/brew ] || [ -f /sw/bin/brew ] || [ -f /sw/local/bin/brew ]; then
     	packager=brew
@@ -44,29 +48,26 @@ if [ ! -v locallisp ]; then
   if [ -f /usr/bin/apt-get ] || [ -f /usr/local/bin/apt-get ]; then
 	packager=apt-get   # overrides brew if you have them both
   fi
-  if test $packager != ':' ; then
-	echo 'CCGLAB install: you have an installer for standard packages'
-	echo 'I can install SBCL and rlwrap from standard repositories'
+  if test $packager != ":" ; then
+	echo "CCGLAB install: you have an installer for standard packages"
+	echo "I can install SBCL and rlwrap from standard repositories"
 	read -p '? Do you want to install SBCL [y/n]? ' auxinstall
-	if test $auxinstall = 'y' ; then
-		echo '! CCGlab install: WARNING: you need sudo access now'
+	if test $auxinstall = "y" ; then
+		echo "! CCGlab install: WARNING: you need sudo access now"
 		sudo $packager install sbcl
 		locallisp=/usr/bin/sbcl
 	fi
-	if [ -f /usr/local/bin/rlwrap ] || [ -f /usr/bin/rlwrap ] || [ -f /sw/bin/rlwrap ] || [ -f /sw/local/bin/rlwrap ]; then
-		echo 'Using rlwrap'
-	else 
-           read -p '? Do you want to install rlwrap [y/n]? ' auxinstall
-	   if test $auxinstall = 'y' ; then
-		echo '! CCGlab install: WARNING: you need sudo access now'
+	read -p '? Do you want to install rlwrap [y/n]? ' auxinstall
+	if test $auxinstall = "y" ; then
+		echo "CCGlab install: WARNING: you need sudo access now"
 		sudo $packager install rlwrap
-	   fi
-        fi
+	fi
   else
-	echo '! apt-get or brew not found. I leave Common Lisp and rlwrap handling to you.'
+	echo "! apt-get or brew not found. I leave Common Lisp and rlwrap handling to you."
   fi
 else
-  echo "Using the Lisp at $locallisp for CCGlab"
+  echo "Using the Lisp at $CCGLAB_LISP for CCGlab"
+  locallisp=$CCGLAB_LISP
 fi
 # check to see if there is already a ccglab
 if [ -v CCGLAB_HOME ]; then
@@ -74,10 +75,14 @@ if [ -v CCGLAB_HOME ]; then
   echo 'If it is not a git repo, then it is legacy CCGlab code'
   echo '! Consider a new location if it is not a git repo'
   read -p "? Do you want me to stay at CCGLAB_HOME = $CCGLAB_HOME [y/n] ? " reinstall
-  if test $reinstall = 'y' ; then
+  if test $reinstall = "y" ; then
     echo 'Using existing system. Best to do a "git pull" there to refresh.'
   else
+<<<<<<< HEAD
     read -p '? What is the new location for CCGlab home ? ' newloc
+=======
+    read -p "? What is the new location for CCGlab home ? " newloc
+>>>>>>> f70459e23d8c25e0e877ba81bb8db69fc530d7b9
     if [ -d $newloc ] && [ -w $newloc ]; then
       ccglabdir=$newloc
       echo "OK. Make sure $ccglabdir has a copy of ccglab repo since install no longer downloads it but uses git"
@@ -90,7 +95,7 @@ fi
 printf '%s\n' '# stuff added by CCGlab installer' >> ~/.bashrc
 if [ -f /usr/local/bin/rlwrap ] || [ -f /usr/bin/rlwrap ] || [ -f /sw/bin/rlwrap ] || [ -f /sw/local/bin/rlwrap ]; then
   printf '%s\n' 'export RLWRAP=rlwrap' >> ~/.bashrc
-  echo 'CCGlab install: you have got rlwrap. Using it for ccglab'
+  echo "CCGlab install: Found rlwrap. Using it for ccglab"
 else
   printf '%s\n' 'export RLWRAP=' >> ~/.bashrc
   echo '! CCGlab install: rlwrap not found. If installed later, change the RLWRAP variable in .bashrc'
@@ -100,10 +105,10 @@ printf '%s\n' '# end of stuff added by CCGlab installer' >> ~/.bashrc
 printf '%s\n' '# stuff added by CCGlab installer' >> ~/.bash_profile
 printf '%s\n' 'if [ -f ~/.bashrc ]; then source ~/.bashrc; fi' >> ~/.bash_profile
 if [ -v reinstall ]; then
-  echo '! You have re-installed ccglab. Make sure its home is a git repo'
+  echo "! You have re-installed ccglab. Make sure its home is a git repo"
+  echo 'For later updates, just cd to that directory and do "git pull"'
 fi
-echo '! Dont forget to look at git repo once in a while for updates: just do "git pull"'
-echo 'CCGlab install: completed.'
-echo 'To run, first open a fresh terminal, or logout and login. Then do'
+echo "! Don't forget to look at git repo once in a while for updates"
+echo "CCGlab install: completed."
+echo "To run, first open a fresh terminal, or logout and login. Then do"
 echo 'ccglab'
-echo '================================================='
