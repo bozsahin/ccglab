@@ -97,6 +97,8 @@ if [ -v reinstall ]; then
   echo '! You have re-installed ccglab. Make sure its home is a git repo'
 fi
 echo '! Just do "git pull" in ccglab home for updates from now on.'
+echo "! I wouldnt do updates in standard files of $ccglabdir. They will be overridden by next git pull"
+echo '! The manual has some pointers for grammar and model development workflows'
 echo 'CCGlab install: completed.'
 echo 'To run, first open a fresh terminal, or logout and login. Then do'
 echo 'ccglab'
