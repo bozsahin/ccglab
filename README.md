@@ -10,7 +10,7 @@ Combinatory Categorial Grammar (CCG): All combinators, native input format, pars
 <br>This is your ccglab home.
 <li> <code>cd h/ccglab</code>
 <li> Execute <code>./run-to-complete-first-time-install</code> bash script in the repo to get the extras needed, and to set up the paths so that CCGlab is usable from anywhere in your user account.
-<br> Use the one for macos if you're on a mac. Macs can do funny things in <code>bash</code> so there is a separate installer.
+<br> Use the one for MacOS if you're on a Mac. Macs can do funny things in <code>bash</code> so there is a separate installer.
 <li> Open a new bash terminal and run <code>ccglab</code> script from anywhere.
 </ol>
 
