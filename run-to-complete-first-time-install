@@ -6,7 +6,7 @@ echo 'CCGlab external resources install and path set up'
 echo '================================================='
 # check to see if lalr has been installed before
 if [ ! "$LALR_HOME" ]; then
-  read -p "CCGlab install: lalrparser.lisp package is external to CCGlab and required.\n Where do you want to install it? " lalr
+  read -r -p "CCGlab install: lalrparser.lisp package is external to CCGlab and required.\nWhere do you want to install it? " lalr
   if [ -d "$lalr" ] && [ -w "$lalr" ]; then
     cd $lalr
     wget -v --no-check-certificate --backups=3 http://web.science.mq.edu.au/~mjohnson/code/lalrparser.lisp
@@ -22,7 +22,7 @@ fi
 if [ -x /usr/local/bin/sbcl ] || [ -x /usr/bin/sbcl ] || [ -x /usr/local/bin/ccl ] || [ -x /usr/bin/ccl ]; then
   echo 'CCGlab install: An installed ANSI Common Lisp is found'
   echo '? If you do NOT want to use an existing Lisp, hit RETURN'
-  read -p '? What is the full path of your preferred Lisp executable? ' locallisp
+  read -r -p '? What is the full path of your preferred Lisp executable? ' locallisp
 fi
 if [ -x "$locallisp" ]; then 
   echo 'CCGlab install: got it.'
@@ -42,7 +42,7 @@ if [ ! "$locallisp" ]; then
   if [ "$packager" ]; then
 	echo 'CCGLAB install: you have an installer for standard packages'
 	echo 'I can install SBCL and rlwrap from standard repositories'
-	read -p '? Do you want to install SBCL [y/n]? ' auxinstall
+	read -r -p '? Do you want to install SBCL [y/n]? ' auxinstall
 	if [ $auxinstall ] && [ $auxinstall = y ] || [ $auxinstall = Y ]; then
 		echo '! CCGlab install: WARNING: you need sudo access now'
 		sudo $packager install sbcl
@@ -67,11 +67,11 @@ if [ "$CCGLAB_HOME" ]; then
   echo 'You have a CCGlab system installed.'
   echo 'If it is not a git repo, then it is legacy CCGlab code'
   echo '! Consider a new location if it is not a git repo'
-  read -p "? Do you want me to stay at CCGLAB_HOME = $CCGLAB_HOME [y/n] ? " reinstall
+  read -r -p "? Do you want me to stay at CCGLAB_HOME = $CCGLAB_HOME [y/n] ? " reinstall
   if [ $reinstall ] && [ $reinstall = y ] || [ $reinstall = Y ]; then
     echo 'Using existing system. Best to do a "git pull" there to refresh.'
   else
-    read -p '? What is the new location for CCGlab home ? ' newloc
+    read -r -p '? What is the new location for CCGlab home ? ' newloc
     if [ -d "$newloc" ] && [ -w "$newloc" ]; then
       ccglabdir=$newloc
       echo "OK. Make sure $ccglabdir has a copy of ccglab repo since install no longer downloads it but uses git"
