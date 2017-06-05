@@ -21,13 +21,13 @@ fi
 # check to see if a Lisp for ccglab has been installed before
 if [ -x /usr/local/bin/sbcl ] || [ -x /usr/bin/sbcl ] || [ -x /usr/local/bin/ccl ] || [ -x /usr/bin/ccl ]; then
   echo 'CCGlab install: An installed ANSI Common Lisp is found'
-  echo '? If you do not want to use an existing Lisp reply NONE'
+  echo '? If you do NOT want to use an existing Lisp, hit RETURN'
   read -p '? What is the full path of your preferred Lisp executable? ' locallisp
 fi
 if [ -x "$locallisp" ]; then 
   echo 'CCGlab install: got it.'
 else
-  echo '! CCGlab install: There is no local SBCL, CCL or local Lisp.'
+  echo '! CCGlab install: no local SBCL, CCL or other Lisp set.'
   echo '! Set the CCGLAB_LISP variable in .bashrc to your binary later if I cannot install SBCL below'
   unset locallisp
 fi
@@ -43,7 +43,8 @@ if [ ! "$locallisp" ]; then
 	echo 'CCGLAB install: you have an installer for standard packages'
 	echo 'I can install SBCL and rlwrap from standard repositories'
 	read -p '? Do you want to install SBCL [y/n]? ' auxinstall
-	if test $auxinstall = [yY] ; then
+	auxinstall=${auxinstall,,} # lowercase now
+	if test $auxinstall = y ; then
 		echo '! CCGlab install: WARNING: you need sudo access now'
 		sudo $packager install sbcl
 		locallisp=`which sbcl`
@@ -51,7 +52,7 @@ if [ ! "$locallisp" ]; then
 	if [ -x /usr/local/bin/rlwrap ] || [ -x /usr/bin/rlwrap ] || [ -x /sw/bin/rlwrap ] || [ -x /sw/local/bin/rlwrap ]; then
 		echo 'Using local rlwrap'
 	else 
-		echo '! rlwrap not found. It is very annoying not to have it when you run ccglab'
+		echo '! rlwrap not found. It is very annoying NOT to have it when you run ccglab'
 		echo '! CCGlab install: WARNING: you need sudo access now'
 		sudo $packager install rlwrap
         fi
@@ -68,7 +69,8 @@ if [ "$CCGLAB_HOME" ]; then
   echo 'If it is not a git repo, then it is legacy CCGlab code'
   echo '! Consider a new location if it is not a git repo'
   read -p "? Do you want me to stay at CCGLAB_HOME = $CCGLAB_HOME [y/n] ? " reinstall
-  if test $reinstall = [yY] ; then
+  reinstall=${reinstall,,}  #lowercase now
+  if test $reinstall = y ; then
     echo 'Using existing system. Best to do a "git pull" there to refresh.'
   else
     read -p '? What is the new location for CCGlab home ? ' newloc
