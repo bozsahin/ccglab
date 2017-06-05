@@ -43,8 +43,7 @@ if [ ! "$locallisp" ]; then
 	echo 'CCGLAB install: you have an installer for standard packages'
 	echo 'I can install SBCL and rlwrap from standard repositories'
 	read -p '? Do you want to install SBCL [y/n]? ' auxinstall
-	auxinstall=${auxinstall,,} # lowercase now
-	if test $auxinstall = y ; then
+	if [ $auxinstall ] && [ $auxinstall = y ] || [ $auxinstall = Y ]; then
 		echo '! CCGlab install: WARNING: you need sudo access now'
 		sudo $packager install sbcl
 		locallisp=`which sbcl`
@@ -69,8 +68,7 @@ if [ "$CCGLAB_HOME" ]; then
   echo 'If it is not a git repo, then it is legacy CCGlab code'
   echo '! Consider a new location if it is not a git repo'
   read -p "? Do you want me to stay at CCGLAB_HOME = $CCGLAB_HOME [y/n] ? " reinstall
-  reinstall=${reinstall,,}  #lowercase now
-  if test $reinstall = y ; then
+  if [ $reinstall ] && [ $reinstall = y ] || [ $reinstall = Y ]; then
     echo 'Using existing system. Best to do a "git pull" there to refresh.'
   else
     read -p '? What is the new location for CCGlab home ? ' newloc
