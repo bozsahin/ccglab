@@ -76,7 +76,7 @@ somewhere in your machine, and set and <code>export</code> the following bash va
 <li><code>LALR_HOME</code> to where you saved lalrparser.lisp
 <li><code>CCGLAB_LISP</code> to full path of your ANSI Common Lisp binary
 <li><code>RLWRAP</code> to path of <code>rlwrap</code> if you have it, otherwise nil, i.e. <code>RLWRAP=</code>
-<li><code>PATH=$CCGLAB_HOME/bin:$PATH</code> to overrride earlier installs of ccglab.
+<li><code>PATH=:.:$CCGLAB_HOME/bin:$PATH</code> to overrride earlier installs of ccglab.
 <li> Then open a new <code>bash</code> terminal and run <code>ccglab</code>
 </ol>
 </ul>
