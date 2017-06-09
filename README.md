@@ -1,7 +1,7 @@
 # ccglab
 Combinatory Categorial Grammar (CCG): All combinators, native input format, parsing to logical form (aka semantic parsing), parameter estimation for probabilistic CCG.
 
-<em>FOR FIRST TIME INSTALL (assuming you have <code>git</code>):</em>
+<em>FIRST TIME INSTALL (assuming you have <code>git</code>):</em>
 
 <ol>
 <li> <code>cd h</code>, where <code>h</code> is your chosen parent directory for CCGlab.
