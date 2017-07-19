@@ -57,7 +57,7 @@ the ccglab install completion script.
 
 Arch, Mint, Suse, Debian, RH, Fedora, MacOS do not seem to have this peculiar Ubuntu caste of packages. The packages for sbcl and rlwrap ara available. CCL too.
 
-<em>NO NEED TO REINSTALL:</em> If you already have a git-installed up-and-running CCGlab, just do the following for updates:
+<b>NO NEED TO REINSTALL:</b> If you already have a git-installed up-and-running CCGlab, just do the following for updates:
 
 <ol>
 <li><code>cd $CCGLAB_HOME</code>
