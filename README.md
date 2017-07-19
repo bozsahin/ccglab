@@ -53,6 +53,9 @@ the ccglab install completion script.
            sudo add-apt-repository multiverse
            sudo apt-get update
 
+<em>OTHER LINUXES</em>
+Arch, Mint, Suse, Debian, RH, Fedora do not seem to have this peculiar Ubuntu caste of packages. The packages for sbcl and rlwrap ara available. CCL too.
+
 <em>NO NEED TO REINSTALL:</em> If you already have a git-installed up-and-running CCGlab, just do the following for updates:
 
 <ol>
