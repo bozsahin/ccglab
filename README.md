@@ -71,7 +71,7 @@ If you have a pre-git CCGlab installed, the new install script will ask whether 
 <em>OTHER LINUXES and/or MANUAL INSTALL:</em>
 
 <ul>
-<li> The installer script works for Debian-based linuxes (ubuntu, debian etc.) and MacOS.
+<li> The installer script works for Debian-based linuxes (Ubuntu, Debian, Mint etc.) and MacOS.
 <li> If you use Windows, install virtualbox, set an Ubuntu machine (easiest one), and follow the instructions above for install.
 <li> If you have another linux (arch, fedora, suse etc.), just clone this repo, get <a href="http://web.science.mq.edu.au/~mjohnson/code/lalrparser.lisp">lalr</a>
 somewhere in your machine, and set and <code>export</code> the following bash variables:
