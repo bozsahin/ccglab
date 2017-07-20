@@ -221,7 +221,7 @@
 (defparameter *loaded-grammar* nil)   ; The source of currently loaded grammar
 
 (defparameter *lfflag* t) ; whether to show intermediate LFs in the output (final one always shown)
-
+(defparameter *abv* nil) ; list of shortcuts for common functions-- see the bottom
 ;; rule switches
 
 (defparameter *f-apply* t)   ;application
@@ -2746,48 +2746,53 @@
 ;; some shortcuts for top-level functions
 ;; ======================================
 
-(defun lg (&rest args)
-  (apply #'load-grammar args))
-(defun lm (&rest args)
-  (apply #'load-model args))
-(defun cd (&rest args)
-  (apply #'ccg-deduce args))
-(defun ci (&rest args)
-  (apply #'ccg-induce args))
-(defun p (&rest args)  ; parse
-  (apply #'ccg-deduce args)) 
-(defun pp (&rest args) ; parse with probabilities
-  (apply #'ccg-induce args))
-(defun rank (&rest args) ; another name for it
-  (apply #'ccg-induce args))
-(defun ders (&rest args) ; derivations
-  (apply #'cky-show-deduction args))
-(defun csd (&rest args)
-  (apply #'cky-show-deduction args))
-(defun csi (&rest args)
-  (apply #'cky-show-induction args))
-(defun probs (&rest args) ; derivations with probabilities
-  (apply #'cky-show-induction args))
-(defun csle (&rest args)
-  (apply #'cky-show-lf-eqv args))
-(defun um (&rest args)
-  (apply #'update-model args))
-(defun st (&rest args)
-  (apply #'show-training args))
-(defun csnf (&rest args)
-  (apply #'cky-show-normal-forms args))
-(defun crs (&rest args)
-  (apply #'cky-reveal-cell args))
-(defun cpp (&rest args)
-  (apply #'cky-pprint-probs args))
-(defun sg (&rest args)
-  (apply #'save-grammar args))
-(defun savet (&rest args)
-  (apply #'save-training args))
-(defun z (&rest args)
-  (apply #'z-score-grammar args))
-(defun beta (&rest args)
-  (apply #'beta-normalize-outer args))
-(defun ms (&rest args)
-  (apply #'make-supervision args))
+;; macros from Graham 94 OL
 
+(defun group (source n)
+  (if (endp source)
+    nil
+    (let ((rest (nthcdr n source)))
+      (cons (if (consp rest) (subseq source 0 n) source)
+	    (group rest n)))))
+
+(defmacro abbrev (short long)
+  `(defmacro ,short (&rest args)
+     `(,',long ,@args)))
+
+(defmacro abbrevs (&rest names)
+  "let here is not really necessary; i use it to show destructive
+  effects of sort. without copy-seq the last reference to np gives error."
+  (let ((np (group names 2)))
+    (setf *abv* (sort (copy-seq np) #'string< :key #'car)) ; beware: sort is destructive
+    `(progn 
+       ,@(mapcar #'(lambda (pair) `(abbrev ,@pair))
+	       np))))
+
+;; shortcuts for common functions. they become macros.
+
+(abbrevs lg load-grammar 
+         lm load-model
+	 cd ccg-deduce
+	 ci ccg-induce
+	 p  ccg-deduce
+	 pp ccg-induce
+	 rank ccg-induce
+	 ders cky-show-deduction
+	 csd cky-show-deduction
+	 csi cky-show-induction
+	 probs cky-show-induction
+	 csle cky-show-lf-eqv 
+	 um update-model
+	 st show-training
+	 csnf cky-show-normal-forms
+	 crs cky-reveal-cell
+	 cpp cky-pprint-probs
+	 sg  save-grammar
+	 savet save-training
+	 z z-score-grammar
+	 beta beta-normalize-outer
+	 ms make-supervision
+	 )
+
+(defun ab ()
+  (dolist (a *abv*) (format t "~5A ~A~%" (first a) (second a))))
