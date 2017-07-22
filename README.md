@@ -25,7 +25,7 @@ You need a linux/unix system, either real or in a virtual box such as Oracle's: 
 
 If you want the installer to install a Common Lisp and <code>rlwrap</code> for you, you need either
 <ul>
-<li> <code>apt-get</code> (the most common package installer for linuxes, at least for debian-based linuxes--ubuntu, mind, debian etc.).
+<li> <code>apt-get</code> (the most common package installer for linuxes, at least for debian-based linuxes--ubuntu, linux mint, debian etc.).
 <li> <code>brew</code> https://brew.sh/ (a common installer for MacOS)
 </ul>
 
