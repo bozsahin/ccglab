@@ -17,7 +17,7 @@ Combinatory Categorial Grammar (CCG): All combinators, native input format, pars
 
 This is Common Lisp code. If you already have an ANSI Common Lisp, it can work with it too.
 
-Current release is shown in the 'release' section above. Use <code>(which-ccglab)</code> in your system to find out whether you've got the latest.
+Latest release is shown in the 'release' tag of the repo. Use <code>(which-ccglab)</code> in your system to find out whether you've got the latest.
 
 <em>SOFTWARE REQUIREMENTS:</em>
 
