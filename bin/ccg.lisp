@@ -42,6 +42,19 @@
 ;;;; == Lisp Top level needs  ==
 ;;;; ===========================
 
+;; a path language layer for multiple gethashes, to write outermost first for readability
+
+(defmacro hash-get2 (ht path)
+  `(cond ((null ,path) (format t "Null feature in hash path!~%"))
+	 (t (let ((base '(gethash (first ,path) ,ht)))
+	      (dolist (feat (rest ,path))(push (list 'gethash feat) base))
+	      base))))
+
+(defmacro hash-get (ht &rest path)
+  "ht is hashtable. If the path contains more than one feature, we get nested
+  gethash on the same table, outermost being the first one in the path list"
+  `(hash-get2 ,ht (reverse ,path)))
+
 ;; Some reader macros and others are defined first to avoid complaints from Lisp compilers. 
 ;; SBCL can be particularly chatty.
  
@@ -311,7 +324,7 @@
   (format t "  Most weighted derivation  : ~A ~%" *cky-max*))
 
 (defun which-ccglab ()
-  "CCGlab, version 3.3")
+  "CCGlab, version 3.4")
 
 (defun welcome()
   (format t "~%===================================================")
