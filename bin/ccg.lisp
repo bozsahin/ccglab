@@ -52,7 +52,11 @@
 
 (defmacro hash-get (ht &rest path)
   "ht is hashtable. If the path contains more than one feature, we get nested
-  gethash on the same table, outermost being the first one in the path list"
+  gethash on the same table, outermost being the first one in the path list.
+
+  Instead of native (gethash 'F2 (gethash 'F1 ht)), we write (hash-get ht 'F1 'F2)
+  if ht table has a hash-valued feature named F1 and the value has feature F2.
+  The idea is that only the last feature is not hash-valued"
   `(hash-get2 ,ht (reverse ,path)))
 
 ;; Some reader macros and others are defined first to avoid complaints from Lisp compilers. 
