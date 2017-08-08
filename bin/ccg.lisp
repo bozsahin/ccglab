@@ -42,24 +42,22 @@
 ;;;; == Lisp Top level needs  ==
 ;;;; ===========================
 
-;; a path language layer for multiple gethashes, to write outermost first for readability
-
-(defmacro hash-get2 (ht path)
-  `(cond ((null ,path) (format t "Null feature in hash path!~%"))
-	 (t (let ((base '(gethash (first ,path) ,ht)))
-	      (dolist (feat (rest ,path))(setf base (nconc (list 'gethash feat) 
-							   (list base))))
-	      base))))
+;; a path language layer for multiple gethashes, to write linearly for visibility
 
 (defmacro hash-get (ht &rest path)
   "ht is hashtable. If the path contains more than one feature, we get nested
-  gethash on the same table, outermost being the first one in the path list.
+  gethash on the same table.
 
-  Instead of native (gethash 'F2 (gethash 'F1 ht)), we write (hash-get ht 'F1 'F2)
-  if ht table has a hash-valued feature named F1 and the value has feature F2.
-  The idea is that only the last feature is not hash-valued"
-  `(let ((rp `,(reverse ,path)))
-     `(hash-get2 ,ht rp)))
+  Instead of native (gethash 'F1 (gethash 'F2 ht)), we write (hash-get ht 'F1 'F2)
+  if ht table has a feature named F1 and the value has feature F2.
+  The idea is that only the outermost (F1 above) feature is not necessarily hash-valued."
+  (cond ((null path) (format t "No feature in hash path!~%"))
+	((not (hash-table-p ht)) (format t "Not a hashtable!: ~A~%" ht))
+	(t (let* ((p (reverse path))
+		  (base (list 'gethash (first p) ht)))
+	     (dolist (feat (rest p))(setf base (nconc (list 'gethash feat) 
+						      (list base))))
+	     base))))
 
 ;; Some reader macros and others are defined first to avoid complaints from Lisp compilers. 
 ;; SBCL can be particularly chatty.
