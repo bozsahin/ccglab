@@ -39,25 +39,23 @@
 
 
 ;;;; ===========================
-;;;; == Lisp Top level needs  ==
+;;;; == Lisp Top level needs and some general utilities
 ;;;; ===========================
 
 ;; a path language layer for multiple gethashes, to write linearly for visibility
 
-(defmacro hash-get (ht &rest path)
-  "ht is hashtable. If the path contains more than one feature, we get nested
-  gethash on the same table.
-
-  Instead of native (gethash 'F1 (gethash 'F2 ht)), we write (hash-get ht 'F1 'F2)
-  if ht table has a feature named F1 and the value has feature F2.
+(defmacro machash (ht &rest path)
+  "Instead of native (gethash 'F1 (gethash 'F2 ht)), we write (machash ht 'F1 'F2)
+  if ht table has a feature named F2 and the value has feature F1.
+  NB.We cannot check at compile-time whether ht is a hashtable. No-one declares them.
   The idea is that only the outermost (F1 above) feature is not necessarily hash-valued."
-  (cond ((null path) (format t "No feature in hash path!~%"))
-	((not (hash-table-p ht)) (format t "Not a hashtable!: ~A~%" ht))
-	(t (let* ((p (reverse path))
-		  (base (list 'gethash (first p) ht)))
-	     (dolist (feat (rest p))(setf base (nconc (list 'gethash feat) 
-						      (list base))))
-	     base))))
+  (if (null path) 
+    (error "No feature in hash path:~S ~S~%" ht path)
+    (let* ((p (reverse path))
+	   (base (list 'gethash (first p) ht)))
+      (dolist (feat (rest p))(setf base (nconc (list 'gethash feat)
+					       (list base))))
+      base)))
 
 ;; Some reader macros and others are defined first to avoid complaints from Lisp compilers. 
 ;; SBCL can be particularly chatty.
