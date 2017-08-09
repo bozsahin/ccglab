@@ -44,18 +44,20 @@
 
 ;; a path language layer for multiple gethashes, to write linearly for visibility
 
-(defmacro machash (ht &rest path)
-  "Instead of native (gethash 'F1 (gethash 'F2 ht)), we write (machash ht 'F1 'F2)
+(defmacro machash (&rest path)
+  "Instead of native (gethash 'F1 (gethash 'F2 ht)), we write (machash 'F1 'F2 ht)
   if ht table has a feature named F2 and the value has feature F1.
   NB.We cannot check at compile-time whether ht is a hashtable. No-one declares them.
   The idea is that only the outermost (F1 above) feature is not necessarily hash-valued."
-  (if (null path) 
-    (error "No feature in hash path:~S ~S~%" ht path)
-    (let* ((p (reverse path))
-	   (base (list 'gethash (first p) ht)))
-      (dolist (feat (rest p))(setf base (nconc (list 'gethash feat)
-					       (list base))))
-      base)))
+  (let* ((p (reverse path))
+	 (ht (first p))
+	 (feats (rest p))
+	 (base (list 'gethash (first feats) ht)))
+    (if (null feats)
+      (error "No feature in hash path:~S ~S~%" ht feats)
+      (dolist (feat (rest feats))(setf base (nconc (list 'gethash feat)
+					    (list base)))))
+    base))
 
 ;; Some reader macros and others are defined first to avoid complaints from Lisp compilers. 
 ;; SBCL can be particularly chatty.
