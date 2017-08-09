@@ -25,7 +25,7 @@
 ;;;; - It can handle Steedman-style lexical type assignments, and lexical rules.
 ;;;; - CCGlab uses only one Lisp tool: LALR parser of Mark Johnson. Thanks for that.
 ;;;;     The locally used copy is provided as an external file. The rest is standard Common Lisp.
-;;;; - Since you asked after seeing the LALR component, CCGlab is a non-deterministic parser.
+;;;; - After seeing the LALR component, you might think CCGlab is a deterministic parser.
 ;;;;     The LALR subcomponent is used to parse text descriptions of lexical items and rules to Lisp structures,
 ;;;;     which is deterministic (and probably not SLR, so thanks to MJ again.)
 ;;;; - The fourth component of course cannot be automated like the others. It depends on the modeler. It is
@@ -38,9 +38,9 @@
 ;;;;
 
 
-;;;; ===========================
+;;;; ==================================================
 ;;;; == Lisp Top level needs and some general utilities
-;;;; ===========================
+;;;; ==================================================
 
 ;; a path language layer for multiple gethashes, to write linearly for visibility
 
@@ -56,7 +56,7 @@
     (if (null feats)
       (error "No feature in hash path:~S ~S~%" ht feats)
       (dolist (feat (rest feats))(setf base (nconc (list 'gethash feat)
-					    (list base)))))
+						   (list base)))))
     base))
 
 ;; Some reader macros and others are defined first to avoid complaints from Lisp compilers. 
