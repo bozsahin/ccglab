@@ -19,22 +19,14 @@
 ;;;;     1) a transformer to turn paper-style CCG categories to lisp objects,
 ;;;;     2) a deductive component to CKY-parse a string, 
 ;;;;     3) an inductive component for PCCG for parse ranking.
-;;;;     4) A modeling component to help set your parameters for the inductive component.
+;;;;     4) A modeling component to help set/train your parameters for the inductive component.
+;;;;
 ;;;; Some CS-ey notes:
 ;;;; - It represents offline grammars serially, as lisp lists, and parse objects as hashtables, for speed.
-;;;; - It can handle Steedman-style lexical type assignments, and lexical rules.
-;;;; - CCGlab uses only one Lisp tool: LALR parser of Mark Johnson. Thanks for that.
-;;;;     The locally used copy is provided as an external file. The rest is standard Common Lisp.
+;;;; - CCGlab uses only one Lisp tool: LALR parser of Mark Johnson. Thanks for that. The rest is standard Common Lisp.
 ;;;; - After seeing the LALR component, you might think CCGlab is a deterministic parser.
 ;;;;     The LALR subcomponent is used to parse text descriptions of lexical items and rules to Lisp structures,
-;;;;     which is deterministic (and probably not SLR, so thanks to MJ again.)
-;;;; - The fourth component of course cannot be automated like the others. It depends on the modeler. It is
-;;;;     there as a facility; if you get your training right, the third component will give
-;;;;     you parameter estimation, most likely LF for a string.
-;;;; - All we can say about parameters of the fourth component is that, minimally they will contain lexical entries,
-;;;;   i.e. lexical features, because that is what is scalar-multiplied as parameters during the CKY parse.
-;;;;   If you have more parameters, you'd know how to train for them. A Plug-in is provided.
-;;;; - CCGlab-manual.pdf describes the data and file structures, and gives some examples.
+;;;;     which is deterministic (and probably not SLR, so thanks to MJ again).
 ;;;;
 
 
