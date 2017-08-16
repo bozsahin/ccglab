@@ -20,6 +20,8 @@ This is Common Lisp code. If you already have an ANSI Common Lisp, it can work w
 (GCL is ANSI but it does not come with CLOS. This is unfortunate because some dispatch macros
 for the Lisp reader needs methods, therefore not usable in GCL out of the box.)
 
+SBCL and CCL are usable out of the box for CCGlab.
+
 Latest release is shown in the 'release' tag of the repo. Use <code>(which-ccglab)</code> in your system to find out whether you've got the latest.
 
 <em>SOFTWARE REQUIREMENTS:</em>
