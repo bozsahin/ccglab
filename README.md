@@ -6,7 +6,7 @@ Combinatory Categorial Grammar (CCG): All combinators, native input format, pars
 <ol>
 <li> <code>cd h</code>, where <code>h</code> is your chosen parent directory for CCGlab.
 <li> <code>git clone git://github.com/bozsahin/ccglab</code>
-<br>This will create the repo in <code>h/ccglab</code>
+<br>This will create the repository in <code>h/ccglab</code>
 <br>This is your ccglab home.
 <li> <code>cd h/ccglab</code>
 <li> Execute <code>./run-to-complete-first-time-install</code> bash script in the repo to get the extras needed, and to set up the paths so that CCGlab is usable from anywhere in your user account.
@@ -16,6 +16,9 @@ Combinatory Categorial Grammar (CCG): All combinators, native input format, pars
 <b>Please read the rest of this document before you run the script.</b>
 
 This is Common Lisp code. If you already have an ANSI Common Lisp, it can work with it too.
+
+(GCL is ANSI but it does not come with CLOS. This is unfortunate because some dispatch macros
+for the Lisp reader needs methods, therefore not usable in GCL out of the box.)
 
 Latest release is shown in the 'release' tag of the repo. Use <code>(which-ccglab)</code> in your system to find out whether you've got the latest.
 
