@@ -555,13 +555,13 @@
 	(t ""))) ; ALL is default
 
 (defun format-dir (dir lex)
-  (cond ((eql dir 'BS) "\\")
-	((eql dir 'FS) "/")
-	(t ""))
-  (and lex 
-       (cond ((eql dir 'BS) "\\")
-	     ((eql dir 'FS) "/")
-	     (t ""))))
+  (if lex 
+    (cond ((eql dir 'BS) "\\\\")
+	  ((eql dir 'FS) "//")
+	  (t ""))
+    (cond ((eql dir 'BS) "\\")
+	  ((eql dir 'FS) "/")
+	  (t ""))))
 
 (defun input-range (len pos)
   "return a subsequence of the current input starting from pos and length long"
@@ -695,7 +695,9 @@
 	    (setf (machash 'MODAL ht) (nv-list-val 'MODAL cat))
 	    (and (nv-list-val 'LEX cat) (setf (machash 'LEX ht) (nv-list-val 'LEX cat))) ; no LEX feature in hashtable if nil (less consing)
 	    (setf (machash 'RESULT ht) (create-syn-table (first cat)))
-	    (setf (machash 'ARG ht) (create-syn-table (fourth cat)))
+	    (if (nv-list-val 'LEX cat)
+	      (setf (machash 'ARG ht) (create-syn-table (fifth cat))) ; after RESULT DIR MOD LEX
+	      (setf (machash 'ARG ht) (create-syn-table (fourth cat)))) ; after RESULT DIR MOD
 	    (return-from create-syn-table ht)))))
 
 (defun hash-lex (lexspec)
