@@ -81,6 +81,10 @@
 (defmacro get-cell-param (cell)
   `(machash 'PARAM (nv-list-val 'SOLUTION (machash ,cell *cky-hashtable*))))
 
+(defmacro lex-check (l1 l2)
+  "return true if l2 is true when l1 is true, true when l1 is false"
+  `(or (not ,l1) ,l2))
+
 ;; macros for training table access
 (defmacro get-key-param (key)
   `(first (machash ,key *training-hashtable*)))
@@ -150,8 +154,8 @@
   (make-hash-table :test #'equal :size (+ nfeatures 5) :rehash-size 2 :rehash-threshold 1.0))
 
 (defun make-complex-cat-hashtable ()
-  "keys are: dir modal result arg."
-  (make-hash-table :test #'equal :size 5 :rehash-size 2 :rehash-threshold 1.0))
+  "keys are: dir modal lex result arg."
+  (make-hash-table :test #'equal :size 6 :rehash-size 2 :rehash-threshold 1.0))
 
 (defun make-cky-entry-hashtable ()
   "keys are: syn sem index param."
@@ -550,10 +554,14 @@
 	((eql modality 'STAR) "*")
 	(t ""))) ; ALL is default
 
-(defun format-dir (dir)
+(defun format-dir (dir lex)
   (cond ((eql dir 'BS) "\\")
 	((eql dir 'FS) "/")
-	(t "")))
+	(t ""))
+  (and lex 
+       (cond ((eql dir 'BS) "\\")
+	     ((eql dir 'FS) "/")
+	     (t ""))))
 
 (defun input-range (len pos)
   "return a subsequence of the current input starting from pos and length long"
@@ -567,8 +575,8 @@
 		   (cond ((machash 'DIR 'RESULT synht) "("))
 		   (linearize-syn (machash 'RESULT synht))
 		   (cond ((machash 'DIR 'RESULT synht) ")"))
-		   (format-dir  (machash 'DIR synht))
-		   (format-mod (machash 'MODAL synht))
+		   (format-dir  (machash 'DIR synht) (machash 'LEX synht))
+		   (or (machash 'LEX synht) (format-mod (machash 'MODAL synht))) ; dont print modality for lex slash
 		   (cond ((machash 'DIR 'ARG synht) "("))
 		   (linearize-syn (machash 'ARG synht))
 		   (cond ((machash 'DIR 'ARG synht) ")"))))))
@@ -685,6 +693,7 @@
 	  (let ((ht (make-complex-cat-hashtable)))
 	    (setf (machash 'DIR ht) (nv-list-val 'DIR cat))
 	    (setf (machash 'MODAL ht) (nv-list-val 'MODAL cat))
+	    (and (nv-list-val 'LEX cat) (setf (machash 'LEX ht) (nv-list-val 'LEX cat))) ; no LEX feature in hashtable if nil (less consing)
 	    (setf (machash 'RESULT ht) (create-syn-table (first cat)))
 	    (setf (machash 'ARG ht) (create-syn-table (fourth cat)))
 	    (return-from create-syn-table ht)))))
@@ -778,8 +787,9 @@
   we avoid reentrant unification, and this is empirically sound."
   (cond ((null (machash 'DIR spht1)) catht2)
 	(t (let ((newsyn (make-complex-cat-hashtable)))
-	     (setf (machash 'DIR newsyn) (machash 'DIR spht1))  ; dir and mod project
+	     (setf (machash 'DIR newsyn) (machash 'DIR spht1))  ; slash projects
 	     (setf (machash 'MODAL newsyn) (machash 'MODAL spht1)) 
+	     (and (machash 'LEX spht1) (setf (machash 'LEX newsyn) (machash 'LEX spht1)))
 	     (setf (machash 'RESULT newsyn)(substitute-special-cat (machash 'RESULT spht1) catht2)) ; arg and res substitute
 	     (setf (machash 'ARG newsyn)(substitute-special-cat (machash 'ARG spht1) catht2))
 	     newsyn))))
@@ -942,38 +952,43 @@
 									(list 'INDEX (second (first (first lrule))))  ; rule name
 									(list 'PARAM 1.0)))))
       (lrule   --> LP ID RP cat1 
-	       ARROW cat          #'(lambda (LP ID RP cat1 ARROW cat)(cons (cons ID cat1) cat))) 
-      (mtag    --> ID		  #'(lambda (ID)(list 'MORPH (cadr ID))))
-      (cat1    --> cat		  #'(lambda (cat)(identity cat)))
+	       ARROW cat              #'(lambda (LP ID RP cat1 ARROW cat)(cons (cons ID cat1) cat))) 
+      (mtag    --> ID		      #'(lambda (ID)(list 'MORPH (cadr ID))))
+      (cat1    --> cat		      #'(lambda (cat)(identity cat)))
       (cat     --> syns COLON lf      #'(lambda (syns COLON lf)(cons (list 'SYN syns) (list (list 'SEM lf)))))
       (syns    --> basic              #'(lambda (basic)(identity basic)))
       (syns    --> parentd            #'(lambda (parentd)(identity parentd)))
-      (syns    --> syns slash syn     #'(lambda (syns slash syn)(list syns (car slash) (cadr slash) syn)))
+      (syns    --> syns slash syn     #'(lambda (syns slash syn)`(,syns ,@slash ,syn)))
       (syn     --> basic              #'(lambda (basic)(identity basic)))
       (syn     --> parentd            #'(lambda (parentd)(identity parentd)))
       (basic   --> ID feats           #'(lambda (ID feats)(list (list 'BCAT (cadr ID)) (list 'FEATS feats))))
       (parentd --> LP syns RP         #'(lambda (LP syns RP) (identity syns)))
       (slash   --> vardir varmod      #'(lambda (vardir varmod)(list vardir varmod)))
-      (feats   --> LB eqns RB 	  #'(lambda (LB eqns RB) (identity eqns)))
+      (slash   --> vardouble          #'(lambda (vardouble)(identity vardouble)))
+      (feats   --> LB eqns RB 	      #'(lambda (LB eqns RB) (identity eqns)))
       (feats                          #'(lambda () nil))
       (eqns    --> eqns COMMA eqn     #'(lambda (eqns COMMA eqn)(append  eqns (list eqn))))
       (eqns    --> eqn                #'(lambda (eqn)(list eqn)))
       (eqn     --> ID1 EQOP ID        #'(lambda (ID1 EQOP ID)(list (cadr ID1) (cadr ID))))
-      (ID1     --> ID		  #'(lambda (ID) (identity ID)))
-      (vardir  --> VALFS		  #'(lambda (VALFS)(list 'DIR 'FS)))
-      (vardir  --> VALBS		  #'(lambda (VALBS)(list 'DIR 'BS )))
-      (varmod  --> MODAL		  #'(lambda (MODAL)(cond ((equalp (cadr MODAL) '^) (list 'MODAL 'HARMONIC))
-								 ((equalp (cadr MODAL) '+) (list 'MODAL 'CROSS))
-								 ((equalp (cadr MODAL) '*) (list 'MODAL 'STAR))
-								 (t (format t "Unknown slash modality!")))))
-      (varmod  --> VALDOT		  #'(lambda (VALDOT)(list 'MODAL 'ALL)))
+      (ID1     --> ID		      #'(lambda (ID) (identity ID)))
+      (vardouble --> VALFS2 VALFS     #'(lambda (VALFS2 VALFS)(list (list 'DIR 'FS)(list 'MODAL 'STAR)(list 'LEX t))))
+      (vardouble --> VALBS2 VALBS     #'(lambda (VALBS2 VALBS)(list (list 'DIR 'BS)(list 'MODAL 'STAR)(list 'LEX t))))
+      (VALFS2  --> VALFS              #'(lambda (VALFS)(identity VALFS)))
+      (VALBS2  --> VALBS              #'(lambda (VALBS)(identity VALBS)))
+      (vardir  --> VALFS              #'(lambda (VALFS)(list 'DIR 'FS)))
+      (vardir  --> VALBS              #'(lambda (VALBS)(list 'DIR 'BS )))
+      (varmod  --> MODAL              #'(lambda (MODAL)(cond ((equalp (cadr MODAL) '^) (list 'MODAL 'HARMONIC))
+							     ((equalp (cadr MODAL) '+) (list 'MODAL 'CROSS))
+							     ((equalp (cadr MODAL) '*) (list 'MODAL 'STAR))
+							     (t (list 'MODAL '*UNKNOWN*)))))
+      (varmod  --> VALDOT             #'(lambda (VALDOT)(list 'MODAL 'ALL)))
       (varmod  -->                    #'(lambda ()(list 'MODAL 'ALL)))
-      (vardot  --> VALDOT	          #'(lambda(VALDOT)(identity nil)))
+      (vardot  --> VALDOT	      #'(lambda(VALDOT)(identity nil)))
       (vardot  -->                    #'(lambda()(identity nil)))
       (lf      --> bodys              #'(lambda (bodys)(identity bodys)))
       (lf      --> lterm              #'(lambda (lterm)(identity lterm)))
       (lterm   --> VALBS ID vardot 
-	       lbody              #'(lambda (VALBS ID vardot lbody)(mk-l (mk-v (cadr ID)) lbody)))
+	       lbody                  #'(lambda (VALBS ID vardot lbody)(mk-l (mk-v (cadr ID)) lbody)))
       (lbody   --> lterm              #'(lambda (lterm)(identity lterm)))           ; lambda bindings are right-associative.
       (lbody   --> bodys              #'(lambda (bodys)(identity bodys)))
       (bodys   --> bodys body         #'(lambda (bodys body)(mk-a bodys body)))     ; LF concatenation is left-associative. 
@@ -1126,29 +1141,33 @@
 ;;;;  We translate all combinator instructions to lambda terms in our lambda ADT language
 ;;;;  so that LF normalizer only works with our lambdas.
 
-(defun f-apply (ht1 ht2) 
+(defun f-apply (ht1 ht2 lex2) 
   "forward application"
   (and (complexp-hash (machash 'SYN ht1))
        (eql (machash 'DIR 'SYN ht1) 'FS) ; no need to check modality, all entries qualify for application.
        (multiple-value-bind (match b1 b2)
 	 (cat-match (machash 'ARG 'SYN ht1) (machash 'SYN ht2))
-	 (and match (let ((newht (make-cky-entry-hashtable)))
-		      (setf (machash 'SEM newht) (&a (machash 'SEM ht1) (machash 'SEM ht2)))
-		      (setf (machash 'INDEX newht) '|>|)
-		      (setf (machash 'SYN newht) (realize-binds (machash 'RESULT 'SYN ht1) b1))
-		      newht)))))
+	 (and match 
+	      (lex-check (machash 'LEX 'SYN ht1) lex2)  ; if we have X//Y Y , Y must be lex
+	      (let ((newht (make-cky-entry-hashtable)))
+		(setf (machash 'SEM newht) (&a (machash 'SEM ht1) (machash 'SEM ht2)))
+		(setf (machash 'INDEX newht) '|>|)
+		(setf (machash 'SYN newht) (realize-binds (machash 'RESULT 'SYN ht1) b1))
+		newht)))))
 
-(defun b-apply (ht1 ht2) 
+(defun b-apply (ht1 ht2 lex1) 
   "backward application"
   (and (complexp-hash (machash 'SYN ht2))
        (eql (machash 'DIR 'SYN ht2) 'BS) ; no need to check modality, all entries qualify for application.
        (multiple-value-bind (match b1 b2)
 	 (cat-match (machash 'SYN ht1) (machash 'ARG 'SYN ht2))
-	 (and match (let ((newht (make-cky-entry-hashtable)))
-		      (setf (machash 'SEM newht) (&a (machash 'SEM ht2) (machash 'SEM ht1)))
-		      (setf (machash 'INDEX newht) '|<|)
-		      (setf (machash 'SYN newht) (realize-binds (machash 'RESULT 'SYN ht2) b2))
-		      newht)))))
+	 (and match 
+	      (lex-check (machash 'LEX 'SYN ht2) lex1)  ; if we have Y X\\Y, Y must be lex
+	      (let ((newht (make-cky-entry-hashtable)))
+		(setf (machash 'SEM newht) (&a (machash 'SEM ht2) (machash 'SEM ht1)))
+		(setf (machash 'INDEX newht) '|<|)
+		(setf (machash 'SYN newht) (realize-binds (machash 'RESULT 'SYN ht2) b2))
+		newht)))))
 
 (defun f-comp (ht1 ht2) 
   "forward composition"
@@ -2139,7 +2158,7 @@
 				     (copy-hashtable (machash 'SYN ht1))))
          newht)))
 
-(defun ccg-combine (ht1 ht2)
+(defun ccg-combine (ht1 ht2 lex1 lex2)
   "Short-circuit evaluates ccg rules one by one, to left term (ht1) and right term (ht2), which are hashtables.
   Returns the result as a hashtable.
   Note: CCG is procedurally neutral, i.e. given two cats, the other is uniquely determined
@@ -2161,8 +2180,8 @@
 	      (eql (machash 'DIR 'SYN ht1) 'BS)
 	      (eql (machash 'DIR 'SYN ht2) 'FS)) ; the only case which no rule can combine 
 	 (return-from ccg-combine nil)))
-  (or (and *f-apply* (f-apply ht1 ht2))         ; application
-      (and *b-apply* (b-apply ht1 ht2))
+  (or (and *f-apply* (f-apply ht1 ht2 lex2))    ; application -- the only relevant case for lex slash
+      (and *b-apply* (b-apply ht1 ht2 lex1))
       (and *f-comp* (f-comp ht1 ht2))           ; composition
       (and *b-comp* (b-comp ht1 ht2))
       (and *fx-comp* (fx-comp ht1 ht2))
@@ -2194,7 +2213,7 @@
       (and *f-apply* (f-special ht1 ht2))       ; application only special cats @X, @Y ...
       (and *b-apply* (b-special ht1 ht2))))
 
-(defun apply-unary-rules (i j m)
+(defun apply-unary-rules (i j m lexp)
   "applies all the unary rules to the result in CKY cell i j k, where k=1,...m.
   Creates more types of same length in the cell i j starting with m+1.
   NB. A later rule can see results of earlier rules; the loop goes up to r, not m.
@@ -2223,11 +2242,18 @@
 			      (setf (machash 'INDEX newht) (machash 'INDEX lr))
 			      (setf (machash 'KEY newht) (machash 'KEY lr))
 			      (setf (machash 'SYN newht) (realize-binds nlr b2))
-			      (setf (machash (list i j r) *cky-hashtable*)
-				    (list 
-				      (list 'LEFT (list i j k))
-				      (list 'RIGHT (list i j k))
-				      (list 'SOLUTION newht)))))))))))
+			      (if lexp   ; slightly less consing this way -- lexical rules on lex item is also lexical, otherwise not
+                                  (setf (machash (list i j r) *cky-hashtable*)
+					(list 
+					  (list 'LEFT (list i j k))
+					  (list 'RIGHT (list i j k))
+					  (list 'SOLUTION newht)
+					  (list 'LEX lexp)))
+			          (setf (machash (list i j r) *cky-hashtable*)
+					(list 
+					  (list 'LEFT (list i j k))
+					  (list 'RIGHT (list i j k))
+					  (list 'SOLUTION newht))))))))))))
   t)
 
 (defun ccg-deduce (itemslist)
@@ -2251,10 +2277,11 @@
 			   (return-from ccg-deduce nil)))
 		   (loop for i2 from 1 to n2 do
 			 (setf (machash (list 1 i i2) *cky-hashtable*) 
-			       (list (list 'left (list 1 i i2))
-				     (list 'right (list 1 i i2))
-				     (list 'solution (hash-lex (nth (- i2 1) matches))))))
-                   (apply-unary-rules 1 i n2))) 
+			       (list (list 'LEFT (list 1 i i2))
+				     (list 'RIGHT (list 1 i i2))
+				     (list 'SOLUTION (hash-lex (nth (- i2 1) matches)))
+				     (list 'LEX t))))
+                   (apply-unary-rules 1 i n2 t))) 
 	   (setf *cky-input* itemslist)
 	   (loop for i from 2 to n do ; i j k are CKY loops
              (loop for j from 1 to (+ (- n i) 1) do
@@ -2266,8 +2293,10 @@
 		         ((not (machash (list (- i k) (+ j k) q) *cky-hashtable*)))
                          (let ((result (ccg-combine 
                                  (nv-list-val 'SOLUTION (machash (list k j p) *cky-hashtable*))
-				 (nv-list-val 'SOLUTION (machash (list (- i k) (+ j k) q)
-						 *cky-hashtable*)))))
+				 (nv-list-val 'SOLUTION (machash (list (- i k) (+ j k) q) *cky-hashtable*))
+				 (nv-list-val 'LEX (machash (list k j p) *cky-hashtable*))
+				 (nv-list-val 'LEX (machash (list (- i k) (+ j k) q) *cky-hashtable*))
+				 )))
 			   (and result 
 				(setf (machash 'PARAM result)  ; calculate inner product on the fly
 				      (f-param-inner-prod 
@@ -2279,10 +2308,10 @@
 				                                   *cky-hashtable*)))))
                                 (setf a (+ a 1))
 				(setf (machash (list i j a) *cky-hashtable*)
-				      (list (list 'left (list k j p))
-					    (list 'right (list (- i k) (+ j k) q))
-					    (list 'solution result))))))))
-	       (apply-unary-rules i j a)))
+				      (list (list 'LEFT (list k j p))
+					    (list 'RIGHT (list (- i k) (+ j k) q))
+					    (list 'SOLUTION result))))))))
+	       (apply-unary-rules i j a nil)))
 	   (and (machash (list n 1 1) *cky-hashtable*) t)))  ; if a rule applied, result would be in n 1 1 
 	(t (format t "Error: expected a list of items.~%"))))
 
