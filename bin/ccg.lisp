@@ -571,15 +571,24 @@
   "turns the syn hashtable synht to a string; avoids features other than BCAT DIR MODAL"
   (cond ((null synht) "")
 	((machash 'BCAT synht)(write-to-string (machash 'BCAT synht)))
-	(t (concatenate 'string
-		   (cond ((machash 'DIR 'RESULT synht) "("))
-		   (linearize-syn (machash 'RESULT synht))
-		   (cond ((machash 'DIR 'RESULT synht) ")"))
-		   (format-dir  (machash 'DIR synht) (machash 'LEX synht))
-		   (or (machash 'LEX synht) (format-mod (machash 'MODAL synht))) ; dont print modality for lex slash
-		   (cond ((machash 'DIR 'ARG synht) "("))
-		   (linearize-syn (machash 'ARG synht))
-		   (cond ((machash 'DIR 'ARG synht) ")"))))))
+	(t (if (machash 'LEX synht)  ; don't print modality for LEX slash. it's * anyway.
+	     (concatenate 'string
+			  (cond ((machash 'DIR 'RESULT synht) "("))
+			  (linearize-syn (machash 'RESULT synht))
+			  (cond ((machash 'DIR 'RESULT synht) ")"))
+			  (format-dir  (machash 'DIR synht) t)
+			  (cond ((machash 'DIR 'ARG synht) "("))
+			  (linearize-syn (machash 'ARG synht))
+			  (cond ((machash 'DIR 'ARG synht) ")")))
+	     (concatenate 'string
+			  (cond ((machash 'DIR 'RESULT synht) "("))
+			  (linearize-syn (machash 'RESULT synht))
+			  (cond ((machash 'DIR 'RESULT synht) ")"))
+			  (format-dir  (machash 'DIR synht) nil)
+			  (format-mod (machash 'MODAL synht)) 
+			  (cond ((machash 'DIR 'ARG synht) "("))
+			  (linearize-syn (machash 'ARG synht))
+			  (cond ((machash 'DIR 'ARG synht) ")")))))))
 
 (defun display-lf (lf &optional (res nil))
   "shorten the keyword LAM as '\' and avoid parenths of currying."
