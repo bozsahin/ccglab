@@ -1163,6 +1163,7 @@
 	      (let ((newht (make-cky-entry-hashtable)))
 		(setf (machash 'SEM newht) (&a (machash 'SEM ht1) (machash 'SEM ht2)))
 		(setf (machash 'INDEX newht) '|>|)
+		(and (machash 'LEX 'SYN ht1) (setf (machash 'LEX newht) t)) ; result is lexical too if X//Y Y succeeds--pass on
 		(setf (machash 'SYN newht) (realize-binds (machash 'RESULT 'SYN ht1) b1))
 		newht)))))
 
@@ -1177,6 +1178,7 @@
 	      (let ((newht (make-cky-entry-hashtable)))
 		(setf (machash 'SEM newht) (&a (machash 'SEM ht2) (machash 'SEM ht1)))
 		(setf (machash 'INDEX newht) '|<|)
+		(and (machash 'LEX 'SYN ht2) (setf (machash 'LEX newht) t)) ; result is lexical too if Y X\\Y succeeds--pass on
 		(setf (machash 'SYN newht) (realize-binds (machash 'RESULT 'SYN ht2) b2))
 		newht)))))
 
@@ -2259,7 +2261,7 @@
 					  (list 'LEFT (list i j k))
 					  (list 'RIGHT (list i j k))
 					  (list 'SOLUTION newht)
-					  (list 'LEX lexp)))
+					  (list 'LEX t)))
 			          (setf (machash (list i j r) *cky-hashtable*)
 					(list 
 					  (list 'LEFT (list i j k))
@@ -2319,9 +2321,14 @@
 				                                   *cky-hashtable*)))))
                                 (setf a (+ a 1))
 				(setf (machash (list i j a) *cky-hashtable*)
-				      (list (list 'LEFT (list k j p))
-					    (list 'RIGHT (list (- i k) (+ j k) q))
-					    (list 'SOLUTION result))))))))
+				      (if (machash 'LEX result)  ; if result is lexical, this is marked in its hashtable, pass it on to cky
+					(list (list 'LEFT (list k j p))
+					      (list 'RIGHT (list (- i k) (+ j k) q))
+					      (list 'LEX t)
+					      (list 'SOLUTION result))
+					(list (list 'LEFT (list k j p))
+					      (list 'RIGHT (list (- i k) (+ j k) q))
+					      (list 'SOLUTION result)))))))))
 	       (apply-unary-rules i j a nil)))
 	   (and (machash (list n 1 1) *cky-hashtable*) t)))  ; if a rule applied, result would be in n 1 1 
 	(t (format t "Error: expected a list of items.~%"))))
