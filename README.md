@@ -29,7 +29,7 @@ for the Lisp reader needs methods, therefore not usable in GCL out of the box.)
 
 SBCL and CCL are usable out of the box for CCGlab.
 
-Latest release is shown by <code>(which-ccglab)</code>. Announced git releases may be slightly behind the latest,
+Latest release is shown by <code>(which-ccglab).</code> Announced git releases may be slightly behind the latest,
 which is always this copy. Just clone this rather than download the release if you want the latest.
 
 <em>SOFTWARE REQUIREMENTS:</em>
