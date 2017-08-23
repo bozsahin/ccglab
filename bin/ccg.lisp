@@ -2782,6 +2782,7 @@
   (setf *cky-input* nil) 
   (setf *cky-max* nil)
   (show-lf)
+  (beam-off)
   (setf *cky-argmax-lf-max* nil) 
   (setf *cky-argmax-lf* nil)
   (setf *cky-lf* nil) 
