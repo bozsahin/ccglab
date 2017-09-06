@@ -6,18 +6,31 @@ Combinatory Categorial Grammar (CCG): All combinators, native input format, pars
 <ol>
 <li> <code>cd h</code>, where <code>h</code> is your chosen parent directory for CCGlab.
 <li> <code>git clone git://github.com/bozsahin/ccglab</code>
-<br>This will create the repo in <code>h/ccglab</code>
+<br>This will create the repository in <code>h/ccglab</code>
 <br>This is your ccglab home.
 <li> <code>cd h/ccglab</code>
 <li> Execute <code>./run-to-complete-first-time-install</code> bash script in the repo to get the extras needed, and to set up the paths so that CCGlab is usable from anywhere in your user account.
 <li> Open a new bash terminal and run <code>ccglab</code> script from anywhere.
 </ol>
 
+<b>NO NEED TO REINSTALL:</b> If you already have a git-installed up-and-running CCGlab, just do the following for updates:
+
+<ol>
+<li><code>cd $CCGLAB_HOME</code>
+<li><code>git pull</code>
+</ol>
+
 <b>Please read the rest of this document before you run the script.</b>
 
 This is Common Lisp code. If you already have an ANSI Common Lisp, it can work with it too.
 
-Latest release is shown in the 'release' tag of the repo. Use <code>(which-ccglab)</code> in your system to find out whether you've got the latest.
+(GCL is ANSI but it does not come with CLOS. This is unfortunate because some dispatch macros
+for the Lisp reader needs methods, therefore not usable in GCL out of the box.)
+
+SBCL and CCL are usable out of the box for CCGlab.
+
+Latest release is shown by <code>(which-ccglab).</code> Announced git releases may be slightly behind the latest,
+which is always this copy. Just clone this rather than download the release if you want the latest.
 
 <em>SOFTWARE REQUIREMENTS:</em>
 
@@ -56,13 +69,6 @@ the ccglab install completion script.
 <em>OTHER LINUXES</em>
 
 Arch, Mint, Suse, Debian, RH, Fedora, MacOS do not seem to have this peculiar Ubuntu caste of packages. The packages for sbcl and rlwrap ara available. CCL too.
-
-<b>NO NEED TO REINSTALL:</b> If you already have a git-installed up-and-running CCGlab, just do the following for updates:
-
-<ol>
-<li><code>cd $CCGLAB_HOME</code>
-<li><code>git pull</code>
-</ol>
 
 <em>INSTALLING with LEGACY ccglab</em>
 

@@ -19,28 +19,37 @@
 ;;;;     1) a transformer to turn paper-style CCG categories to lisp objects,
 ;;;;     2) a deductive component to CKY-parse a string, 
 ;;;;     3) an inductive component for PCCG for parse ranking.
-;;;;     4) A modeling component to help set your parameters for the inductive component.
+;;;;     4) A modeling component to help set/train your parameters for the inductive component.
+;;;;
 ;;;; Some CS-ey notes:
 ;;;; - It represents offline grammars serially, as lisp lists, and parse objects as hashtables, for speed.
-;;;; - It can handle Steedman-style lexical type assignments, and lexical rules.
-;;;; - CCGlab uses only one Lisp tool: LALR parser of Mark Johnson. Thanks for that.
-;;;;     The locally used copy is provided as an external file. The rest is standard Common Lisp.
-;;;; - Since you asked after seeing the LALR component, CCGlab is a non-deterministic parser.
+;;;; - CCGlab uses only one Lisp tool: LALR parser of Mark Johnson. Thanks for that. The rest is standard Common Lisp.
+;;;; - After seeing the LALR component, you might think CCGlab is a deterministic parser.
 ;;;;     The LALR subcomponent is used to parse text descriptions of lexical items and rules to Lisp structures,
-;;;;     which is deterministic (and probably not SLR, so thanks to MJ again.)
-;;;; - The fourth component of course cannot be automated like the others. It depends on the modeler. It is
-;;;;     there as a facility; if you get your training right, the third component will give
-;;;;     you parameter estimation, most likely LF for a string.
-;;;; - All we can say about parameters of the fourth component is that, minimally they will contain lexical entries,
-;;;;   i.e. lexical features, because that is what is scalar-multiplied as parameters during the CKY parse.
-;;;;   If you have more parameters, you'd know how to train for them. A Plug-in is provided.
-;;;; - CCGlab-manual.pdf describes the data and file structures, and gives some examples.
+;;;;     which is deterministic (and probably not SLR, so thanks to MJ again).
 ;;;;
 
 
-;;;; ===========================
-;;;; == Lisp Top level needs  ==
-;;;; ===========================
+;;;; ==================================================
+;;;; == Lisp Top level needs and some general utilities
+;;;; ==================================================
+
+;; a path language layer for multiple gethashes, to write linearly for visibility
+
+(defmacro machash (&rest path)
+  "Instead of native (gethash 'F1 (gethash 'F2 ht)), we write (machash 'F1 'F2 ht)
+  if ht table has a feature named F2 and the value has feature F1.
+  NB.We cannot check at compile-time whether ht is a hashtable. No-one declares them.
+  The idea is that only the outermost (F1 above) feature is not necessarily hash-valued."
+  (let* ((p (reverse path))
+	 (ht (first p))
+	 (feats (rest p))
+	 (base (list 'gethash (first feats) ht)))
+    (if (null feats)
+      (error "No feature in hash path:~S ~S~%" ht feats)
+      (dolist (feat (rest feats))(setf base (nconc (list 'gethash feat)
+						   (list base)))))
+    base))
 
 ;; Some reader macros and others are defined first to avoid complaints from Lisp compilers. 
 ;; SBCL can be particularly chatty.
@@ -70,19 +79,23 @@
 (defmacro cell-ana (cell)
   `(third ,cell))
 (defmacro get-cell-param (cell)
-  `(gethash 'PARAM (nv-list-val 'SOLUTION (gethash ,cell *cky-hashtable*))))
+  `(machash 'PARAM (nv-list-val 'SOLUTION (machash ,cell *cky-hashtable*))))
+
+(defmacro lex-check (l1 l2)
+  "return true if l2 is true when l1 is true, true when l1 is false"
+  `(or (not ,l1) ,l2))
 
 ;; macros for training table access
 (defmacro get-key-param (key)
-  `(first (gethash ,key *training-hashtable*)))
+  `(first (machash ,key *training-hashtable*)))
 (defmacro get-key-derivative (key)
-  `(rest (gethash ,key *training-hashtable*)))
+  `(rest (machash ,key *training-hashtable*)))
 (defmacro put-key-param (key param)
-  `(setf (first (gethash ,key *training-hashtable*)) ,param))
+  `(setf (first (machash ,key *training-hashtable*)) ,param))
 (defmacro put-key-derivative (key der)
-  `(setf (rest (gethash ,key *training-hashtable*)) ,der))
+  `(setf (rest (machash ,key *training-hashtable*)) ,der))
 (defmacro mk-train-entry (key param der)
-  `(setf (gethash ,key *training-hashtable*) (cons ,param ,der)))
+  `(setf (machash ,key *training-hashtable*) (cons ,param ,der)))
 (defmacro get-param (val)
   `(first ,val))
 (defmacro get-derivative (val)
@@ -90,7 +103,7 @@
 (defmacro put-param (val param)
   `(setf (first ,val) ,param))
 (defmacro put-derivative (key der)
-  `(setf (rest (gethash ,key *training-hashtable*)) ,der))
+  `(setf (rest (machash ,key *training-hashtable*)) ,der))
 
 ;; macros for supervision pairs (Sentence LF)
 (defmacro sup-sentence (pair)
@@ -141,8 +154,8 @@
   (make-hash-table :test #'equal :size (+ nfeatures 5) :rehash-size 2 :rehash-threshold 1.0))
 
 (defun make-complex-cat-hashtable ()
-  "keys are: dir modal result arg."
-  (make-hash-table :test #'equal :size 5 :rehash-size 2 :rehash-threshold 1.0))
+  "keys are: dir modal lex result arg."
+  (make-hash-table :test #'equal :size 6 :rehash-size 2 :rehash-threshold 1.0))
 
 (defun make-cky-entry-hashtable ()
   "keys are: syn sem index param."
@@ -154,8 +167,8 @@
 				    :size (hash-table-size ht))))
     (maphash #'(lambda(key value) 
 		 (cond ((eql (type-of value) 'HASH-TABLE)
-			(setf (gethash key new-table) (copy-hashtable value)))
-		       (t (setf (gethash key new-table) value))))
+			(setf (machash key new-table) (copy-hashtable value)))
+		       (t (setf (machash key new-table) value))))
 	     ht)
     new-table))
 
@@ -311,7 +324,7 @@
   (format t "  Most weighted derivation  : ~A ~%" *cky-max*))
 
 (defun which-ccglab ()
-  "CCGlab, version 3.3")
+  "CCGlab, version 3.4")
 
 (defun welcome()
   (format t "~%===================================================")
@@ -541,10 +554,14 @@
 	((eql modality 'STAR) "*")
 	(t ""))) ; ALL is default
 
-(defun format-dir (dir)
-  (cond ((eql dir 'BS) "\\")
-	((eql dir 'FS) "/")
-	(t "")))
+(defun format-dir (dir lex)
+  (if lex 
+    (cond ((eql dir 'BS) "\\\\")
+	  ((eql dir 'FS) "//")
+	  (t ""))
+    (cond ((eql dir 'BS) "\\")
+	  ((eql dir 'FS) "/")
+	  (t ""))))
 
 (defun input-range (len pos)
   "return a subsequence of the current input starting from pos and length long"
@@ -553,16 +570,25 @@
 (defun linearize-syn (synht)
   "turns the syn hashtable synht to a string; avoids features other than BCAT DIR MODAL"
   (cond ((null synht) "")
-	((gethash 'BCAT synht)(write-to-string (gethash 'BCAT synht)))
-	(t (concatenate 'string
-		   (cond ((gethash 'DIR (gethash 'RESULT synht)) "("))
-		   (linearize-syn (gethash 'RESULT synht))
-		   (cond ((gethash 'DIR (gethash 'RESULT synht)) ")"))
-		   (format-dir  (gethash 'DIR synht))
-		   (format-mod (gethash 'MODAL synht))
-		   (cond ((gethash 'DIR (gethash 'ARG synht)) "("))
-		   (linearize-syn (gethash 'ARG synht))
-		   (cond ((gethash 'DIR (gethash 'ARG synht)) ")"))))))
+	((machash 'BCAT synht)(write-to-string (machash 'BCAT synht)))
+	(t (if (machash 'LEX synht)  ; don't print modality for LEX slash. it's * anyway.
+	     (concatenate 'string
+			  (cond ((machash 'DIR 'RESULT synht) "("))
+			  (linearize-syn (machash 'RESULT synht))
+			  (cond ((machash 'DIR 'RESULT synht) ")"))
+			  (format-dir  (machash 'DIR synht) t)
+			  (cond ((machash 'DIR 'ARG synht) "("))
+			  (linearize-syn (machash 'ARG synht))
+			  (cond ((machash 'DIR 'ARG synht) ")")))
+	     (concatenate 'string
+			  (cond ((machash 'DIR 'RESULT synht) "("))
+			  (linearize-syn (machash 'RESULT synht))
+			  (cond ((machash 'DIR 'RESULT synht) ")"))
+			  (format-dir  (machash 'DIR synht) nil)
+			  (format-mod (machash 'MODAL synht)) 
+			  (cond ((machash 'DIR 'ARG synht) "("))
+			  (linearize-syn (machash 'ARG synht))
+			  (cond ((machash 'DIR 'ARG synht) ")")))))))
 
 (defun display-lf (lf &optional (res nil))
   "shorten the keyword LAM as '\' and avoid parenths of currying."
@@ -579,20 +605,20 @@
 
 (defun cky-sem (cell)
   "get the lf stored in cky table's cell location. Cells are (i j k) triplets"
-  (and (gethash cell *cky-hashtable*)
-       (gethash 'SEM (nv-list-val 'SOLUTION (gethash cell *cky-hashtable*)))))
+  (and (machash cell *cky-hashtable*)
+       (machash 'SEM (nv-list-val 'SOLUTION (machash cell *cky-hashtable*)))))
 
 (defun cky-thread (cell)
   "to show (partial) results"
-  (let* ((solution (nv-list-val 'SOLUTION (gethash cell *cky-hashtable*)))
-	 (l (nv-list-val 'LEFT (gethash cell *cky-hashtable*)))
-	 (r (nv-list-val 'RIGHT (gethash cell *cky-hashtable*)))
-	 (lf (gethash 'SEM solution))
-	 (ix (gethash 'INDEX solution))
+  (let* ((solution (nv-list-val 'SOLUTION (machash cell *cky-hashtable*)))
+	 (l (nv-list-val 'LEFT (machash cell *cky-hashtable*)))
+	 (r (nv-list-val 'RIGHT (machash cell *cky-hashtable*)))
+	 (lf (machash 'SEM solution))
+	 (ix (machash 'INDEX solution))
 	 (inputs (concatenate 'string
 			      (write-to-string (input-range (cell-len l)(cell-pos l)))
 			      (write-to-string (input-range (cell-len r)(cell-pos r)))))
-	 (syn (linearize-syn (gethash 'SYN solution))))
+	 (syn (linearize-syn (machash 'SYN solution))))
     (cond ((equal l r)   ; we've reached a lexical cell 
 	   (cond ((> (cell-len l) 1)
 		  (format t (cky-thread l)))) ; it may be a lex rule applying to a phrase
@@ -645,13 +671,13 @@
 (defun specialp-hash (htsyn)
   "special cats have @ prefix on BCAT and can be complex in result but not in arg.
   This way they maintain procedural neutrality of CCG."
-  (cond ((and (gethash 'BCAT htsyn)(algebraic? (gethash 'BCAT htsyn))))
-        ((and (gethash 'ARG htsyn)(null (gethash 'DIR (gethash 'ARG htsyn)))
-	 (algebraic? (gethash 'BCAT (gethash 'ARG htsyn)))))))
+  (cond ((and (machash 'BCAT htsyn)(algebraic? (machash 'BCAT htsyn))))
+        ((and (machash 'ARG htsyn)(null (machash 'DIR 'ARG htsyn))
+	 (algebraic? (machash 'BCAT 'ARG htsyn))))))
 
 (defun basicp-hash (htsyn)
   "Returns true iff htsyn has no DIR feature, and it is not special."
-  (and (null (gethash 'DIR htsyn)) (not (specialp-hash htsyn)))) 
+  (and (null (machash 'DIR htsyn)) (not (specialp-hash htsyn)))) 
 
 (defun complexp-hash (htsyn)
   (and (not (basicp-hash htsyn)) (not (specialp-hash htsyn))))
@@ -662,22 +688,25 @@
 
 (defun lexp-hash (ht)
   "Returns the PHON feature of hashtable ht, which is nil only for lexical rules."
-  (gethash 'PHON ht))
+  (machash 'PHON ht))
 
 (defun create-syn-table (cat)
   "Creates a hash table, which may contain other hash tables if cat is complex."
   (cond ((basicp cat) 
 	 (let ((ht (make-basic-cat-hashtable (length (nv-list-val 'FEATS cat)))))
-	   (setf (gethash 'BCAT ht) (nv-list-val 'BCAT cat))
+	   (setf (machash 'BCAT ht) (nv-list-val 'BCAT cat))
 	   (dolist (feat-val (nv-list-val 'FEATS cat))
-	     (setf (gethash (car feat-val) ht) (cadr feat-val)))
+	     (setf (machash (car feat-val) ht) (cadr feat-val)))
 	   (return-from create-syn-table ht)))
 	(t 		   ; the cat is complex
 	  (let ((ht (make-complex-cat-hashtable)))
-	    (setf (gethash 'DIR ht) (nv-list-val 'DIR cat))
-	    (setf (gethash 'MODAL ht) (nv-list-val 'MODAL cat))
-	    (setf (gethash 'RESULT ht) (create-syn-table (first cat)))
-	    (setf (gethash 'ARG ht) (create-syn-table (fourth cat)))
+	    (setf (machash 'DIR ht) (nv-list-val 'DIR cat))
+	    (setf (machash 'MODAL ht) (nv-list-val 'MODAL cat))
+	    (and (nv-list-val 'LEX cat) (setf (machash 'LEX ht) (nv-list-val 'LEX cat))) ; no LEX feature in hashtable if nil (less consing)
+	    (setf (machash 'RESULT ht) (create-syn-table (first cat)))
+	    (if (nv-list-val 'LEX cat)
+	      (setf (machash 'ARG ht) (create-syn-table (fifth cat))) ; after RESULT DIR MOD LEX
+	      (setf (machash 'ARG ht) (create-syn-table (fourth cat)))) ; after RESULT DIR MOD
 	    (return-from create-syn-table ht)))))
 
 (defun hash-lex (lexspec)
@@ -685,26 +714,26 @@
   Lisp association lists in the lexicalized grammar, to a hashtable, 
   for faster and easier parsing. Called during parsing only."
   (let ((ht (make-lex-hashtable)))
-    (setf (gethash 'INDEX ht) 'LEX)     ; created by not combining
-    (setf (gethash 'KEY ht) (nv-list-val 'KEY lexspec))
-    (setf (gethash 'PARAM ht) (nv-list-val 'PARAM lexspec))
-    (setf (gethash 'SEM ht) (nv-list-val 'SEM lexspec))
-    (setf (gethash 'MORPH ht) (nv-list-val 'MORPH lexspec))
-    (setf (gethash 'PHON ht) (nv-list-val 'PHON lexspec))
-    (setf (gethash 'SYN ht) (create-syn-table (nv-list-val 'SYN lexspec))) ; this is another hash table
+    (setf (machash 'INDEX ht) 'LEX)     ; created by not combining
+    (setf (machash 'KEY ht) (nv-list-val 'KEY lexspec))
+    (setf (machash 'PARAM ht) (nv-list-val 'PARAM lexspec))
+    (setf (machash 'SEM ht) (nv-list-val 'SEM lexspec))
+    (setf (machash 'MORPH ht) (nv-list-val 'MORPH lexspec))
+    (setf (machash 'PHON ht) (nv-list-val 'PHON lexspec))
+    (setf (machash 'SYN ht) (create-syn-table (nv-list-val 'SYN lexspec))) ; this is another hash table
     ht))
 
 (defun hash-lexrule (lexspec)
   "Lexical rules are kept in a global hash table to avoid search and reload.
   This function creates a lexical rule entry to be put in that table."
   (let ((ht (make-lrule-hashtable)))
-    (setf (gethash 'INDEX ht) (nv-list-val 'INDEX lexspec))     ; lexical rule name
-    (setf (gethash 'KEY ht) (nv-list-val 'KEY lexspec))
-    (setf (gethash 'PARAM ht) (nv-list-val 'PARAM lexspec))
-    (setf (gethash 'INSEM ht) (nv-list-val 'INSEM lexspec))
-    (setf (gethash 'OUTSEM ht) (nv-list-val 'OUTSEM lexspec))
-    (setf (gethash 'INSYN ht) (create-syn-table (nv-list-val 'INSYN lexspec)))
-    (setf (gethash 'OUTSYN ht) (create-syn-table (nv-list-val 'OUTSYN lexspec)))
+    (setf (machash 'INDEX ht) (nv-list-val 'INDEX lexspec))     ; lexical rule name
+    (setf (machash 'KEY ht) (nv-list-val 'KEY lexspec))
+    (setf (machash 'PARAM ht) (nv-list-val 'PARAM lexspec))
+    (setf (machash 'INSEM ht) (nv-list-val 'INSEM lexspec))
+    (setf (machash 'OUTSEM ht) (nv-list-val 'OUTSEM lexspec))
+    (setf (machash 'INSYN ht) (create-syn-table (nv-list-val 'INSYN lexspec)))
+    (setf (machash 'OUTSYN ht) (create-syn-table (nv-list-val 'OUTSYN lexspec)))
     ht))
 
 (defun cat-match (sht1 sht2)
@@ -722,23 +751,23 @@
 	 (let ((binds1 nil)
 	       (binds2 nil))
 	   (maphash #'(lambda (feat1 v1)  ; check sht1 feats and find binds
-			(let ((v2 (gethash feat1 sht2)))
+			(let ((v2 (machash feat1 sht2)))
 			  (and v1 v2 (not (var? v1))(not (var? v2))(not (eql v1 v2)) 
 			       (return-from cat-match (values nil nil nil)))
 			  (and v2 (var? v1)(not (var? v2))(push (list feat1 v2) binds1))))
 		    sht1)
 	   (maphash #'(lambda (feat2 v2)  ; find sht2 binds, common features are by now known to match
-			(let ((v1 (gethash feat2 sht1)))
+			(let ((v1 (machash feat2 sht1)))
 			  (and v1 (var? v2)(not (var? v1))(push (list feat2 v1) binds2))))
 		    sht2)
 	   (values t binds1 binds2)))
 	((and (complexp-hash sht1)(complexp-hash sht2)
-	      (eql (gethash 'DIR sht1)(gethash 'DIR sht2))
-	      (mod-compatiblep (gethash 'MODAL sht1) (gethash 'MODAL sht2))
+	      (eql (machash 'DIR sht1)(machash 'DIR sht2))
+	      (mod-compatiblep (machash 'MODAL sht1) (machash 'MODAL sht2))
 	      (multiple-value-bind (res1 b1 b2)
-		(cat-match (gethash 'ARG sht1)(gethash 'ARG sht2))
+		(cat-match (machash 'ARG sht1)(machash 'ARG sht2))
 		(and res1 (multiple-value-bind (res2 b12 b22)
-			    (cat-match (gethash 'RESULT sht1)(gethash 'RESULT sht2))
+			    (cat-match (machash 'RESULT sht1)(machash 'RESULT sht2))
 			    (return-from cat-match (values res2 (append b12 b1) (append b22 b2))))))))
 	(t (values nil nil nil))))
 
@@ -746,11 +775,11 @@
   "we know that binds is non-empty."
   (cond  ((basicp-hash newht)
 	  (dolist (fv binds)
-	    (let ((shtval (gethash (first fv) newht)))
+	    (let ((shtval (machash (first fv) newht)))
 	      (and (var? shtval)
-		   (setf (gethash (first fv) newht)(second fv))))))
-	 (t (progn (realize-binds2 (gethash 'RESULT newht) binds)
-		   (realize-binds2 (gethash 'ARG newht) binds))))
+		   (setf (machash (first fv) newht)(second fv))))))
+	 (t (progn (realize-binds2 (machash 'RESULT newht) binds)
+		   (realize-binds2 (machash 'ARG newht) binds))))
     newht)
 
 (defun realize-binds (sht binds)
@@ -767,12 +796,13 @@
   "substitutes all categories in special cat spht1 with normal cat catht2.
   To avoid HPSGisation of CCG, we must assume all basic cats in spht1 are special. This way
   we avoid reentrant unification, and this is empirically sound."
-  (cond ((null (gethash 'DIR spht1)) catht2)
+  (cond ((null (machash 'DIR spht1)) catht2)
 	(t (let ((newsyn (make-complex-cat-hashtable)))
-	     (setf (gethash 'DIR newsyn) (gethash 'DIR spht1))  ; dir and mod project
-	     (setf (gethash 'MODAL newsyn) (gethash 'MODAL spht1)) 
-	     (setf (gethash 'RESULT newsyn)(substitute-special-cat (gethash 'RESULT spht1) catht2)) ; arg and res substitute
-	     (setf (gethash 'ARG newsyn)(substitute-special-cat (gethash 'ARG spht1) catht2))
+	     (setf (machash 'DIR newsyn) (machash 'DIR spht1))  ; slash projects
+	     (setf (machash 'MODAL newsyn) (machash 'MODAL spht1)) 
+	     (and (machash 'LEX spht1) (setf (machash 'LEX newsyn) (machash 'LEX spht1)))
+	     (setf (machash 'RESULT newsyn)(substitute-special-cat (machash 'RESULT spht1) catht2)) ; arg and res substitute
+	     (setf (machash 'ARG newsyn)(substitute-special-cat (machash 'ARG spht1) catht2))
 	     newsyn))))
 
 (defmacro parse/2 (words)
@@ -859,7 +889,7 @@
 (defun get-ht (phon ht-list)
   "returns the hashtable in ht-list that has PHON feature same as phon.
   Used for testing purposes only."
-  (dolist (ht ht-list)(and (eql phon (gethash 'PHON ht)) (return-from get-ht ht))))
+  (dolist (ht ht-list)(and (eql phon (machash 'PHON ht)) (return-from get-ht ht))))
 
 (defun cky-pprint ()
   "Tries to pretty print cky table as much as it can. Hashtable and closure prints are
@@ -871,7 +901,7 @@
   "tries to print the derivations ending in CKY cell (row col) as humanly as possible. Only final result is
   normalized in its LF."
   (do ((m 1 (incf m)))
-    ((null (gethash (list row col m) *cky-hashtable*)))
+    ((null (machash (list row col m) *cky-hashtable*)))
     (format t "~2%Derivation ~A~%--------------" m)
     (format t (cky-thread (list row col m)))
     (format t "~2&Final LF, normal-order evaluated: ~2%    ~A =~%    ~A" 
@@ -882,7 +912,7 @@
 
 (defun cky-show-normal-forms (row col)
    (do ((m 1 (incf m)))
-     ((null (gethash (list row col m) *cky-hashtable*)))
+     ((null (machash (list row col m) *cky-hashtable*)))
      (format t "~2%Derivation ~A~%----------------~%" m)
      (beta-normalize (cky-sem (list row col m)))))
 
@@ -933,38 +963,43 @@
 									(list 'INDEX (second (first (first lrule))))  ; rule name
 									(list 'PARAM 1.0)))))
       (lrule   --> LP ID RP cat1 
-	       ARROW cat          #'(lambda (LP ID RP cat1 ARROW cat)(cons (cons ID cat1) cat))) 
-      (mtag    --> ID		  #'(lambda (ID)(list 'MORPH (cadr ID))))
-      (cat1    --> cat		  #'(lambda (cat)(identity cat)))
+	       ARROW cat              #'(lambda (LP ID RP cat1 ARROW cat)(cons (cons ID cat1) cat))) 
+      (mtag    --> ID		      #'(lambda (ID)(list 'MORPH (cadr ID))))
+      (cat1    --> cat		      #'(lambda (cat)(identity cat)))
       (cat     --> syns COLON lf      #'(lambda (syns COLON lf)(cons (list 'SYN syns) (list (list 'SEM lf)))))
       (syns    --> basic              #'(lambda (basic)(identity basic)))
       (syns    --> parentd            #'(lambda (parentd)(identity parentd)))
-      (syns    --> syns slash syn     #'(lambda (syns slash syn)(list syns (car slash) (cadr slash) syn)))
+      (syns    --> syns slash syn     #'(lambda (syns slash syn)`(,syns ,@slash ,syn)))
       (syn     --> basic              #'(lambda (basic)(identity basic)))
       (syn     --> parentd            #'(lambda (parentd)(identity parentd)))
       (basic   --> ID feats           #'(lambda (ID feats)(list (list 'BCAT (cadr ID)) (list 'FEATS feats))))
       (parentd --> LP syns RP         #'(lambda (LP syns RP) (identity syns)))
       (slash   --> vardir varmod      #'(lambda (vardir varmod)(list vardir varmod)))
-      (feats   --> LB eqns RB 	  #'(lambda (LB eqns RB) (identity eqns)))
+      (slash   --> vardouble          #'(lambda (vardouble)(identity vardouble)))
+      (feats   --> LB eqns RB 	      #'(lambda (LB eqns RB) (identity eqns)))
       (feats                          #'(lambda () nil))
       (eqns    --> eqns COMMA eqn     #'(lambda (eqns COMMA eqn)(append  eqns (list eqn))))
       (eqns    --> eqn                #'(lambda (eqn)(list eqn)))
       (eqn     --> ID1 EQOP ID        #'(lambda (ID1 EQOP ID)(list (cadr ID1) (cadr ID))))
-      (ID1     --> ID		  #'(lambda (ID) (identity ID)))
-      (vardir  --> VALFS		  #'(lambda (VALFS)(list 'DIR 'FS)))
-      (vardir  --> VALBS		  #'(lambda (VALBS)(list 'DIR 'BS )))
-      (varmod  --> MODAL		  #'(lambda (MODAL)(cond ((equalp (cadr MODAL) '^) (list 'MODAL 'HARMONIC))
-								 ((equalp (cadr MODAL) '+) (list 'MODAL 'CROSS))
-								 ((equalp (cadr MODAL) '*) (list 'MODAL 'STAR))
-								 (t (format t "Unknown slash modality!")))))
-      (varmod  --> VALDOT		  #'(lambda (VALDOT)(list 'MODAL 'ALL)))
+      (ID1     --> ID		      #'(lambda (ID) (identity ID)))
+      (vardouble --> VALFS2 VALFS     #'(lambda (VALFS2 VALFS)(list (list 'DIR 'FS)(list 'MODAL 'STAR)(list 'LEX t))))
+      (vardouble --> VALBS2 VALBS     #'(lambda (VALBS2 VALBS)(list (list 'DIR 'BS)(list 'MODAL 'STAR)(list 'LEX t))))
+      (VALFS2  --> VALFS              #'(lambda (VALFS)(identity VALFS)))
+      (VALBS2  --> VALBS              #'(lambda (VALBS)(identity VALBS)))
+      (vardir  --> VALFS              #'(lambda (VALFS)(list 'DIR 'FS)))
+      (vardir  --> VALBS              #'(lambda (VALBS)(list 'DIR 'BS )))
+      (varmod  --> MODAL              #'(lambda (MODAL)(cond ((equalp (cadr MODAL) '^) (list 'MODAL 'HARMONIC))
+							     ((equalp (cadr MODAL) '+) (list 'MODAL 'CROSS))
+							     ((equalp (cadr MODAL) '*) (list 'MODAL 'STAR))
+							     (t (list 'MODAL '*UNKNOWN*)))))
+      (varmod  --> VALDOT             #'(lambda (VALDOT)(list 'MODAL 'ALL)))
       (varmod  -->                    #'(lambda ()(list 'MODAL 'ALL)))
-      (vardot  --> VALDOT	          #'(lambda(VALDOT)(identity nil)))
+      (vardot  --> VALDOT	      #'(lambda(VALDOT)(identity nil)))
       (vardot  -->                    #'(lambda()(identity nil)))
       (lf      --> bodys              #'(lambda (bodys)(identity bodys)))
       (lf      --> lterm              #'(lambda (lterm)(identity lterm)))
       (lterm   --> VALBS ID vardot 
-	       lbody              #'(lambda (VALBS ID vardot lbody)(mk-l (mk-v (cadr ID)) lbody)))
+	       lbody                  #'(lambda (VALBS ID vardot lbody)(mk-l (mk-v (cadr ID)) lbody)))
       (lbody   --> lterm              #'(lambda (lterm)(identity lterm)))           ; lambda bindings are right-associative.
       (lbody   --> bodys              #'(lambda (bodys)(identity bodys)))
       (bodys   --> bodys body         #'(lambda (bodys body)(mk-a bodys body)))     ; LF concatenation is left-associative. 
@@ -1117,235 +1152,241 @@
 ;;;;  We translate all combinator instructions to lambda terms in our lambda ADT language
 ;;;;  so that LF normalizer only works with our lambdas.
 
-(defun f-apply (ht1 ht2) 
+(defun f-apply (ht1 ht2 lex2) 
   "forward application"
-  (and (complexp-hash (gethash 'SYN ht1))
-       (eql (gethash 'DIR (gethash 'SYN ht1)) 'FS) ; no need to check modality, all entries qualify for application.
+  (and (complexp-hash (machash 'SYN ht1))
+       (eql (machash 'DIR 'SYN ht1) 'FS) ; no need to check modality, all entries qualify for application.
        (multiple-value-bind (match b1 b2)
-	 (cat-match (gethash 'ARG (gethash 'SYN ht1)) (gethash 'SYN ht2))
-	 (and match (let ((newht (make-cky-entry-hashtable)))
-		      (setf (gethash 'SEM newht) (&a (gethash 'SEM ht1) (gethash 'SEM ht2)))
-		      (setf (gethash 'INDEX newht) '|>|)
-		      (setf (gethash 'SYN newht) (realize-binds (gethash 'RESULT (gethash 'SYN ht1)) b1))
-		      newht)))))
+	 (cat-match (machash 'ARG 'SYN ht1) (machash 'SYN ht2))
+	 (and match 
+	      (lex-check (machash 'LEX 'SYN ht1) lex2)  ; if we have X//Y Y , Y must be lex
+	      (let ((newht (make-cky-entry-hashtable)))
+		(setf (machash 'SEM newht) (&a (machash 'SEM ht1) (machash 'SEM ht2)))
+		(setf (machash 'INDEX newht) '|>|)
+		(and (machash 'LEX 'SYN ht1) (setf (machash 'LEX newht) t)) ; result is lexical too if X//Y Y succeeds--pass on
+		(setf (machash 'SYN newht) (realize-binds (machash 'RESULT 'SYN ht1) b1))
+		newht)))))
 
-(defun b-apply (ht1 ht2) 
+(defun b-apply (ht1 ht2 lex1) 
   "backward application"
-  (and (complexp-hash (gethash 'SYN ht2))
-       (eql (gethash 'DIR (gethash 'SYN ht2)) 'BS) ; no need to check modality, all entries qualify for application.
+  (and (complexp-hash (machash 'SYN ht2))
+       (eql (machash 'DIR 'SYN ht2) 'BS) ; no need to check modality, all entries qualify for application.
        (multiple-value-bind (match b1 b2)
-	 (cat-match (gethash 'SYN ht1) (gethash 'ARG (gethash 'SYN ht2)))
-	 (and match (let ((newht (make-cky-entry-hashtable)))
-		      (setf (gethash 'SEM newht) (&a (gethash 'SEM ht2) (gethash 'SEM ht1)))
-		      (setf (gethash 'INDEX newht) '|<|)
-		      (setf (gethash 'SYN newht) (realize-binds (gethash 'RESULT (gethash 'SYN ht2)) b2))
-		      newht)))))
+	 (cat-match (machash 'SYN ht1) (machash 'ARG 'SYN ht2))
+	 (and match 
+	      (lex-check (machash 'LEX 'SYN ht2) lex1)  ; if we have Y X\\Y, Y must be lex
+	      (let ((newht (make-cky-entry-hashtable)))
+		(setf (machash 'SEM newht) (&a (machash 'SEM ht2) (machash 'SEM ht1)))
+		(setf (machash 'INDEX newht) '|<|)
+		(and (machash 'LEX 'SYN ht2) (setf (machash 'LEX newht) t)) ; result is lexical too if Y X\\Y succeeds--pass on
+		(setf (machash 'SYN newht) (realize-binds (machash 'RESULT 'SYN ht2) b2))
+		newht)))))
 
 (defun f-comp (ht1 ht2) 
   "forward composition"
-  (and (complexp-hash (gethash 'SYN ht1))
-       (complexp-hash (gethash 'SYN ht2))
-       (eql (gethash 'DIR (gethash 'SYN ht1)) 'FS)
-       (eql (gethash 'DIR (gethash 'SYN ht2)) 'FS)
-       (member (gethash 'MODAL (gethash 'SYN ht1)) '(ALL HARMONIC))
-       (member (gethash 'MODAL (gethash 'SYN ht2)) '(ALL HARMONIC))
+  (and (complexp-hash (machash 'SYN ht1))
+       (complexp-hash (machash 'SYN ht2))
+       (eql (machash 'DIR 'SYN ht1) 'FS)
+       (eql (machash 'DIR 'SYN ht2) 'FS)
+       (member (machash 'MODAL 'SYN ht1) '(ALL HARMONIC))
+       (member (machash 'MODAL 'SYN ht2) '(ALL HARMONIC))
        (multiple-value-bind (match b1 b2)
-	 (cat-match (gethash 'ARG (gethash 'SYN ht1)) (gethash 'RESULT (gethash 'SYN ht2)))
+	 (cat-match (machash 'ARG 'SYN ht1) (machash 'RESULT 'SYN ht2))
 	 (and match (let ((newht (make-cky-entry-hashtable))
 			  (newsyn (make-complex-cat-hashtable)))
-		      (setf (gethash 'SEM newht) (&b (gethash 'SEM ht1) (gethash 'SEM ht2)))
-		      (setf (gethash 'INDEX newht) '|>B|) ; ht2 dir and modality projects
-		      (setf (gethash 'SYN newht) newsyn)
-		      (setf (gethash 'DIR (gethash 'SYN newht)) (gethash 'DIR (gethash 'SYN ht2)))
-		      (setf (gethash 'MODAL (gethash 'SYN newht)) (gethash 'MODAL (gethash 'SYN ht2)))
-		      (setf (gethash 'RESULT (gethash 'SYN newht))(realize-binds (gethash 'RESULT (gethash 'SYN ht1)) b1))
-		      (setf (gethash 'ARG (gethash 'SYN newht))(realize-binds (gethash 'ARG (gethash 'SYN ht2)) b2))
+		      (setf (machash 'SEM newht) (&b (machash 'SEM ht1) (machash 'SEM ht2)))
+		      (setf (machash 'INDEX newht) '|>B|) ; ht2 dir and modality projects
+		      (setf (machash 'SYN newht) newsyn)
+		      (setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht2))
+		      (setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht2))
+		      (setf (machash 'RESULT 'SYN newht)(realize-binds (machash 'RESULT 'SYN ht1) b1))
+		      (setf (machash 'ARG 'SYN newht)(realize-binds (machash 'ARG 'SYN ht2) b2))
 		      newht)))))
 
 (defun b-comp (ht1 ht2) 
   "backward composition"
-  (and (complexp-hash (gethash 'SYN ht1))
-       (complexp-hash (gethash 'SYN ht2))
-       (eql (gethash 'DIR (gethash 'SYN ht1)) 'BS)
-       (eql (gethash 'DIR (gethash 'SYN ht2)) 'BS)
-       (member (gethash 'MODAL (gethash 'SYN ht1)) '(ALL HARMONIC))
-       (member (gethash 'MODAL (gethash 'SYN ht2)) '(ALL HARMONIC))
+  (and (complexp-hash (machash 'SYN ht1))
+       (complexp-hash (machash 'SYN ht2))
+       (eql (machash 'DIR 'SYN ht1) 'BS)
+       (eql (machash 'DIR 'SYN ht2) 'BS)
+       (member (machash 'MODAL 'SYN ht1) '(ALL HARMONIC))
+       (member (machash 'MODAL 'SYN ht2) '(ALL HARMONIC))
        (multiple-value-bind (match b1 b2)
-	 (cat-match (gethash 'RESULT (gethash 'SYN ht1)) (gethash 'ARG (gethash 'SYN ht2)))
+	 (cat-match (machash 'RESULT 'SYN ht1) (machash 'ARG 'SYN ht2))
 	 (and match (let ((newht (make-cky-entry-hashtable))
 			  (newsyn (make-complex-cat-hashtable)))
-		      (setf (gethash 'SEM newht) (&b (gethash 'SEM ht2) (gethash 'SEM ht1)))
-		      (setf (gethash 'INDEX newht) '|<B|) ; ht1 dir and modality projects
-		      (setf (gethash 'SYN newht) newsyn)
-		      (setf (gethash 'DIR (gethash 'SYN newht)) (gethash 'DIR (gethash 'SYN ht1)))
-		      (setf (gethash 'MODAL (gethash 'SYN newht)) (gethash 'MODAL (gethash 'SYN ht1)))
-		      (setf (gethash 'RESULT (gethash 'SYN newht))(realize-binds (gethash 'RESULT (gethash 'SYN ht2)) b2))
-		      (setf (gethash 'ARG (gethash 'SYN newht))(realize-binds (gethash 'ARG (gethash 'SYN ht1)) b1))
+		      (setf (machash 'SEM newht) (&b (machash 'SEM ht2) (machash 'SEM ht1)))
+		      (setf (machash 'INDEX newht) '|<B|) ; ht1 dir and modality projects
+		      (setf (machash 'SYN newht) newsyn)
+		      (setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht1))
+		      (setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht1))
+		      (setf (machash 'RESULT 'SYN newht)(realize-binds (machash 'RESULT 'SYN ht2) b2))
+		      (setf (machash 'ARG 'SYN newht)(realize-binds (machash 'ARG 'SYN ht1) b1))
 		      newht)))))
 
 (defun fx-comp (ht1 ht2) 
   "forward crossing composition"
-  (and (complexp-hash (gethash 'SYN ht1))
-       (complexp-hash (gethash 'SYN ht2))
-       (eql (gethash 'DIR (gethash 'SYN ht1)) 'FS)
-       (eql (gethash 'DIR (gethash 'SYN ht2)) 'BS)
-       (member (gethash 'MODAL (gethash 'SYN ht1)) '(ALL CROSS))
-       (member (gethash 'MODAL (gethash 'SYN ht2)) '(ALL CROSS))
+  (and (complexp-hash (machash 'SYN ht1))
+       (complexp-hash (machash 'SYN ht2))
+       (eql (machash 'DIR 'SYN ht1) 'FS)
+       (eql (machash 'DIR 'SYN ht2) 'BS)
+       (member (machash 'MODAL 'SYN ht1) '(ALL CROSS))
+       (member (machash 'MODAL 'SYN ht2) '(ALL CROSS))
        (multiple-value-bind (match b1 b2)
-	 (cat-match (gethash 'ARG (gethash 'SYN ht1)) (gethash 'RESULT (gethash 'SYN ht2)))
+	 (cat-match (machash 'ARG 'SYN ht1) (machash 'RESULT 'SYN ht2))
 	 (and match (let ((newht (make-cky-entry-hashtable))
 			  (newsyn (make-complex-cat-hashtable)))
-		      (setf (gethash 'SEM newht) (&b (gethash 'SEM ht1) (gethash 'SEM ht2)))
-		      (setf (gethash 'INDEX newht) '|>Bx|) ; ht2 dir and modality projects
-		      (setf (gethash 'SYN newht) newsyn)
-		      (setf (gethash 'DIR (gethash 'SYN newht)) (gethash 'DIR (gethash 'SYN ht2)))
-		      (setf (gethash 'MODAL (gethash 'SYN newht)) (gethash 'MODAL (gethash 'SYN ht2)))
-		      (setf (gethash 'RESULT (gethash 'SYN newht))(realize-binds (gethash 'RESULT (gethash 'SYN ht1)) b1))
-		      (setf (gethash 'ARG (gethash 'SYN newht))(realize-binds (gethash 'ARG (gethash 'SYN ht2)) b2))
+		      (setf (machash 'SEM newht) (&b (machash 'SEM ht1) (machash 'SEM ht2)))
+		      (setf (machash 'INDEX newht) '|>Bx|) ; ht2 dir and modality projects
+		      (setf (machash 'SYN newht) newsyn)
+		      (setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht2))
+		      (setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht2))
+		      (setf (machash 'RESULT 'SYN newht)(realize-binds (machash 'RESULT 'SYN ht1) b1))
+		      (setf (machash 'ARG 'SYN newht)(realize-binds (machash 'ARG 'SYN ht2) b2))
 		      newht)))))
 
 (defun bx-comp (ht1 ht2) 
   "backward crossing composition"
-  (and (complexp-hash (gethash 'SYN ht1))
-       (complexp-hash (gethash 'SYN ht2))
-       (eql (gethash 'DIR (gethash 'SYN ht1)) 'FS)
-       (eql (gethash 'DIR (gethash 'SYN ht2)) 'BS)
-       (member (gethash 'MODAL (gethash 'SYN ht1)) '(ALL CROSS))
-       (member (gethash 'MODAL (gethash 'SYN ht2)) '(ALL CROSS))
+  (and (complexp-hash (machash 'SYN ht1))
+       (complexp-hash (machash 'SYN ht2))
+       (eql (machash 'DIR 'SYN ht1) 'FS)
+       (eql (machash 'DIR 'SYN ht2) 'BS)
+       (member (machash 'MODAL 'SYN ht1) '(ALL CROSS))
+       (member (machash 'MODAL 'SYN ht2) '(ALL CROSS))
        (multiple-value-bind (match b1 b2)
-	 (cat-match (gethash 'RESULT (gethash 'SYN ht1)) (gethash 'ARG (gethash 'SYN ht2)))
+	 (cat-match (machash 'RESULT 'SYN ht1) (machash 'ARG 'SYN ht2))
 	 (and match (let ((newht (make-cky-entry-hashtable))
 			  (newsyn (make-complex-cat-hashtable)))
-		      (setf (gethash 'SEM newht) (&b (gethash 'SEM ht2) (gethash 'SEM ht1)))
-		      (setf (gethash 'INDEX newht) '|<Bx|) ; ht1 dir and modality projects
-		      (setf (gethash 'SYN newht) newsyn)
-		      (setf (gethash 'DIR (gethash 'SYN newht)) (gethash 'DIR (gethash 'SYN ht1)))
-		      (setf (gethash 'MODAL (gethash 'SYN newht)) (gethash 'MODAL (gethash 'SYN ht1)))
-		      (setf (gethash 'RESULT (gethash 'SYN newht))(realize-binds (gethash 'RESULT (gethash 'SYN ht2)) b2))
-		      (setf (gethash 'ARG (gethash 'SYN newht))(realize-binds (gethash 'ARG (gethash 'SYN ht1)) b1))
+		      (setf (machash 'SEM newht) (&b (machash 'SEM ht2) (machash 'SEM ht1)))
+		      (setf (machash 'INDEX newht) '|<Bx|) ; ht1 dir and modality projects
+		      (setf (machash 'SYN newht) newsyn)
+		      (setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht1))
+		      (setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht1))
+		      (setf (machash 'RESULT 'SYN newht)(realize-binds (machash 'RESULT 'SYN ht2) b2))
+		      (setf (machash 'ARG 'SYN newht)(realize-binds (machash 'ARG 'SYN ht1) b1))
 		      newht)))))
 
 (defun f-sub (ht1 ht2) 
   "forward substitution"
-  (and (complexp-hash (gethash 'SYN ht1))
-       (complexp-hash (gethash 'SYN ht2))
-       (gethash 'RESULT (gethash 'SYN ht1)) 
-       (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht1))) ; result must be functor too
-       (eql (gethash 'DIR (gethash 'SYN ht1)) 'FS)
-       (eql (gethash 'DIR (gethash 'SYN ht2)) 'FS)
-       (eql (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht1))) 'FS)
-       (member (gethash 'MODAL (gethash 'SYN ht1)) '(ALL HARMONIC))
-       (member (gethash 'MODAL (gethash 'SYN ht2)) '(ALL HARMONIC))
-       (member (gethash 'MODAL (gethash 'RESULT (gethash 'SYN ht1))) '(ALL HARMONIC))
+  (and (complexp-hash (machash 'SYN ht1))
+       (complexp-hash (machash 'SYN ht2))
+       (machash 'RESULT 'SYN ht1) 
+       (machash 'DIR 'RESULT 'SYN ht1) ; result must be functor too
+       (eql (machash 'DIR 'SYN ht1) 'FS)
+       (eql (machash 'DIR 'SYN ht2) 'FS)
+       (eql (machash 'DIR 'RESULT 'SYN ht1) 'FS)
+       (member (machash 'MODAL 'SYN ht1) '(ALL HARMONIC))
+       (member (machash 'MODAL 'SYN ht2) '(ALL HARMONIC))
+       (member (machash 'MODAL 'RESULT 'SYN ht1) '(ALL HARMONIC))
        (multiple-value-bind (match b1 b2)
-	 (cat-match (gethash 'ARG (gethash 'SYN ht1)) (gethash 'ARG (gethash 'SYN ht2)))
+	 (cat-match (machash 'ARG 'SYN ht1) (machash 'ARG 'SYN ht2))
 	 (and match (multiple-value-bind (match2 b12 b22)
-		      (cat-match (gethash 'ARG (gethash 'RESULT (gethash 'SYN ht1)))
-				 (gethash 'RESULT (gethash 'SYN ht2)))
+		      (cat-match (machash 'ARG 'RESULT 'SYN ht1)
+				 (machash 'RESULT 'SYN ht2))
 		      (and match2 
 			   (let ((newht (make-cky-entry-hashtable))
 				 (newsyn (make-complex-cat-hashtable)))
-			     (setf (gethash 'SEM newht) (&s (gethash 'SEM ht1) (gethash 'SEM ht2)))
-			     (setf (gethash 'INDEX newht) '|>S|) ; ht2 dir and modality projects below
-			     (setf (gethash 'SYN newht) newsyn)
-			     (setf (gethash 'DIR (gethash 'SYN newht)) (gethash 'DIR (gethash 'SYN ht2)))
-			     (setf (gethash 'MODAL (gethash 'SYN newht)) (gethash 'MODAL (gethash 'SYN ht2)))
-			     (setf (gethash 'RESULT (gethash 'SYN newht))(realize-binds (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht1))) 
+			     (setf (machash 'SEM newht) (&s (machash 'SEM ht1) (machash 'SEM ht2)))
+			     (setf (machash 'INDEX newht) '|>S|) ; ht2 dir and modality projects below
+			     (setf (machash 'SYN newht) newsyn)
+			     (setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht2))
+			     (setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht2))
+			     (setf (machash 'RESULT 'SYN newht)(realize-binds (machash 'RESULT 'RESULT 'SYN ht1) 
 											(append b1 b12)))
-			     (setf (gethash 'ARG (gethash 'SYN newht))(realize-binds (gethash 'ARG (gethash 'SYN ht2)) 
+			     (setf (machash 'ARG 'SYN newht)(realize-binds (machash 'ARG 'SYN ht2) 
 										     (append b2 b22)))
 			     newht)))))))
 
 (defun b-sub (ht1 ht2) 
   "backward substitution"
-  (and (complexp-hash (gethash 'SYN ht2))
-       (complexp-hash (gethash 'SYN ht1))
-       (gethash 'RESULT (gethash 'SYN ht2)) 
-       (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht2))) ; result must be functor too
-       (eql (gethash 'DIR (gethash 'SYN ht2)) 'BS)
-       (eql (gethash 'DIR (gethash 'SYN ht1)) 'BS)
-       (eql (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht2))) 'BS)
-       (member (gethash 'MODAL (gethash 'SYN ht2)) '(ALL HARMONIC))
-       (member (gethash 'MODAL (gethash 'SYN ht1)) '(ALL HARMONIC))
-       (member (gethash 'MODAL (gethash 'RESULT (gethash 'SYN ht2))) '(ALL HARMONIC))
+  (and (complexp-hash (machash 'SYN ht2))
+       (complexp-hash (machash 'SYN ht1))
+       (machash 'RESULT 'SYN ht2) 
+       (machash 'DIR 'RESULT 'SYN ht2) ; result must be functor too
+       (eql (machash 'DIR 'SYN ht2) 'BS)
+       (eql (machash 'DIR 'SYN ht1) 'BS)
+       (eql (machash 'DIR 'RESULT 'SYN ht2) 'BS)
+       (member (machash 'MODAL 'SYN ht2) '(ALL HARMONIC))
+       (member (machash 'MODAL 'SYN ht1) '(ALL HARMONIC))
+       (member (machash 'MODAL 'RESULT 'SYN ht2) '(ALL HARMONIC))
        (multiple-value-bind (match b2 b1)
-	 (cat-match (gethash 'ARG (gethash 'SYN ht2)) (gethash 'ARG (gethash 'SYN ht1)))
+	 (cat-match (machash 'ARG 'SYN ht2) (machash 'ARG 'SYN ht1))
 	 (and match (multiple-value-bind (match2 b21 b12)
-		      (cat-match (gethash 'ARG (gethash 'RESULT (gethash 'SYN ht2)))
-				 (gethash 'RESULT (gethash 'SYN ht1)))
+		      (cat-match (machash 'ARG 'RESULT 'SYN ht2)
+				 (machash 'RESULT 'SYN ht1))
 		      (and match2 
 			   (let ((newht (make-cky-entry-hashtable))
 				 (newsyn (make-complex-cat-hashtable)))
-			     (setf (gethash 'SEM newht) (&s (gethash 'SEM ht2) (gethash 'SEM ht1)))
-			     (setf (gethash 'INDEX newht) '|<S|) ; ht1 dir and modality projects below
-			     (setf (gethash 'SYN newht) newsyn)
-			     (setf (gethash 'DIR (gethash 'SYN newht)) (gethash 'DIR (gethash 'SYN ht1)))
-			     (setf (gethash 'MODAL (gethash 'SYN newht)) (gethash 'MODAL (gethash 'SYN ht1)))
-			     (setf (gethash 'RESULT (gethash 'SYN newht))(realize-binds (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht2))) 
+			     (setf (machash 'SEM newht) (&s (machash 'SEM ht2) (machash 'SEM ht1)))
+			     (setf (machash 'INDEX newht) '|<S|) ; ht1 dir and modality projects below
+			     (setf (machash 'SYN newht) newsyn)
+			     (setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht1))
+			     (setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht1))
+			     (setf (machash 'RESULT 'SYN newht)(realize-binds (machash 'RESULT 'RESULT 'SYN ht2) 
 											(append b2 b21)))
-			     (setf (gethash 'ARG (gethash 'SYN newht))(realize-binds (gethash 'ARG (gethash 'SYN ht1)) 
+			     (setf (machash 'ARG 'SYN newht)(realize-binds (machash 'ARG 'SYN ht1) 
 										     (append b1 b12)))
 			     newht)))))))
 
 (defun fx-sub (ht1 ht2) 
   "forward crossed substitution"
-  (and (complexp-hash (gethash 'SYN ht1))
-       (complexp-hash (gethash 'SYN ht2))
-       (gethash 'RESULT (gethash 'SYN ht1)) 
-       (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht1))) ; result must be functor too
-       (eql (gethash 'DIR (gethash 'SYN ht1)) 'BS)
-       (eql (gethash 'DIR (gethash 'SYN ht2)) 'BS)
-       (eql (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht1))) 'FS)
-       (member (gethash 'MODAL (gethash 'SYN ht1)) '(ALL CROSS))
-       (member (gethash 'MODAL (gethash 'SYN ht2)) '(ALL CROSS))
-       (member (gethash 'MODAL (gethash 'RESULT (gethash 'SYN ht1))) '(ALL CROSS))
+  (and (complexp-hash (machash 'SYN ht1))
+       (complexp-hash (machash 'SYN ht2))
+       (machash 'RESULT 'SYN ht1) 
+       (machash 'DIR 'RESULT 'SYN ht1) ; result must be functor too
+       (eql (machash 'DIR 'SYN ht1) 'BS)
+       (eql (machash 'DIR 'SYN ht2) 'BS)
+       (eql (machash 'DIR 'RESULT 'SYN ht1) 'FS)
+       (member (machash 'MODAL 'SYN ht1) '(ALL CROSS))
+       (member (machash 'MODAL 'SYN ht2) '(ALL CROSS))
+       (member (machash 'MODAL 'RESULT 'SYN ht1) '(ALL CROSS))
        (multiple-value-bind (match b1 b2)
-	 (cat-match (gethash 'ARG (gethash 'SYN ht1)) (gethash 'ARG (gethash 'SYN ht2)))
+	 (cat-match (machash 'ARG 'SYN ht1) (machash 'ARG 'SYN ht2))
 	 (and match (multiple-value-bind (match2 b12 b22)
-		      (cat-match (gethash 'ARG (gethash 'RESULT (gethash 'SYN ht1)))
-				 (gethash 'RESULT (gethash 'SYN ht2)))
+		      (cat-match (machash 'ARG 'RESULT 'SYN ht1)
+				 (machash 'RESULT 'SYN ht2))
 		      (and match2 
 			   (let ((newht (make-cky-entry-hashtable))
 				 (newsyn (make-complex-cat-hashtable)))
-			     (setf (gethash 'SEM newht) (&s (gethash 'SEM ht1) (gethash 'SEM ht2)))
-			     (setf (gethash 'INDEX newht) '|>Sx|) ; ht2 dir and modality projects below
-			     (setf (gethash 'SYN newht) newsyn)
-			     (setf (gethash 'DIR (gethash 'SYN newht)) (gethash 'DIR (gethash 'SYN ht2)))
-			     (setf (gethash 'MODAL (gethash 'SYN newht)) (gethash 'MODAL (gethash 'SYN ht2)))
-			     (setf (gethash 'RESULT (gethash 'SYN newht))(realize-binds (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht1))) 
+			     (setf (machash 'SEM newht) (&s (machash 'SEM ht1) (machash 'SEM ht2)))
+			     (setf (machash 'INDEX newht) '|>Sx|) ; ht2 dir and modality projects below
+			     (setf (machash 'SYN newht) newsyn)
+			     (setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht2))
+			     (setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht2))
+			     (setf (machash 'RESULT 'SYN newht)(realize-binds (machash 'RESULT 'RESULT 'SYN ht1) 
 											(append b1 b12)))
-			     (setf (gethash 'ARG (gethash 'SYN newht))(realize-binds (gethash 'ARG (gethash 'SYN ht2)) 
+			     (setf (machash 'ARG 'SYN newht)(realize-binds (machash 'ARG 'SYN ht2) 
 										     (append b2 b22)))
 			     newht)))))))
 
 (defun bx-sub (ht1 ht2) 
   "backward crossed substitution"
-  (and (complexp-hash (gethash 'SYN ht2))
-       (complexp-hash (gethash 'SYN ht1))
-       (gethash 'RESULT (gethash 'SYN ht2)) 
-       (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht2))) ; result must be functor too
-       (eql (gethash 'DIR (gethash 'SYN ht2)) 'FS)
-       (eql (gethash 'DIR (gethash 'SYN ht1)) 'FS)
-       (eql (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht2))) 'BS)
-       (member (gethash 'MODAL (gethash 'SYN ht2)) '(ALL CROSS))
-       (member (gethash 'MODAL (gethash 'SYN ht1)) '(ALL CROSS))
-       (member (gethash 'MODAL (gethash 'RESULT (gethash 'SYN ht2))) '(ALL CROSS))
+  (and (complexp-hash (machash 'SYN ht2))
+       (complexp-hash (machash 'SYN ht1))
+       (machash 'RESULT 'SYN ht2) 
+       (machash 'DIR 'RESULT 'SYN ht2) ; result must be functor too
+       (eql (machash 'DIR 'SYN ht2) 'FS)
+       (eql (machash 'DIR 'SYN ht1) 'FS)
+       (eql (machash 'DIR 'RESULT 'SYN ht2) 'BS)
+       (member (machash 'MODAL 'SYN ht2) '(ALL CROSS))
+       (member (machash 'MODAL 'SYN ht1) '(ALL CROSS))
+       (member (machash 'MODAL 'RESULT 'SYN ht2) '(ALL CROSS))
        (multiple-value-bind (match b2 b1)
-	 (cat-match (gethash 'ARG (gethash 'SYN ht2)) (gethash 'ARG (gethash 'SYN ht1)))
+	 (cat-match (machash 'ARG 'SYN ht2) (machash 'ARG 'SYN ht1))
 	 (and match (multiple-value-bind (match2 b21 b12)
-		      (cat-match (gethash 'ARG (gethash 'RESULT (gethash 'SYN ht2)))
-				 (gethash 'RESULT (gethash 'SYN ht1)))
+		      (cat-match (machash 'ARG 'RESULT 'SYN ht2)
+				 (machash 'RESULT 'SYN ht1))
 		      (and match2 
 			   (let ((newht (make-cky-entry-hashtable))
 				 (newsyn (make-complex-cat-hashtable)))
-			     (setf (gethash 'SEM newht) (&s (gethash 'SEM ht2) (gethash 'SEM ht1)))
-			     (setf (gethash 'INDEX newht) '|<Sx|) ; ht1 dir and modality projects below
-			     (setf (gethash 'SYN newht) newsyn)
-			     (setf (gethash 'DIR (gethash 'SYN newht)) (gethash 'DIR (gethash 'SYN ht1)))
-			     (setf (gethash 'MODAL (gethash 'SYN newht)) (gethash 'MODAL (gethash 'SYN ht1)))
-			     (setf (gethash 'RESULT (gethash 'SYN newht))(realize-binds (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht2))) 
+			     (setf (machash 'SEM newht) (&s (machash 'SEM ht2) (machash 'SEM ht1)))
+			     (setf (machash 'INDEX newht) '|<Sx|) ; ht1 dir and modality projects below
+			     (setf (machash 'SYN newht) newsyn)
+			     (setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht1))
+			     (setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht1))
+			     (setf (machash 'RESULT 'SYN newht)(realize-binds (machash 'RESULT 'RESULT 'SYN ht2) 
 											(append b2 b21)))
-			     (setf (gethash 'ARG (gethash 'SYN newht))(realize-binds (gethash 'ARG (gethash 'SYN ht1)) 
+			     (setf (machash 'ARG 'SYN newht)(realize-binds (machash 'ARG 'SYN ht1) 
 										     (append b1 b12)))
 			     newht)))))))
 
@@ -1353,137 +1394,137 @@
 ;; by default all its variants are turned off
 (defun f-subbar (ht1 ht2) 
   "forward substitution bar, aka the lost combinator"
-  (and (complexp-hash (gethash 'SYN ht1))
-       (complexp-hash (gethash 'SYN ht2))
-       (gethash 'RESULT (gethash 'SYN ht1)) 
-       (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht1))) ; result must be functor too
-       (eql (gethash 'DIR (gethash 'SYN ht2)) 'FS)
-       (eql (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht1))) 'FS)
-       (member (gethash 'MODAL (gethash 'SYN ht2)) '(ALL HARMONIC))
-       (member (gethash 'MODAL (gethash 'RESULT (gethash 'SYN ht1))) '(ALL HARMONIC))
+  (and (complexp-hash (machash 'SYN ht1))
+       (complexp-hash (machash 'SYN ht2))
+       (machash 'RESULT 'SYN ht1) 
+       (machash 'DIR 'RESULT 'SYN ht1) ; result must be functor too
+       (eql (machash 'DIR 'SYN ht2) 'FS)
+       (eql (machash 'DIR 'RESULT 'SYN ht1) 'FS)
+       (member (machash 'MODAL 'SYN ht2) '(ALL HARMONIC))
+       (member (machash 'MODAL 'RESULT 'SYN ht1) '(ALL HARMONIC))
        (multiple-value-bind (match2 b12 b22)
-		      (cat-match (gethash 'ARG (gethash 'RESULT (gethash 'SYN ht1)))
-				 (gethash 'RESULT (gethash 'SYN ht2)))
+		      (cat-match (machash 'ARG 'RESULT 'SYN ht1)
+				 (machash 'RESULT 'SYN ht2))
 		      (and match2 
 			   (let ((newht (make-cky-entry-hashtable))
 				 (newsyn (make-complex-cat-hashtable))
 				 (newsynw (make-complex-cat-hashtable)))
-			     (setf (gethash 'SEM newht) (&sbar (gethash 'SEM ht1) (gethash 'SEM ht2)))
-			     (setf (gethash 'INDEX newht) '|>L|) 
-			     (setf (gethash 'SYN newht) newsyn)
-			     (setf (gethash 'DIR (gethash 'SYN newht)) (gethash 'DIR (gethash 'SYN ht1)))
-			     (setf (gethash 'MODAL (gethash 'SYN newht)) (gethash 'MODAL (gethash 'SYN ht1)))
-			     (setf (gethash 'DIR newsynw) (gethash 'DIR (gethash 'SYN ht2)))
-			     (setf (gethash 'RESULT newsynw) (realize-binds 
-							       (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht1))) 
+			     (setf (machash 'SEM newht) (&sbar (machash 'SEM ht1) (machash 'SEM ht2)))
+			     (setf (machash 'INDEX newht) '|>L|) 
+			     (setf (machash 'SYN newht) newsyn)
+			     (setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht1))
+			     (setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht1))
+			     (setf (machash 'DIR newsynw) (machash 'DIR 'SYN ht2))
+			     (setf (machash 'RESULT newsynw) (realize-binds 
+							       (machash 'RESULT 'RESULT 'SYN ht1) 
 											(append nil b12)))
-			     (setf (gethash 'ARG newsynw) (realize-binds 
-							    (gethash 'ARG (gethash 'SYN ht2)) 
+			     (setf (machash 'ARG newsynw) (realize-binds 
+							    (machash 'ARG 'SYN ht2) 
 							    (append nil b22)))
-			     (setf (gethash 'RESULT (gethash 'SYN newht)) newsynw)
-			     (setf (gethash 'ARG (gethash 'SYN newht))(realize-binds (gethash 'ARG (gethash 'SYN ht1)) 
+			     (setf (machash 'RESULT 'SYN newht) newsynw)
+			     (setf (machash 'ARG 'SYN newht)(realize-binds (machash 'ARG 'SYN ht1) 
 										     (append nil b12)))
 			     newht)))))
 
 (defun fx-subbar (ht1 ht2) 
   "forward crossing substitution bar"
-  (and (complexp-hash (gethash 'SYN ht1))
-       (complexp-hash (gethash 'SYN ht2))
-       (gethash 'RESULT (gethash 'SYN ht1)) 
-       (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht1))) ; result must be functor too
-       (eql (gethash 'DIR (gethash 'SYN ht2)) 'BS)
-       (eql (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht1))) 'FS)
-       (member (gethash 'MODAL (gethash 'SYN ht2)) '(ALL CROSS))
-       (member (gethash 'MODAL (gethash 'RESULT (gethash 'SYN ht1))) '(ALL CROSS))
+  (and (complexp-hash (machash 'SYN ht1))
+       (complexp-hash (machash 'SYN ht2))
+       (machash 'RESULT 'SYN ht1) 
+       (machash 'DIR 'RESULT 'SYN ht1) ; result must be functor too
+       (eql (machash 'DIR 'SYN ht2) 'BS)
+       (eql (machash 'DIR 'RESULT 'SYN ht1) 'FS)
+       (member (machash 'MODAL 'SYN ht2) '(ALL CROSS))
+       (member (machash 'MODAL 'RESULT 'SYN ht1) '(ALL CROSS))
        (multiple-value-bind (match2 b12 b22)
-		      (cat-match (gethash 'ARG (gethash 'RESULT (gethash 'SYN ht1)))
-				 (gethash 'RESULT (gethash 'SYN ht2)))
+		      (cat-match (machash 'ARG 'RESULT 'SYN ht1)
+				 (machash 'RESULT 'SYN ht2))
 		      (and match2 
 			   (let ((newht (make-cky-entry-hashtable))
 				 (newsyn (make-complex-cat-hashtable))
 				 (newsynw (make-complex-cat-hashtable)))
-			     (setf (gethash 'SEM newht) (&sbar (gethash 'SEM ht1) (gethash 'SEM ht2)))
-			     (setf (gethash 'INDEX newht) '|>Lx|)
-			     (setf (gethash 'SYN newht) newsyn)
-			     (setf (gethash 'DIR (gethash 'SYN newht)) (gethash 'DIR (gethash 'SYN ht1)))
-			     (setf (gethash 'MODAL (gethash 'SYN newht)) (gethash 'MODAL (gethash 'SYN ht1)))
-			     (setf (gethash 'DIR newsynw) (gethash 'DIR (gethash 'SYN ht2)))
-			     (setf (gethash 'RESULT newsynw) (realize-binds 
-							       (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht1))) 
+			     (setf (machash 'SEM newht) (&sbar (machash 'SEM ht1) (machash 'SEM ht2)))
+			     (setf (machash 'INDEX newht) '|>Lx|)
+			     (setf (machash 'SYN newht) newsyn)
+			     (setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht1))
+			     (setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht1))
+			     (setf (machash 'DIR newsynw) (machash 'DIR 'SYN ht2))
+			     (setf (machash 'RESULT newsynw) (realize-binds 
+							       (machash 'RESULT 'RESULT 'SYN ht1) 
 											(append nil b12)))
-			     (setf (gethash 'ARG newsynw) (realize-binds 
-							    (gethash 'ARG (gethash 'SYN ht2)) 
+			     (setf (machash 'ARG newsynw) (realize-binds 
+							    (machash 'ARG 'SYN ht2) 
 							    (append nil b22)))
-			     (setf (gethash 'RESULT (gethash 'SYN newht)) newsynw)
-			     (setf (gethash 'ARG (gethash 'SYN newht))(realize-binds (gethash 'ARG (gethash 'SYN ht1)) 
+			     (setf (machash 'RESULT 'SYN newht) newsynw)
+			     (setf (machash 'ARG 'SYN newht)(realize-binds (machash 'ARG 'SYN ht1) 
 										     (append nil b12)))
 			     newht)))))
 
 (defun b-subbar (ht1 ht2) 
   "backward substitution bar"
-  (and (complexp-hash (gethash 'SYN ht1))
-       (complexp-hash (gethash 'SYN ht2))
-       (gethash 'RESULT (gethash 'SYN ht2)) 
-       (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht2))) ; result must be functor too
-       (eql (gethash 'DIR (gethash 'SYN ht1)) 'BS)
-       (eql (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht2))) 'BS)
-       (member (gethash 'MODAL (gethash 'SYN ht1)) '(ALL HARMONIC))
-       (member (gethash 'MODAL (gethash 'RESULT (gethash 'SYN ht2))) '(ALL HARMONIC))
+  (and (complexp-hash (machash 'SYN ht1))
+       (complexp-hash (machash 'SYN ht2))
+       (machash 'RESULT 'SYN ht2) 
+       (machash 'DIR 'RESULT 'SYN ht2) ; result must be functor too
+       (eql (machash 'DIR 'SYN ht1) 'BS)
+       (eql (machash 'DIR 'RESULT 'SYN ht2) 'BS)
+       (member (machash 'MODAL 'SYN ht1) '(ALL HARMONIC))
+       (member (machash 'MODAL 'RESULT 'SYN ht2) '(ALL HARMONIC))
        (multiple-value-bind (match2 b22 b12)
-		      (cat-match (gethash 'ARG (gethash 'RESULT (gethash 'SYN ht2)))
-				 (gethash 'RESULT (gethash 'SYN ht1)))
+		      (cat-match (machash 'ARG 'RESULT 'SYN ht2)
+				 (machash 'RESULT 'SYN ht1))
 		      (and match2 
 			   (let ((newht (make-cky-entry-hashtable))
 				 (newsyn (make-complex-cat-hashtable))
 				 (newsynw (make-complex-cat-hashtable)))
-			     (setf (gethash 'SEM newht) (&sbar (gethash 'SEM ht2) (gethash 'SEM ht1)))
-			     (setf (gethash 'INDEX newht) '|<L|) 
-			     (setf (gethash 'SYN newht) newsyn)
-			     (setf (gethash 'DIR (gethash 'SYN newht)) (gethash 'DIR (gethash 'SYN ht2)))
-			     (setf (gethash 'MODAL (gethash 'SYN newht)) (gethash 'MODAL (gethash 'SYN ht2)))
-			     (setf (gethash 'DIR newsynw) (gethash 'DIR (gethash 'SYN ht1)))
-			     (setf (gethash 'RESULT newsynw) (realize-binds 
-							       (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht2))) 
+			     (setf (machash 'SEM newht) (&sbar (machash 'SEM ht2) (machash 'SEM ht1)))
+			     (setf (machash 'INDEX newht) '|<L|) 
+			     (setf (machash 'SYN newht) newsyn)
+			     (setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht2))
+			     (setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht2))
+			     (setf (machash 'DIR newsynw) (machash 'DIR 'SYN ht1))
+			     (setf (machash 'RESULT newsynw) (realize-binds 
+							       (machash 'RESULT 'RESULT 'SYN ht2) 
 											(append nil b22)))
-			     (setf (gethash 'ARG newsynw) (realize-binds 
-							    (gethash 'ARG (gethash 'SYN ht1)) 
+			     (setf (machash 'ARG newsynw) (realize-binds 
+							    (machash 'ARG 'SYN ht1) 
 							    (append nil b12)))
-			     (setf (gethash 'RESULT (gethash 'SYN newht)) newsynw)
-			     (setf (gethash 'ARG (gethash 'SYN newht))(realize-binds (gethash 'ARG (gethash 'SYN ht2)) 
+			     (setf (machash 'RESULT 'SYN newht) newsynw)
+			     (setf (machash 'ARG 'SYN newht)(realize-binds (machash 'ARG 'SYN ht2) 
 										     (append nil b22)))
 			     newht)))))
 
 (defun bx-subbar (ht1 ht2) 
   "backward crossed substitution bar"
-  (and (complexp-hash (gethash 'SYN ht1))
-       (complexp-hash (gethash 'SYN ht2))
-       (gethash 'RESULT (gethash 'SYN ht2)) 
-       (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht2))) ; result must be functor too
-       (eql (gethash 'DIR (gethash 'SYN ht1)) 'FS)
-       (eql (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht2))) 'BS)
-       (member (gethash 'MODAL (gethash 'SYN ht1)) '(ALL CROSS))
-       (member (gethash 'MODAL (gethash 'RESULT (gethash 'SYN ht2))) '(ALL CROSS))
+  (and (complexp-hash (machash 'SYN ht1))
+       (complexp-hash (machash 'SYN ht2))
+       (machash 'RESULT 'SYN ht2) 
+       (machash 'DIR 'RESULT  'SYN ht2) ; result must be functor too
+       (eql (machash 'DIR 'SYN ht1) 'FS)
+       (eql (machash 'DIR 'RESULT 'SYN ht2) 'BS)
+       (member (machash 'MODAL 'SYN ht1) '(ALL CROSS))
+       (member (machash 'MODAL 'RESULT 'SYN ht2) '(ALL CROSS))
        (multiple-value-bind (match2 b22 b12)
-		      (cat-match (gethash 'ARG (gethash 'RESULT (gethash 'SYN ht2)))
-				 (gethash 'RESULT (gethash 'SYN ht1)))
+		      (cat-match (machash 'ARG 'RESULT 'SYN ht2)
+				 (machash 'RESULT 'SYN ht1))
 		      (and match2 
 			   (let ((newht (make-cky-entry-hashtable))
 				 (newsyn (make-complex-cat-hashtable))
 				 (newsynw (make-complex-cat-hashtable)))
-			     (setf (gethash 'SEM newht) (&sbar (gethash 'SEM ht2) (gethash 'SEM ht1)))
-			     (setf (gethash 'INDEX newht) '|<Lx|) 
-			     (setf (gethash 'SYN newht) newsyn)
-			     (setf (gethash 'DIR (gethash 'SYN newht)) (gethash 'DIR (gethash 'SYN ht2)))
-			     (setf (gethash 'MODAL (gethash 'SYN newht)) (gethash 'MODAL (gethash 'SYN ht2)))
-			     (setf (gethash 'DIR newsynw) (gethash 'DIR (gethash 'SYN ht1)))
-			     (setf (gethash 'RESULT newsynw) (realize-binds 
-							       (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht2))) 
+			     (setf (machash 'SEM newht) (&sbar (machash 'SEM ht2) (machash 'SEM ht1)))
+			     (setf (machash 'INDEX newht) '|<Lx|) 
+			     (setf (machash 'SYN newht) newsyn)
+			     (setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht2))
+			     (setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht2))
+			     (setf (machash 'DIR newsynw) (machash 'DIR 'SYN ht1))
+			     (setf (machash 'RESULT newsynw) (realize-binds 
+							       (machash 'RESULT 'RESULT 'SYN ht2) 
 											(append nil b22)))
-			     (setf (gethash 'ARG newsynw) (realize-binds 
-							    (gethash 'ARG (gethash 'SYN ht1)) 
+			     (setf (machash 'ARG newsynw) (realize-binds 
+							    (machash 'ARG 'SYN ht1) 
 							    (append nil b12)))
-			     (setf (gethash 'RESULT (gethash 'SYN newht)) newsynw)
-			     (setf (gethash 'ARG (gethash 'SYN newht))(realize-binds (gethash 'ARG (gethash 'SYN ht2)) 
+			     (setf (machash 'RESULT 'SYN newht) newsynw)
+			     (setf (machash 'ARG 'SYN newht)(realize-binds (machash 'ARG 'SYN ht2) 
 										     (append nil b22)))
 			     newht)))))
 
@@ -1492,645 +1533,645 @@
    Cf. Bozsahin 2012 and Hoyt and Baldridge 2008 for subcomposition/subcombination.
    This is what is dubbed Orifice (O) in the former, and D in the latter publication.
    Not to be confused with combinator D of Rosenbloom 1950, which is just BB."
-  (and (complexp-hash (gethash 'SYN ht1))
-       (complexp-hash (gethash 'SYN ht2))
-       (gethash 'RESULT (gethash 'SYN ht1)) 
-       (gethash 'DIR (gethash 'ARG (gethash 'SYN ht1))) ; arg must be functor too
-       (eql (gethash 'DIR (gethash 'SYN ht2)) 'FS)
-       (eql (gethash 'DIR (gethash 'SYN ht1)) 'FS)
-       (member (gethash 'MODAL (gethash 'SYN ht2)) '(ALL HARMONIC))
-       (member (gethash 'MODAL (gethash 'SYN ht1)) '(ALL HARMONIC))
+  (and (complexp-hash (machash 'SYN ht1))
+       (complexp-hash (machash 'SYN ht2))
+       (machash 'RESULT 'SYN ht1) 
+       (machash 'DIR 'ARG 'SYN ht1) ; arg must be functor too
+       (eql (machash 'DIR 'SYN ht2) 'FS)
+       (eql (machash 'DIR 'SYN ht1) 'FS)
+       (member (machash 'MODAL 'SYN ht2) '(ALL HARMONIC))
+       (member (machash 'MODAL 'SYN ht1) '(ALL HARMONIC))
        (multiple-value-bind (match b1 b2)
-	 (cat-match (gethash 'RESULT (gethash 'ARG (gethash 'SYN ht1))) (gethash 'RESULT (gethash 'SYN ht2)))
+	 (cat-match (machash 'RESULT 'ARG 'SYN ht1) (machash 'RESULT 'SYN ht2))
 	 (and match 
               (let ((newht (make-cky-entry-hashtable))     ;
 		    (newsynx (make-complex-cat-hashtable))   ; new result
 		    (newsynw (make-complex-cat-hashtable)))  ; new result of new argument
-		(setf (gethash 'SEM newht) (&o (gethash 'SEM ht1) (gethash 'SEM ht2)))
-		(setf (gethash 'INDEX newht) '|>O|) ; things project from ht1 and ht2
-		(setf (gethash 'SYN newht) newsynx)
-		(setf (gethash 'DIR (gethash 'SYN newht)) (gethash 'DIR (gethash 'SYN ht2)))
-		(setf (gethash 'MODAL (gethash 'SYN newht)) (gethash 'MODAL (gethash 'SYN ht2)))
-                (setf (gethash 'RESULT (gethash 'SYN newht))
-		      (realize-binds (gethash 'RESULT (gethash 'SYN ht1)) b1))
-                (setf (gethash 'ARG (gethash 'SYN newht)) newsynw)
-                (setf (gethash 'DIR (gethash 'ARG (gethash 'SYN newht))) 
-			       (gethash 'DIR (gethash 'ARG (gethash 'SYN ht1))))
-                (setf (gethash 'MODAL (gethash 'ARG (gethash 'SYN newht)))
-			       (gethash 'MODAL (gethash 'ARG (gethash 'SYN ht1))))
-                (setf (gethash 'RESULT (gethash 'ARG (gethash 'SYN newht)))
-		      (realize-binds (gethash 'ARG (gethash 'SYN ht2)) b2))
-                (setf (gethash 'ARG (gethash 'ARG (gethash 'SYN newht)))
-		      (realize-binds (gethash 'ARG (gethash 'ARG (gethash 'SYN ht1))) b1))
+		(setf (machash 'SEM newht) (&o (machash 'SEM ht1) (machash 'SEM ht2)))
+		(setf (machash 'INDEX newht) '|>O|) ; things project from ht1 and ht2
+		(setf (machash 'SYN newht) newsynx)
+		(setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht2))
+		(setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht2))
+                (setf (machash 'RESULT 'SYN newht)
+		      (realize-binds (machash 'RESULT 'SYN ht1) b1))
+                (setf (machash 'ARG 'SYN newht) newsynw)
+                (setf (machash 'DIR 'ARG 'SYN newht) 
+			       (machash 'DIR 'ARG 'SYN ht1))
+                (setf (machash 'MODAL 'ARG 'SYN newht)
+			       (machash 'MODAL 'ARG 'SYN ht1))
+                (setf (machash 'RESULT 'ARG 'SYN newht)
+		      (realize-binds (machash 'ARG 'SYN ht2) b2))
+                (setf (machash 'ARG 'ARG 'SYN newht)
+		      (realize-binds (machash 'ARG 'ARG 'SYN ht1) b1))
 			     newht)))))
 
 (defun b-subcomp (ht1 ht2) 
   "backward subcomposition."
-  (and (complexp-hash (gethash 'SYN ht1))
-       (complexp-hash (gethash 'SYN ht2))
-       (gethash 'RESULT (gethash 'SYN ht2)) 
-       (gethash 'DIR (gethash 'ARG (gethash 'SYN ht2))) ; arg must be functor too
-       (eql (gethash 'DIR (gethash 'SYN ht1)) 'BS)
-       (eql (gethash 'DIR (gethash 'SYN ht2)) 'BS)
-       (member (gethash 'MODAL (gethash 'SYN ht1)) '(ALL HARMONIC))
-       (member (gethash 'MODAL (gethash 'SYN ht2)) '(ALL HARMONIC))
+  (and (complexp-hash (machash 'SYN ht1))
+       (complexp-hash (machash 'SYN ht2))
+       (machash 'RESULT 'SYN ht2) 
+       (machash 'DIR 'ARG 'SYN ht2) ; arg must be functor too
+       (eql (machash 'DIR 'SYN ht1) 'BS)
+       (eql (machash 'DIR 'SYN ht2) 'BS)
+       (member (machash 'MODAL  'SYN ht1) '(ALL HARMONIC))
+       (member (machash 'MODAL 'SYN ht2) '(ALL HARMONIC))
        (multiple-value-bind (match b1 b2)
-	 (cat-match (gethash 'RESULT (gethash 'SYN ht1))
-		    (gethash 'RESULT (gethash 'ARG (gethash 'SYN ht2)))) 
+	 (cat-match (machash 'RESULT 'SYN ht1)
+		    (machash 'RESULT 'ARG 'SYN ht2)) 
 	 (and match 
               (let ((newht (make-cky-entry-hashtable))     ;
 		    (newsynx (make-complex-cat-hashtable))   ; new result
 		    (newsynw (make-complex-cat-hashtable)))  ; new result of new argument
-		(setf (gethash 'SEM newht) (&o (gethash 'SEM ht2) (gethash 'SEM ht1)))
-		(setf (gethash 'INDEX newht) '|<O|) ; things project from ht1 and ht2
-		(setf (gethash 'SYN newht) newsynx)
-		(setf (gethash 'DIR (gethash 'SYN newht)) (gethash 'DIR (gethash 'SYN ht1)))
-		(setf (gethash 'MODAL (gethash 'SYN newht)) (gethash 'MODAL (gethash 'SYN ht1)))
-                (setf (gethash 'RESULT (gethash 'SYN newht))
-		      (realize-binds (gethash 'RESULT (gethash 'SYN ht2)) b2))
-                (setf (gethash 'ARG (gethash 'SYN newht)) newsynw)
-                (setf (gethash 'DIR (gethash 'ARG (gethash 'SYN newht))) 
-			       (gethash 'DIR (gethash 'ARG (gethash 'SYN ht2))))
-                (setf (gethash 'MODAL (gethash 'ARG (gethash 'SYN newht)))
-			       (gethash 'MODAL (gethash 'ARG (gethash 'SYN ht2))))
-                (setf (gethash 'RESULT (gethash 'ARG (gethash 'SYN newht)))
-		      (realize-binds (gethash 'ARG (gethash 'SYN ht1)) b1))
-                (setf (gethash 'ARG (gethash 'ARG (gethash 'SYN newht)))
-		      (realize-binds (gethash 'ARG (gethash 'ARG (gethash 'SYN ht2))) b2))
+		(setf (machash 'SEM newht) (&o (machash 'SEM ht2) (machash 'SEM ht1)))
+		(setf (machash 'INDEX newht) '|<O|) ; things project from ht1 and ht2
+		(setf (machash 'SYN newht) newsynx)
+		(setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht1))
+		(setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht1))
+                (setf (machash 'RESULT 'SYN newht)
+		      (realize-binds (machash 'RESULT 'SYN ht2) b2))
+                (setf (machash 'ARG 'SYN newht) newsynw)
+                (setf (machash 'DIR 'ARG 'SYN newht) 
+			       (machash 'DIR 'ARG 'SYN ht2))
+                (setf (machash 'MODAL 'ARG 'SYN newht)
+			       (machash 'MODAL 'ARG 'SYN ht2))
+                (setf (machash 'RESULT 'ARG 'SYN newht)
+		      (realize-binds (machash 'ARG 'SYN ht1) b1))
+                (setf (machash 'ARG 'ARG 'SYN newht)
+		      (realize-binds (machash 'ARG 'ARG 'SYN ht2) b2))
 			     newht)))))
 
 (defun fx-subcomp (ht1 ht2) 
   "forward crossed subcomposition."
-  (and (complexp-hash (gethash 'SYN ht1))
-       (complexp-hash (gethash 'SYN ht2))
-       (gethash 'RESULT (gethash 'SYN ht1)) 
-       (gethash 'DIR (gethash 'ARG (gethash 'SYN ht1))) ; arg must be functor too
-       (eql (gethash 'DIR (gethash 'SYN ht2)) 'BS)
-       (eql (gethash 'DIR (gethash 'SYN ht1)) 'FS)
-       (member (gethash 'MODAL (gethash 'SYN ht2)) '(ALL CROSS))
-       (member (gethash 'MODAL (gethash 'SYN ht1)) '(ALL CROSS))
+  (and (complexp-hash (machash 'SYN ht1))
+       (complexp-hash (machash 'SYN ht2))
+       (machash 'RESULT 'SYN ht1) 
+       (machash 'DIR 'ARG 'SYN ht1) ; arg must be functor too
+       (eql (machash 'DIR 'SYN ht2) 'BS)
+       (eql (machash 'DIR 'SYN ht1) 'FS)
+       (member (machash 'MODAL 'SYN ht2) '(ALL CROSS))
+       (member (machash 'MODAL 'SYN ht1) '(ALL CROSS))
        (multiple-value-bind (match b1 b2)
-	 (cat-match (gethash 'RESULT (gethash 'ARG (gethash 'SYN ht1))) (gethash 'RESULT (gethash 'SYN ht2)))
+	 (cat-match (machash 'RESULT 'ARG 'SYN ht1) (machash 'RESULT 'SYN ht2))
 	 (and match 
               (let ((newht (make-cky-entry-hashtable))     ;
 		    (newsynx (make-complex-cat-hashtable))   ; new result
 		    (newsynw (make-complex-cat-hashtable)))  ; new result of new argument
-		(setf (gethash 'SEM newht) (&o (gethash 'SEM ht1) (gethash 'SEM ht2)))
-		(setf (gethash 'INDEX newht) '|>Ox|) ; things project from ht1 and ht2
-		(setf (gethash 'SYN newht) newsynx)
-		(setf (gethash 'DIR (gethash 'SYN newht)) (gethash 'DIR (gethash 'SYN ht2)))
-		(setf (gethash 'MODAL (gethash 'SYN newht)) (gethash 'MODAL (gethash 'SYN ht2)))
-                (setf (gethash 'RESULT (gethash 'SYN newht))
-		      (realize-binds (gethash 'RESULT (gethash 'SYN ht1)) b1))
-                (setf (gethash 'ARG (gethash 'SYN newht)) newsynw)
-                (setf (gethash 'DIR (gethash 'ARG (gethash 'SYN newht))) 
-			       (gethash 'DIR (gethash 'ARG (gethash 'SYN ht1))))
-                (setf (gethash 'MODAL (gethash 'ARG (gethash 'SYN newht)))
-			       (gethash 'MODAL (gethash 'ARG (gethash 'SYN ht1))))
-                (setf (gethash 'RESULT (gethash 'ARG (gethash 'SYN newht)))
-		      (realize-binds (gethash 'ARG (gethash 'SYN ht2)) b2))
-                (setf (gethash 'ARG (gethash 'ARG (gethash 'SYN newht)))
-		      (realize-binds (gethash 'ARG (gethash 'ARG (gethash 'SYN ht1))) b1))
+		(setf (machash 'SEM newht) (&o (machash 'SEM ht1) (machash 'SEM ht2)))
+		(setf (machash 'INDEX newht) '|>Ox|) ; things project from ht1 and ht2
+		(setf (machash 'SYN newht) newsynx)
+		(setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht2))
+		(setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht2))
+                (setf (machash 'RESULT 'SYN newht)
+		      (realize-binds (machash 'RESULT 'SYN ht1) b1))
+                (setf (machash 'ARG  'SYN newht) newsynw)
+                (setf (machash 'DIR 'ARG 'SYN newht) 
+			       (machash 'DIR 'ARG 'SYN ht1))
+                (setf (machash 'MODAL 'ARG 'SYN newht)
+			       (machash 'MODAL 'ARG 'SYN ht1))
+                (setf (machash 'RESULT 'ARG 'SYN newht)
+		      (realize-binds (machash 'ARG 'SYN ht2) b2))
+                (setf (machash 'ARG 'ARG 'SYN newht)
+		      (realize-binds (machash 'ARG 'ARG 'SYN ht1) b1))
 			     newht)))))
 
 (defun bx-subcomp (ht1 ht2) 
   "backward crossed subcomposition."
-  (and (complexp-hash (gethash 'SYN ht1))
-       (complexp-hash (gethash 'SYN ht2))
-       (gethash 'RESULT (gethash 'SYN ht2)) 
-       (gethash 'DIR (gethash 'ARG (gethash 'SYN ht2))) ; arg must be functor too
-       (eql (gethash 'DIR (gethash 'SYN ht1)) 'FS)
-       (eql (gethash 'DIR (gethash 'SYN ht2)) 'BS)
-       (member (gethash 'MODAL (gethash 'SYN ht1)) '(ALL CROSS))
-       (member (gethash 'MODAL (gethash 'SYN ht2)) '(ALL CROSS))
+  (and (complexp-hash (machash 'SYN ht1))
+       (complexp-hash (machash 'SYN ht2))
+       (machash 'RESULT 'SYN ht2) 
+       (machash 'DIR 'ARG 'SYN ht2) ; arg must be functor too
+       (eql (machash 'DIR 'SYN ht1) 'FS)
+       (eql (machash 'DIR 'SYN ht2) 'BS)
+       (member (machash 'MODAL 'SYN ht1) '(ALL CROSS))
+       (member (machash 'MODAL 'SYN ht2) '(ALL CROSS))
        (multiple-value-bind (match b1 b2)
-	 (cat-match (gethash 'RESULT (gethash 'SYN ht1))
-		    (gethash 'RESULT (gethash 'ARG (gethash 'SYN ht2)))) 
+	 (cat-match (machash 'RESULT 'SYN ht1)
+		    (machash 'RESULT 'ARG 'SYN ht2)) 
 	 (and match 
               (let ((newht (make-cky-entry-hashtable))     ;
 		    (newsynx (make-complex-cat-hashtable))   ; new result
 		    (newsynw (make-complex-cat-hashtable)))  ; new result of new argument
-		(setf (gethash 'SEM newht) (&o (gethash 'SEM ht2) (gethash 'SEM ht1)))
-		(setf (gethash 'INDEX newht) '|<Ox|) ; things project from ht1 and ht2
-		(setf (gethash 'SYN newht) newsynx)
-		(setf (gethash 'DIR (gethash 'SYN newht)) (gethash 'DIR (gethash 'SYN ht1)))
-		(setf (gethash 'MODAL (gethash 'SYN newht)) (gethash 'MODAL (gethash 'SYN ht1)))
-                (setf (gethash 'RESULT (gethash 'SYN newht))
-		      (realize-binds (gethash 'RESULT (gethash 'SYN ht2)) b2))
-                (setf (gethash 'ARG (gethash 'SYN newht)) newsynw)
-                (setf (gethash 'DIR (gethash 'ARG (gethash 'SYN newht))) 
-			       (gethash 'DIR (gethash 'ARG (gethash 'SYN ht2))))
-                (setf (gethash 'MODAL (gethash 'ARG (gethash 'SYN newht)))
-			       (gethash 'MODAL (gethash 'ARG (gethash 'SYN ht2))))
-                (setf (gethash 'RESULT (gethash 'ARG (gethash 'SYN newht)))
-		      (realize-binds (gethash 'ARG (gethash 'SYN ht1)) b1))
-                (setf (gethash 'ARG (gethash 'ARG (gethash 'SYN newht)))
-		      (realize-binds (gethash 'ARG (gethash 'ARG (gethash 'SYN ht2))) b2))
+		(setf (machash 'SEM newht) (&o (machash 'SEM ht2) (machash 'SEM ht1)))
+		(setf (machash 'INDEX newht) '|<Ox|) ; things project from ht1 and ht2
+		(setf (machash 'SYN newht) newsynx)
+		(setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht1))
+		(setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht1))
+                (setf (machash 'RESULT 'SYN newht)
+		      (realize-binds (machash 'RESULT 'SYN ht2) b2))
+                (setf (machash 'ARG 'SYN newht) newsynw)
+                (setf (machash 'DIR 'ARG 'SYN newht) 
+			       (machash 'DIR 'ARG 'SYN ht2))
+                (setf (machash 'MODAL 'ARG 'SYN newht)
+			       (machash 'MODAL 'ARG 'SYN ht2))
+                (setf (machash 'RESULT 'ARG 'SYN newht)
+		      (realize-binds (machash 'ARG 'SYN ht1) b1))
+                (setf (machash 'ARG 'ARG 'SYN newht)
+		      (realize-binds (machash 'ARG 'ARG 'SYN ht2) b2))
 			     newht)))))
 
 (defun f2-comp (ht1 ht2) 
   ">B^2"
-  (and (complexp-hash (gethash 'SYN ht1))
-       (complexp-hash (gethash 'SYN ht2))
-       (eql (gethash 'DIR (gethash 'SYN ht1)) 'FS)
-       (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht2))) ; ht2 must have complex result
-       (eql (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht2))) 'FS)
-       (member (gethash 'MODAL (gethash 'SYN ht1)) '(ALL HARMONIC))
-       (not (eql (gethash 'MODAL (gethash 'SYN ht2)) 'STAR)) ; main functor must allow composition
-       (member (gethash 'MODAL (gethash 'RESULT (gethash 'SYN ht2))) '(ALL HARMONIC))
+  (and (complexp-hash (machash 'SYN ht1))
+       (complexp-hash (machash 'SYN ht2))
+       (eql (machash 'DIR 'SYN ht1) 'FS)
+       (machash 'DIR 'RESULT 'SYN ht2) ; ht2 must have complex result
+       (eql (machash 'DIR 'RESULT 'SYN ht2) 'FS)
+       (member (machash 'MODAL 'SYN ht1) '(ALL HARMONIC))
+       (not (eql (machash 'MODAL 'SYN ht2) 'STAR)) ; main functor must allow composition
+       (member (machash 'MODAL 'RESULT 'SYN ht2) '(ALL HARMONIC))
        (multiple-value-bind (match b1 b2)
-	 (cat-match (gethash 'ARG (gethash 'SYN ht1)) (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht2))))
+	 (cat-match (machash 'ARG 'SYN ht1) (machash 'RESULT 'RESULT 'SYN ht2))
 	 (and match (let ((newht (make-cky-entry-hashtable))
 			  (newsynx (make-complex-cat-hashtable))
 			  (newsyn (make-complex-cat-hashtable)))
-		      (setf (gethash 'SEM newht) (&b2 (gethash 'SEM ht1) (gethash 'SEM ht2)))
-		      (setf (gethash 'INDEX newht) '|>B2|) ; ht2 dir and modality projects
-		      (setf (gethash 'SYN newht) newsyn)
-		      (setf (gethash 'DIR (gethash 'SYN newht)) (gethash 'DIR (gethash 'SYN ht2)))
-		      (setf (gethash 'MODAL (gethash 'SYN newht)) (gethash 'MODAL (gethash 'SYN ht2)))
-		      (setf (gethash 'ARG (gethash 'SYN newht))
-			    (realize-binds (gethash 'ARG (gethash 'SYN ht2)) b2))
-		      (setf (gethash 'RESULT (gethash 'SYN newht)) newsynx)
-		      (setf (gethash 'DIR (gethash 'RESULT (gethash 'SYN newht))) 
-			    (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht2))))
-		      (setf (gethash 'MODAL (gethash 'RESULT (gethash 'SYN newht))) 
-			    (gethash 'MODAL (gethash 'RESULT (gethash 'SYN ht2))))
-		      (setf (gethash 'RESULT (gethash 'RESULT (gethash 'SYN newht)))
-			    (realize-binds (gethash 'RESULT (gethash 'SYN ht1)) b1))
-		      (setf (gethash 'ARG (gethash 'RESULT (gethash 'SYN newht)))
-			    (realize-binds (gethash 'ARG (gethash 'RESULT (gethash 'SYN ht2))) b2))
+		      (setf (machash 'SEM newht) (&b2 (machash 'SEM ht1) (machash 'SEM ht2)))
+		      (setf (machash 'INDEX newht) '|>B2|) ; ht2 dir and modality projects
+		      (setf (machash 'SYN newht) newsyn)
+		      (setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht2))
+		      (setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht2))
+		      (setf (machash 'ARG 'SYN newht)
+			    (realize-binds (machash 'ARG 'SYN ht2) b2))
+		      (setf (machash 'RESULT 'SYN newht) newsynx)
+		      (setf (machash 'DIR 'RESULT 'SYN newht) 
+			    (machash 'DIR 'RESULT 'SYN ht2))
+		      (setf (machash 'MODAL 'RESULT 'SYN newht) 
+			    (machash 'MODAL 'RESULT 'SYN ht2))
+		      (setf (machash 'RESULT 'RESULT 'SYN newht)
+			    (realize-binds (machash 'RESULT 'SYN ht1) b1))
+		      (setf (machash 'ARG 'RESULT 'SYN newht)
+			    (realize-binds (machash 'ARG 'RESULT 'SYN ht2) b2))
 		      newht)))))
 
 (defun b2-comp (ht1 ht2) 
   "<B^2"
-  (and (complexp-hash (gethash 'SYN ht1))
-       (complexp-hash (gethash 'SYN ht2))
-       (eql (gethash 'DIR (gethash 'SYN ht2)) 'BS)
-       (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht1))) ; ht1 must have complex result
-       (eql (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht1))) 'BS)
-       (member (gethash 'MODAL (gethash 'SYN ht2)) '(ALL HARMONIC))
-       (not (eql (gethash 'MODAL (gethash 'SYN ht1)) 'STAR)) ; main functor must allow composition
-       (member (gethash 'MODAL (gethash 'RESULT (gethash 'SYN ht1))) '(ALL HARMONIC))
+  (and (complexp-hash (machash 'SYN ht1))
+       (complexp-hash (machash 'SYN ht2))
+       (eql (machash 'DIR 'SYN ht2) 'BS)
+       (machash 'DIR 'RESULT 'SYN ht1) ; ht1 must have complex result
+       (eql (machash 'DIR 'RESULT 'SYN ht1) 'BS)
+       (member (machash 'MODAL 'SYN ht2) '(ALL HARMONIC))
+       (not (eql (machash 'MODAL 'SYN ht1) 'STAR)) ; main functor must allow composition
+       (member (machash 'MODAL 'RESULT 'SYN ht1) '(ALL HARMONIC))
        (multiple-value-bind (match b1 b2)
-	 (cat-match (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht1)))
-	            (gethash 'ARG (gethash 'SYN ht2)))
+	 (cat-match (machash 'RESULT 'RESULT 'SYN ht1)
+	            (machash 'ARG 'SYN ht2))
 	 (and match (let ((newht (make-cky-entry-hashtable))
 			  (newsynx (make-complex-cat-hashtable))
 			  (newsyn (make-complex-cat-hashtable)))
-		      (setf (gethash 'SEM newht) (&b2 (gethash 'SEM ht2) (gethash 'SEM ht1)))
-		      (setf (gethash 'INDEX newht) '|<B2|) ; ht1 dir and modality projects
-		      (setf (gethash 'SYN newht) newsyn)
-		      (setf (gethash 'DIR (gethash 'SYN newht)) (gethash 'DIR (gethash 'SYN ht1)))
-		      (setf (gethash 'MODAL (gethash 'SYN newht)) (gethash 'MODAL (gethash 'SYN ht1)))
-		      (setf (gethash 'ARG (gethash 'SYN newht))
-			    (realize-binds (gethash 'ARG (gethash 'SYN ht1)) b1))
-		      (setf (gethash 'RESULT (gethash 'SYN newht)) newsynx)
-		      (setf (gethash 'DIR (gethash 'RESULT (gethash 'SYN newht))) 
-			    (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht1))))
-		      (setf (gethash 'MODAL (gethash 'RESULT (gethash 'SYN newht))) 
-			    (gethash 'MODAL (gethash 'RESULT (gethash 'SYN ht1))))
-		      (setf (gethash 'RESULT (gethash 'RESULT (gethash 'SYN newht)))
-			    (realize-binds (gethash 'RESULT (gethash 'SYN ht2)) b2))
-		      (setf (gethash 'ARG (gethash 'RESULT (gethash 'SYN newht)))
-			    (realize-binds (gethash 'ARG (gethash 'RESULT (gethash 'SYN ht1))) b1))
+		      (setf (machash 'SEM newht) (&b2 (machash 'SEM ht2) (machash 'SEM ht1)))
+		      (setf (machash 'INDEX newht) '|<B2|) ; ht1 dir and modality projects
+		      (setf (machash 'SYN newht) newsyn)
+		      (setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht1))
+		      (setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht1))
+		      (setf (machash 'ARG 'SYN newht)
+			    (realize-binds (machash 'ARG 'SYN ht1) b1))
+		      (setf (machash 'RESULT 'SYN newht) newsynx)
+		      (setf (machash 'DIR 'RESULT 'SYN newht) 
+			    (machash 'DIR 'RESULT 'SYN ht1))
+		      (setf (machash 'MODAL 'RESULT 'SYN newht) 
+			    (machash 'MODAL 'RESULT 'SYN ht1))
+		      (setf (machash 'RESULT 'RESULT 'SYN newht)
+			    (realize-binds (machash 'RESULT 'SYN ht2) b2))
+		      (setf (machash 'ARG 'RESULT 'SYN newht)
+			    (realize-binds (machash 'ARG 'RESULT 'SYN ht1) b1))
 		      newht)))))
 
 (defun fx2-comp (ht1 ht2) 
   ">Bx^2"
-  (and (complexp-hash (gethash 'SYN ht1))
-       (complexp-hash (gethash 'SYN ht2))
-       (eql (gethash 'DIR (gethash 'SYN ht1)) 'FS)
-       (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht2))) ; ht2 must have complex result
-       (eql (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht2))) 'BS)
-       (member (gethash 'MODAL (gethash 'SYN ht1)) '(ALL CROSS))
-       (not (eql (gethash 'MODAL (gethash 'SYN ht2)) 'STAR)) ; main functor must allow composition
-       (member (gethash 'MODAL (gethash 'RESULT (gethash 'SYN ht2))) '(ALL CROSS))
+  (and (complexp-hash (machash 'SYN ht1))
+       (complexp-hash (machash 'SYN ht2))
+       (eql (machash 'DIR 'SYN ht1) 'FS)
+       (machash 'DIR 'RESULT 'SYN ht2) ; ht2 must have complex result
+       (eql (machash 'DIR 'RESULT 'SYN ht2) 'BS)
+       (member (machash 'MODAL 'SYN ht1) '(ALL CROSS))
+       (not (eql (machash 'MODAL 'SYN ht2) 'STAR)) ; main functor must allow composition
+       (member (machash 'MODAL 'RESULT 'SYN ht2) '(ALL CROSS))
        (multiple-value-bind (match b1 b2)
-	 (cat-match (gethash 'ARG (gethash 'SYN ht1)) (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht2))))
+	 (cat-match (machash 'ARG 'SYN ht1) (machash 'RESULT 'RESULT 'SYN ht2))
 	 (and match (let ((newht (make-cky-entry-hashtable))
 			  (newsynx (make-complex-cat-hashtable))
 			  (newsyn (make-complex-cat-hashtable)))
-		      (setf (gethash 'SEM newht) (&b2 (gethash 'SEM ht1) (gethash 'SEM ht2)))
-		      (setf (gethash 'INDEX newht) '|>Bx2|) ; ht2 dir and modality projects
-		      (setf (gethash 'SYN newht) newsyn)
-		      (setf (gethash 'DIR (gethash 'SYN newht)) (gethash 'DIR (gethash 'SYN ht2)))
-		      (setf (gethash 'MODAL (gethash 'SYN newht)) (gethash 'MODAL (gethash 'SYN ht2)))
-		      (setf (gethash 'ARG (gethash 'SYN newht))
-			    (realize-binds (gethash 'ARG (gethash 'SYN ht2)) b2))
-		      (setf (gethash 'RESULT (gethash 'SYN newht)) newsynx)
-		      (setf (gethash 'DIR (gethash 'RESULT (gethash 'SYN newht))) 
-			    (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht2))))
-		      (setf (gethash 'MODAL (gethash 'RESULT (gethash 'SYN newht))) 
-			    (gethash 'MODAL (gethash 'RESULT (gethash 'SYN ht2))))
-		      (setf (gethash 'RESULT (gethash 'RESULT (gethash 'SYN newht)))
-			    (realize-binds (gethash 'RESULT (gethash 'SYN ht1)) b1))
-		      (setf (gethash 'ARG (gethash 'RESULT (gethash 'SYN newht)))
-			    (realize-binds (gethash 'ARG (gethash 'RESULT (gethash 'SYN ht2))) b2))
+		      (setf (machash 'SEM newht) (&b2 (machash 'SEM ht1) (machash 'SEM ht2)))
+		      (setf (machash 'INDEX newht) '|>Bx2|) ; ht2 dir and modality projects
+		      (setf (machash 'SYN newht) newsyn)
+		      (setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht2))
+		      (setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht2))
+		      (setf (machash 'ARG 'SYN newht)
+			    (realize-binds (machash 'ARG 'SYN ht2) b2))
+		      (setf (machash 'RESULT 'SYN newht) newsynx)
+		      (setf (machash 'DIR 'RESULT 'SYN newht) 
+			    (machash 'DIR 'RESULT 'SYN ht2))
+		      (setf (machash 'MODAL 'RESULT 'SYN newht) 
+			    (machash 'MODAL 'RESULT 'SYN ht2))
+		      (setf (machash 'RESULT 'RESULT 'SYN newht)
+			    (realize-binds (machash 'RESULT 'SYN ht1) b1))
+		      (setf (machash 'ARG 'RESULT 'SYN newht)
+			    (realize-binds (machash 'ARG 'RESULT 'SYN ht2) b2))
 		      newht)))))
 
 (defun bx2-comp (ht1 ht2) 
   "<Bx^2"
-  (and (complexp-hash (gethash 'SYN ht1))
-       (complexp-hash (gethash 'SYN ht2))
-       (eql (gethash 'DIR (gethash 'SYN ht2)) 'BS)
-       (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht1))) ; ht1 must have complex result
-       (eql (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht1))) 'FS)
-       (member (gethash 'MODAL (gethash 'SYN ht2)) '(ALL CROSS))
-       (not (eql (gethash 'MODAL (gethash 'SYN ht1)) 'STAR)) ; main functor must allow composition
-       (member (gethash 'MODAL (gethash 'RESULT (gethash 'SYN ht1))) '(ALL CROSS))
+  (and (complexp-hash (machash 'SYN ht1))
+       (complexp-hash (machash 'SYN ht2))
+       (eql (machash 'DIR 'SYN ht2) 'BS)
+       (machash 'DIR 'RESULT 'SYN ht1) ; ht1 must have complex result
+       (eql (machash 'DIR 'RESULT 'SYN ht1) 'FS)
+       (member (machash 'MODAL 'SYN ht2) '(ALL CROSS))
+       (not (eql (machash 'MODAL 'SYN ht1) 'STAR)) ; main functor must allow composition
+       (member (machash 'MODAL 'RESULT 'SYN ht1) '(ALL CROSS))
        (multiple-value-bind (match b1 b2)
-	 (cat-match (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht1)))
-	            (gethash 'ARG (gethash 'SYN ht2)))
+	 (cat-match (machash 'RESULT 'RESULT 'SYN ht1)
+	            (machash 'ARG  'SYN ht2))
 	 (and match (let ((newht (make-cky-entry-hashtable))
 			  (newsynx (make-complex-cat-hashtable))
 			  (newsyn (make-complex-cat-hashtable)))
-		      (setf (gethash 'SEM newht) (&b2 (gethash 'SEM ht2) (gethash 'SEM ht1)))
-		      (setf (gethash 'INDEX newht) '|<Bx2|) ; ht1 dir and modality projects
-		      (setf (gethash 'SYN newht) newsyn)
-		      (setf (gethash 'DIR (gethash 'SYN newht)) (gethash 'DIR (gethash 'SYN ht1)))
-		      (setf (gethash 'MODAL (gethash 'SYN newht)) (gethash 'MODAL (gethash 'SYN ht1)))
-		      (setf (gethash 'ARG (gethash 'SYN newht))
-			    (realize-binds (gethash 'ARG (gethash 'SYN ht1)) b1))
-		      (setf (gethash 'RESULT (gethash 'SYN newht)) newsynx)
-		      (setf (gethash 'DIR (gethash 'RESULT (gethash 'SYN newht))) 
-			    (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht1))))
-		      (setf (gethash 'MODAL (gethash 'RESULT (gethash 'SYN newht))) 
-			    (gethash 'MODAL (gethash 'RESULT (gethash 'SYN ht1))))
-		      (setf (gethash 'RESULT (gethash 'RESULT (gethash 'SYN newht)))
-			    (realize-binds (gethash 'RESULT (gethash 'SYN ht2)) b2))
-		      (setf (gethash 'ARG (gethash 'RESULT (gethash 'SYN newht)))
-			    (realize-binds (gethash 'ARG (gethash 'RESULT (gethash 'SYN ht1))) b1))
+		      (setf (machash 'SEM newht) (&b2 (machash 'SEM ht2) (machash 'SEM ht1)))
+		      (setf (machash 'INDEX newht) '|<Bx2|) ; ht1 dir and modality projects
+		      (setf (machash 'SYN newht) newsyn)
+		      (setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht1))
+		      (setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht1))
+		      (setf (machash 'ARG 'SYN newht)
+			    (realize-binds (machash 'ARG 'SYN ht1) b1))
+		      (setf (machash 'RESULT 'SYN newht) newsynx)
+		      (setf (machash 'DIR 'RESULT 'SYN newht) 
+			    (machash 'DIR 'RESULT 'SYN ht1))
+		      (setf (machash 'MODAL  'RESULT  'SYN newht) 
+			    (machash 'MODAL 'RESULT 'SYN ht1))
+		      (setf (machash 'RESULT 'RESULT 'SYN newht)
+			    (realize-binds (machash 'RESULT 'SYN ht2) b2))
+		      (setf (machash 'ARG 'RESULT 'SYN newht)
+			    (realize-binds (machash 'ARG 'RESULT 'SYN ht1) b1))
 		      newht)))))
 
 (defun f2-sub (ht1 ht2) 
   ">S'', which is not S2, which is useless. See Bozsahin CL book ch.5"
-  (and (complexp-hash (gethash 'SYN ht1))
-       (complexp-hash (gethash 'SYN ht2))
-       (gethash 'RESULT (gethash 'SYN ht1)) 
-       (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht1))) ; result must be functor too
-       (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht2))) ; result must be functor too
-       (eql (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht1))) 'FS)
-       (eql (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht2))) 'FS)
-       (not (eql (gethash 'MODAL (gethash 'SYN ht2)) 'STAR)) ; main functor must allow composition
-       (member (gethash 'MODAL (gethash 'RESULT (gethash 'SYN ht1))) '(ALL HARMONIC))
-       (member (gethash 'MODAL (gethash 'RESULT (gethash 'SYN ht2))) '(ALL HARMONIC))
+  (and (complexp-hash (machash 'SYN ht1))
+       (complexp-hash (machash 'SYN ht2))
+       (machash 'RESULT 'SYN ht1) 
+       (machash 'DIR 'RESULT 'SYN ht1) ; result must be functor too
+       (machash 'DIR 'RESULT 'SYN ht2) ; result must be functor too
+       (eql (machash 'DIR 'RESULT 'SYN ht1) 'FS)
+       (eql (machash 'DIR 'RESULT 'SYN ht2) 'FS)
+       (not (eql (machash 'MODAL 'SYN ht2) 'STAR)) ; main functor must allow composition
+       (member (machash 'MODAL 'RESULT 'SYN ht1) '(ALL HARMONIC))
+       (member (machash 'MODAL 'RESULT 'SYN ht2) '(ALL HARMONIC))
        (multiple-value-bind (match b1 b2)
-	 (cat-match (gethash 'ARG (gethash 'SYN ht1)) (gethash 'ARG (gethash 'SYN ht2)))
+	 (cat-match (machash 'ARG 'SYN ht1) (machash 'ARG 'SYN ht2))
 	 (and match (multiple-value-bind (match2 b12 b22)
-		      (cat-match (gethash 'ARG (gethash 'RESULT (gethash 'SYN ht1)))
-				 (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht2))))
+		      (cat-match (machash 'ARG 'RESULT 'SYN ht1)
+				 (machash 'RESULT 'RESULT 'SYN ht2))
 		      (and match2 
 			   (let ((newht (make-cky-entry-hashtable))
 				 (newsyn2 (make-complex-cat-hashtable))
 				 (newsyn (make-complex-cat-hashtable)))
-			     (setf (gethash 'SEM newht) (&s2 (gethash 'SEM ht1) (gethash 'SEM ht2)))
-			     (setf (gethash 'INDEX newht) '|>S2|) ; ht2 dir and modality projects below
-			     (setf (gethash 'SYN newht) newsyn)
-			     (setf (gethash 'DIR (gethash 'SYN newht)) (gethash 'DIR (gethash 'SYN ht2)))
-			     (setf (gethash 'MODAL (gethash 'SYN newht)) (gethash 'MODAL (gethash 'SYN ht2)))
-			     (setf (gethash 'ARG (gethash 'SYN newht))
-				   (realize-binds (gethash 'ARG (gethash 'SYN ht2))
+			     (setf (machash 'SEM newht) (&s2 (machash 'SEM ht1) (machash 'SEM ht2)))
+			     (setf (machash 'INDEX newht) '|>S2|) ; ht2 dir and modality projects below
+			     (setf (machash 'SYN newht) newsyn)
+			     (setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht2))
+			     (setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht2))
+			     (setf (machash 'ARG 'SYN newht)
+				   (realize-binds (machash 'ARG 'SYN ht2)
 			                          (append b2 b22)))
-			     (setf (gethash 'RESULT (gethash 'SYN newht)) newsyn2)
-			     (setf (gethash 'RESULT (gethash 'RESULT (gethash 'SYN newht)))
-				   (realize-binds (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht1))) 
+			     (setf (machash 'RESULT 'SYN newht) newsyn2)
+			     (setf (machash 'RESULT 'RESULT 'SYN newht)
+				   (realize-binds (machash 'RESULT 'RESULT 'SYN ht1) 
 						  (append b1 b12)))
-			     (setf (gethash 'ARG (gethash 'RESULT (gethash 'SYN newht)))
-				   (realize-binds (gethash 'ARG (gethash 'RESULT (gethash 'SYN ht2))) 
+			     (setf (machash 'ARG 'RESULT 'SYN newht)
+				   (realize-binds (machash 'ARG 'RESULT 'SYN ht2) 
 			                          (append b2 b22)))
-			     (setf (gethash 'DIR (gethash 'RESULT (gethash 'SYN newht)))
-				   (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht2))))
-			     (setf (gethash 'MODAL (gethash 'RESULT (gethash 'SYN newht)))
-				   (gethash 'MODAL (gethash 'RESULT (gethash 'SYN ht2))))
+			     (setf (machash 'DIR 'RESULT 'SYN newht)
+				   (machash 'DIR 'RESULT 'SYN ht2))
+			     (setf (machash 'MODAL 'RESULT 'SYN newht)
+				   (machash 'MODAL 'RESULT 'SYN ht2))
 			     newht)))))))
 
 (defun b2-sub (ht1 ht2) 
   "<S'', which is not S2, which is useless. See Bozsahin CL book ch.5"
-  (and (complexp-hash (gethash 'SYN ht2))
-       (complexp-hash (gethash 'SYN ht1))
-       (gethash 'RESULT (gethash 'SYN ht2)) 
-       (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht2))) ; result must be functor too
-       (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht1))) ; result must be functor too
-       (eql (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht2))) 'BS)
-       (eql (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht1))) 'BS)
-       (not (eql (gethash 'MODAL (gethash 'SYN ht1)) 'STAR)) ; main functor must allow composition
-       (member (gethash 'MODAL (gethash 'RESULT (gethash 'SYN ht2))) '(ALL HARMONIC))
-       (member (gethash 'MODAL (gethash 'RESULT (gethash 'SYN ht1))) '(ALL HARMONIC))
+  (and (complexp-hash (machash 'SYN ht2))
+       (complexp-hash (machash 'SYN ht1))
+       (machash 'RESULT 'SYN ht2) 
+       (machash 'DIR 'RESULT 'SYN ht2) ; result must be functor too
+       (machash 'DIR 'RESULT 'SYN ht1) ; result must be functor too
+       (eql (machash 'DIR 'RESULT 'SYN ht2) 'BS)
+       (eql (machash 'DIR 'RESULT 'SYN ht1) 'BS)
+       (not (eql (machash 'MODAL 'SYN ht1) 'STAR)) ; main functor must allow composition
+       (member (machash 'MODAL 'RESULT 'SYN ht2) '(ALL HARMONIC))
+       (member (machash 'MODAL 'RESULT 'SYN ht1) '(ALL HARMONIC))
        (multiple-value-bind (match b1 b2)
-	 (cat-match (gethash 'ARG (gethash 'SYN ht1)) 
-		    (gethash 'ARG (gethash 'SYN ht2)))
+	 (cat-match (machash 'ARG 'SYN ht1) 
+		    (machash 'ARG 'SYN ht2))
 	 (and match (multiple-value-bind (match2 b12 b22)
-		      (cat-match (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht1)))
-				 (gethash 'ARG (gethash 'RESULT (gethash 'SYN ht2))))
+		      (cat-match (machash 'RESULT 'RESULT 'SYN ht1)
+				 (machash 'ARG 'RESULT 'SYN ht2))
 		      (and match2 
 			   (let ((newht (make-cky-entry-hashtable))
 				 (newsyn2 (make-complex-cat-hashtable))
 				 (newsyn (make-complex-cat-hashtable)))
-			     (setf (gethash 'SEM newht) (&s2 (gethash 'SEM ht2) (gethash 'SEM ht1)))
-			     (setf (gethash 'INDEX newht) '|<S2|) ; ht1 dir and modality projects below
-			     (setf (gethash 'SYN newht) newsyn)
-			     (setf (gethash 'DIR (gethash 'SYN newht)) (gethash 'DIR (gethash 'SYN ht1)))
-			     (setf (gethash 'MODAL (gethash 'SYN newht)) (gethash 'MODAL (gethash 'SYN ht1)))
-			     (setf (gethash 'ARG (gethash 'SYN newht))
-				   (realize-binds (gethash 'ARG (gethash 'SYN ht1))
+			     (setf (machash 'SEM newht) (&s2 (machash 'SEM ht2) (machash 'SEM ht1)))
+			     (setf (machash 'INDEX newht) '|<S2|) ; ht1 dir and modality projects below
+			     (setf (machash 'SYN newht) newsyn)
+			     (setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht1))
+			     (setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht1))
+			     (setf (machash 'ARG 'SYN newht)
+				   (realize-binds (machash 'ARG 'SYN ht1)
 			                          (append b1 b12)))
-			     (setf (gethash 'RESULT (gethash 'SYN newht)) newsyn2)
-			     (setf (gethash 'RESULT (gethash 'RESULT (gethash 'SYN newht)))
-				   (realize-binds (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht2))) 
+			     (setf (machash 'RESULT 'SYN newht) newsyn2)
+			     (setf (machash 'RESULT 'RESULT 'SYN newht)
+				   (realize-binds (machash 'RESULT 'RESULT 'SYN ht2) 
 						  (append b2 b22)))
-			     (setf (gethash 'ARG (gethash 'RESULT (gethash 'SYN newht)))
-				   (realize-binds (gethash 'ARG (gethash 'RESULT (gethash 'SYN ht1))) 
+			     (setf (machash 'ARG 'RESULT 'SYN newht)
+				   (realize-binds (machash 'ARG 'RESULT  'SYN ht1) 
 			                          (append b1 b12)))
-			     (setf (gethash 'DIR (gethash 'RESULT (gethash 'SYN newht)))
-				   (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht1))))
-			     (setf (gethash 'MODAL (gethash 'RESULT (gethash 'SYN newht)))
-				   (gethash 'MODAL (gethash 'RESULT (gethash 'SYN ht1))))
+			     (setf (machash 'DIR 'RESULT 'SYN newht)
+				   (machash 'DIR 'RESULT 'SYN ht1))
+			     (setf (machash 'MODAL 'RESULT 'SYN newht)
+				   (machash 'MODAL 'RESULT 'SYN ht1))
 			     newht)))))))
 
 (defun fx2-sub (ht1 ht2) 
   ">Sx'', which is not S2, which is useless. See Bozsahin CL book ch.5"
-  (and (complexp-hash (gethash 'SYN ht1))
-       (complexp-hash (gethash 'SYN ht2))
-       (gethash 'RESULT (gethash 'SYN ht1)) 
-       (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht1))) ; result must be functor too
-       (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht2))) ; result must be functor too
-       (eql (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht1))) 'FS)
-       (eql (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht2))) 'BS)
-       (not (eql (gethash 'MODAL (gethash 'SYN ht2)) 'STAR)) ; main functor must allow composition
-       (member (gethash 'MODAL (gethash 'RESULT (gethash 'SYN ht1))) '(ALL CROSS))
-       (member (gethash 'MODAL (gethash 'RESULT (gethash 'SYN ht2))) '(ALL CROSS))
+  (and (complexp-hash (machash 'SYN ht1))
+       (complexp-hash (machash 'SYN ht2))
+       (machash 'RESULT 'SYN ht1) 
+       (machash 'DIR 'RESULT 'SYN ht1) ; result must be functor too
+       (machash 'DIR 'RESULT 'SYN ht2) ; result must be functor too
+       (eql (machash 'DIR 'RESULT 'SYN ht1) 'FS)
+       (eql (machash 'DIR 'RESULT 'SYN ht2) 'BS)
+       (not (eql (machash 'MODAL 'SYN ht2) 'STAR)) ; main functor must allow composition
+       (member (machash 'MODAL 'RESULT 'SYN ht1) '(ALL CROSS))
+       (member (machash 'MODAL 'RESULT 'SYN ht2) '(ALL CROSS))
        (multiple-value-bind (match b1 b2)
-	 (cat-match (gethash 'ARG (gethash 'SYN ht1)) (gethash 'ARG (gethash 'SYN ht2)))
+	 (cat-match (machash 'ARG 'SYN ht1) (machash 'ARG 'SYN ht2))
 	 (and match (multiple-value-bind (match2 b12 b22)
-		      (cat-match (gethash 'ARG (gethash 'RESULT (gethash 'SYN ht1)))
-				 (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht2))))
+		      (cat-match (machash 'ARG 'RESULT 'SYN ht1)
+				 (machash 'RESULT 'RESULT 'SYN ht2))
 		      (and match2 
 			   (let ((newht (make-cky-entry-hashtable))
 				 (newsyn2 (make-complex-cat-hashtable))
 				 (newsyn (make-complex-cat-hashtable)))
-			     (setf (gethash 'SEM newht) (&s2 (gethash 'SEM ht1) (gethash 'SEM ht2)))
-			     (setf (gethash 'INDEX newht) '|>Sx2|) ; ht2 dir and modality projects below
-			     (setf (gethash 'SYN newht) newsyn)
-			     (setf (gethash 'DIR (gethash 'SYN newht)) (gethash 'DIR (gethash 'SYN ht2)))
-			     (setf (gethash 'MODAL (gethash 'SYN newht)) (gethash 'MODAL (gethash 'SYN ht2)))
-			     (setf (gethash 'ARG (gethash 'SYN newht))
-				   (realize-binds (gethash 'ARG (gethash 'SYN ht2))
+			     (setf (machash 'SEM newht) (&s2 (machash 'SEM ht1) (machash 'SEM ht2)))
+			     (setf (machash 'INDEX newht) '|>Sx2|) ; ht2 dir and modality projects below
+			     (setf (machash 'SYN newht) newsyn)
+			     (setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht2))
+			     (setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht2))
+			     (setf (machash 'ARG 'SYN newht)
+				   (realize-binds (machash 'ARG 'SYN ht2)
 			                          (append b2 b22)))
-			     (setf (gethash 'RESULT (gethash 'SYN newht)) newsyn2)
-			     (setf (gethash 'RESULT (gethash 'RESULT (gethash 'SYN newht)))
-				   (realize-binds (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht1))) 
+			     (setf (machash 'RESULT 'SYN newht) newsyn2)
+			     (setf (machash 'RESULT 'RESULT 'SYN newht)
+				   (realize-binds (machash 'RESULT 'RESULT 'SYN ht1) 
 						  (append b1 b12)))
-			     (setf (gethash 'ARG (gethash 'RESULT (gethash 'SYN newht)))
-				   (realize-binds (gethash 'ARG (gethash 'RESULT (gethash 'SYN ht2))) 
+			     (setf (machash 'ARG 'RESULT 'SYN newht)
+				   (realize-binds (machash 'ARG 'RESULT 'SYN ht2) 
 			                          (append b2 b22)))
-			     (setf (gethash 'DIR (gethash 'RESULT (gethash 'SYN newht)))
-				   (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht2))))
-			     (setf (gethash 'MODAL (gethash 'RESULT (gethash 'SYN newht)))
-				   (gethash 'MODAL (gethash 'RESULT (gethash 'SYN ht2))))
+			     (setf (machash 'DIR 'RESULT 'SYN newht)
+				   (machash 'DIR 'RESULT 'SYN ht2))
+			     (setf (machash 'MODAL 'RESULT 'SYN newht)
+				   (machash 'MODAL 'RESULT  'SYN ht2))
 			     newht)))))))
 
 (defun bx2-sub (ht1 ht2) 
   "<Sx'', which is not S2, which is useless. See Bozsahin CL book ch.5"
-  (and (complexp-hash (gethash 'SYN ht2))
-       (complexp-hash (gethash 'SYN ht1))
-       (gethash 'RESULT (gethash 'SYN ht2)) 
-       (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht2))) ; result must be functor too
-       (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht1))) ; result must be functor too
-       (eql (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht2))) 'BS)
-       (eql (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht1))) 'FS)
-       (not (eql (gethash 'MODAL (gethash 'SYN ht1)) 'STAR)) ; main functor must allow composition
-       (member (gethash 'MODAL (gethash 'RESULT (gethash 'SYN ht2))) '(ALL CROSS))
-       (member (gethash 'MODAL (gethash 'RESULT (gethash 'SYN ht1))) '(ALL CROSS))
+  (and (complexp-hash (machash 'SYN ht2))
+       (complexp-hash (machash 'SYN ht1))
+       (machash 'RESULT 'SYN ht2) 
+       (machash 'DIR 'RESULT 'SYN ht2) ; result must be functor too
+       (machash 'DIR 'RESULT 'SYN ht1) ; result must be functor too
+       (eql (machash 'DIR 'RESULT 'SYN ht2) 'BS)
+       (eql (machash 'DIR 'RESULT 'SYN ht1) 'FS)
+       (not (eql (machash 'MODAL 'SYN ht1) 'STAR)) ; main functor must allow composition
+       (member (machash 'MODAL 'RESULT 'SYN ht2) '(ALL CROSS))
+       (member (machash 'MODAL 'RESULT 'SYN ht1) '(ALL CROSS))
        (multiple-value-bind (match b1 b2)
-	 (cat-match (gethash 'ARG (gethash 'SYN ht1)) 
-		    (gethash 'ARG (gethash 'SYN ht2)))
+	 (cat-match (machash 'ARG 'SYN ht1) 
+		    (machash 'ARG 'SYN ht2))
 	 (and match (multiple-value-bind (match2 b12 b22)
-		      (cat-match (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht1)))
-				 (gethash 'ARG (gethash 'RESULT (gethash 'SYN ht2))))
+		      (cat-match (machash 'RESULT 'RESULT 'SYN ht1)
+				 (machash 'ARG 'RESULT 'SYN ht2))
 		      (and match2 
 			   (let ((newht (make-cky-entry-hashtable))
 				 (newsyn2 (make-complex-cat-hashtable))
 				 (newsyn (make-complex-cat-hashtable)))
-			     (setf (gethash 'SEM newht) (&s2 (gethash 'SEM ht2) (gethash 'SEM ht1)))
-			     (setf (gethash 'INDEX newht) '|<Sx2|) ; ht1 dir and modality projects below
-			     (setf (gethash 'SYN newht) newsyn)
-			     (setf (gethash 'DIR (gethash 'SYN newht)) (gethash 'DIR (gethash 'SYN ht1)))
-			     (setf (gethash 'MODAL (gethash 'SYN newht)) (gethash 'MODAL (gethash 'SYN ht1)))
-			     (setf (gethash 'ARG (gethash 'SYN newht))
-				   (realize-binds (gethash 'ARG (gethash 'SYN ht1))
+			     (setf (machash 'SEM newht) (&s2 (machash 'SEM ht2) (machash 'SEM ht1)))
+			     (setf (machash 'INDEX newht) '|<Sx2|) ; ht1 dir and modality projects below
+			     (setf (machash 'SYN newht) newsyn)
+			     (setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht1))
+			     (setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht1))
+			     (setf (machash 'ARG 'SYN newht)
+				   (realize-binds (machash 'ARG 'SYN ht1)
 			                          (append b1 b12)))
-			     (setf (gethash 'RESULT (gethash 'SYN newht)) newsyn2)
-			     (setf (gethash 'RESULT (gethash 'RESULT (gethash 'SYN newht)))
-				   (realize-binds (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht2))) 
+			     (setf (machash 'RESULT 'SYN newht) newsyn2)
+			     (setf (machash 'RESULT 'RESULT 'SYN newht)
+				   (realize-binds (machash 'RESULT 'RESULT 'SYN ht2) 
 						  (append b2 b22)))
-			     (setf (gethash 'ARG (gethash 'RESULT (gethash 'SYN newht)))
-				   (realize-binds (gethash 'ARG (gethash 'RESULT (gethash 'SYN ht1))) 
+			     (setf (machash 'ARG 'RESULT 'SYN newht)
+				   (realize-binds (machash 'ARG 'RESULT 'SYN ht1) 
 			                          (append b1 b12)))
-			     (setf (gethash 'DIR (gethash 'RESULT (gethash 'SYN newht)))
-				   (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht1))))
-			     (setf (gethash 'MODAL (gethash 'RESULT (gethash 'SYN newht)))
-				   (gethash 'MODAL (gethash 'RESULT (gethash 'SYN ht1))))
+			     (setf (machash 'DIR 'RESULT 'SYN newht)
+				   (machash 'DIR 'RESULT 'SYN ht1))
+			     (setf (machash 'MODAL 'RESULT 'SYN newht)
+				   (machash 'MODAL 'RESULT  'SYN ht1))
 			     newht)))))))
 
 (defun f3-comp (ht1 ht2) 
   ">B^3"
-  (and (complexp-hash (gethash 'SYN ht1))
-       (complexp-hash (gethash 'SYN ht2))
-       (eql (gethash 'DIR (gethash 'SYN ht1)) 'FS)
-       (member (gethash 'MODAL (gethash 'SYN ht1)) '(ALL HARMONIC))
-       (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht2))) ; ht2 must have a really complex result
-       (gethash 'DIR (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht2))))
-       (eql (gethash 'DIR (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht2)))) 'FS)
-       (not (eql (gethash 'MODAL (gethash 'SYN ht2)) 'STAR)) ; main functor must allow composition
-       (member (gethash 'MODAL (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht2)))) '(ALL HARMONIC))
+  (and (complexp-hash (machash 'SYN ht1))
+       (complexp-hash (machash 'SYN ht2))
+       (eql (machash 'DIR 'SYN ht1) 'FS)
+       (member (machash 'MODAL 'SYN ht1) '(ALL HARMONIC))
+       (machash 'DIR 'RESULT 'SYN ht2) ; ht2 must have a really complex result
+       (machash 'DIR 'RESULT 'RESULT 'SYN ht2)
+       (eql (machash 'DIR 'RESULT 'RESULT 'SYN ht2) 'FS)
+       (not (eql (machash 'MODAL 'SYN ht2) 'STAR)) ; main functor must allow composition
+       (member (machash 'MODAL 'RESULT 'RESULT 'SYN ht2) '(ALL HARMONIC))
        (multiple-value-bind (match b1 b2)
-	 (cat-match (gethash 'ARG (gethash 'SYN ht1)) 
-		    (gethash 'RESULT (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht2)))))
+	 (cat-match (machash 'ARG 'SYN ht1) 
+		    (machash 'RESULT 'RESULT 'RESULT 'SYN ht2))
 	 (and match (let ((newht (make-cky-entry-hashtable))
 			  (newsyn1 (make-complex-cat-hashtable))
 			  (newsyn2 (make-complex-cat-hashtable))
 			  (newsyn3 (make-complex-cat-hashtable)))
-		      (setf (gethash 'SEM newht) (&b3 (gethash 'SEM ht1) (gethash 'SEM ht2)))
-		      (setf (gethash 'INDEX newht) '|>B3|) ; ht2 dir and modality projects
-		      (setf (gethash 'SYN newht) newsyn1)
-		      (setf (gethash 'DIR (gethash 'SYN newht)) (gethash 'DIR (gethash 'SYN ht2)))
-		      (setf (gethash 'MODAL (gethash 'SYN newht)) (gethash 'MODAL (gethash 'SYN ht2)))
-		      (setf (gethash 'ARG (gethash 'SYN newht))
-			    (realize-binds (gethash 'ARG (gethash 'SYN ht2)) b2))
-		      (setf (gethash 'RESULT (gethash 'SYN newht)) newsyn2)
-		      (setf (gethash 'DIR (gethash 'RESULT (gethash 'SYN newht))) 
-			    (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht2))))
-		      (setf (gethash 'MODAL (gethash 'RESULT (gethash 'SYN newht))) 
-			    (gethash 'MODAL (gethash 'RESULT (gethash 'SYN ht2))))
-		      (setf (gethash 'ARG (gethash 'RESULT (gethash 'SYN newht)))
-			    (realize-binds (gethash 'ARG (gethash 'RESULT (gethash 'SYN ht2))) b2))
-		      (setf (gethash 'RESULT (gethash 'RESULT (gethash 'SYN newht))) newsyn3)
-		      (setf (gethash 'RESULT (gethash 'RESULT (gethash 'RESULT (gethash 'SYN newht))))
-			    (realize-binds (gethash 'RESULT (gethash 'SYN ht1)) b1))
-		      (setf (gethash 'ARG (gethash 'RESULT (gethash 'RESULT (gethash 'SYN newht))))
-			    (realize-binds (gethash 'ARG (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht2)))) b2))
-		      (setf (gethash 'DIR (gethash 'RESULT (gethash 'RESULT (gethash 'SYN newht))))
-			    (gethash 'DIR (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht2)))))
-		      (setf (gethash 'MODAL (gethash 'RESULT (gethash 'RESULT (gethash 'SYN newht))))
-			    (gethash 'MODAL (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht2)))))
+		      (setf (machash 'SEM newht) (&b3 (machash 'SEM ht1) (machash 'SEM ht2)))
+		      (setf (machash 'INDEX newht) '|>B3|) ; ht2 dir and modality projects
+		      (setf (machash 'SYN newht) newsyn1)
+		      (setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht2))
+		      (setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht2))
+		      (setf (machash 'ARG 'SYN newht)
+			    (realize-binds (machash 'ARG 'SYN ht2) b2))
+		      (setf (machash 'RESULT 'SYN newht) newsyn2)
+		      (setf (machash 'DIR 'RESULT 'SYN newht) 
+			    (machash 'DIR 'RESULT 'SYN ht2))
+		      (setf (machash 'MODAL 'RESULT 'SYN newht) 
+			    (machash 'MODAL 'RESULT 'SYN ht2))
+		      (setf (machash 'ARG 'RESULT 'SYN newht)
+			    (realize-binds (machash 'ARG 'RESULT 'SYN ht2) b2))
+		      (setf (machash 'RESULT 'RESULT 'SYN newht) newsyn3)
+		      (setf (machash 'RESULT 'RESULT 'RESULT 'SYN newht)
+			    (realize-binds (machash 'RESULT 'SYN ht1) b1))
+		      (setf (machash 'ARG 'RESULT 'RESULT 'SYN newht)
+			    (realize-binds (machash 'ARG 'RESULT 'RESULT 'SYN ht2) b2))
+		      (setf (machash 'DIR 'RESULT 'RESULT 'SYN newht)
+			    (machash 'DIR 'RESULT 'RESULT 'SYN ht2))
+		      (setf (machash 'MODAL 'RESULT 'RESULT 'SYN newht)
+			    (machash 'MODAL 'RESULT 'RESULT 'SYN ht2))
 		      newht)))))
 
 (defun fx3-comp (ht1 ht2) 
   ">Bx^3"
-  (and (complexp-hash (gethash 'SYN ht1))
-       (complexp-hash (gethash 'SYN ht2))
-       (eql (gethash 'DIR (gethash 'SYN ht1)) 'FS)
-       (member (gethash 'MODAL (gethash 'SYN ht1)) '(ALL CROSS))
-       (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht2))) ; ht2 must have a really complex result
-       (gethash 'DIR (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht2))))
-       (eql (gethash 'DIR (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht2)))) 'BS)
-       (not (eql (gethash 'MODAL (gethash 'SYN ht2)) 'STAR)) ; main functor must allow composition
-       (member (gethash 'MODAL (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht2)))) '(ALL CROSS))
+  (and (complexp-hash (machash 'SYN ht1))
+       (complexp-hash (machash 'SYN ht2))
+       (eql (machash 'DIR 'SYN ht1) 'FS)
+       (member (machash 'MODAL 'SYN ht1) '(ALL CROSS))
+       (machash 'DIR 'RESULT 'SYN ht2) ; ht2 must have a really complex result
+       (machash 'DIR 'RESULT 'RESULT 'SYN ht2)
+       (eql (machash 'DIR 'RESULT 'RESULT 'SYN ht2) 'BS)
+       (not (eql (machash 'MODAL 'SYN ht2) 'STAR)) ; main functor must allow composition
+       (member (machash 'MODAL 'RESULT 'RESULT 'SYN ht2) '(ALL CROSS))
        (multiple-value-bind (match b1 b2)
-	 (cat-match (gethash 'ARG (gethash 'SYN ht1)) 
-		    (gethash 'RESULT (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht2)))))
+	 (cat-match (machash 'ARG 'SYN ht1) 
+		    (machash 'RESULT 'RESULT 'RESULT 'SYN ht2))
 	 (and match (let ((newht (make-cky-entry-hashtable))
 			  (newsyn1 (make-complex-cat-hashtable))
 			  (newsyn2 (make-complex-cat-hashtable))
 			  (newsyn3 (make-complex-cat-hashtable)))
-		      (setf (gethash 'SEM newht) (&b3 (gethash 'SEM ht1) (gethash 'SEM ht2)))
-		      (setf (gethash 'INDEX newht) '|>Bx3|) ; ht2 dir and modality projects
-		      (setf (gethash 'SYN newht) newsyn1)
-		      (setf (gethash 'DIR (gethash 'SYN newht)) (gethash 'DIR (gethash 'SYN ht2)))
-		      (setf (gethash 'MODAL (gethash 'SYN newht)) (gethash 'MODAL (gethash 'SYN ht2)))
-		      (setf (gethash 'ARG (gethash 'SYN newht))
-			    (realize-binds (gethash 'ARG (gethash 'SYN ht2)) b2))
-		      (setf (gethash 'RESULT (gethash 'SYN newht)) newsyn2)
-		      (setf (gethash 'DIR (gethash 'RESULT (gethash 'SYN newht))) 
-			    (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht2))))
-		      (setf (gethash 'MODAL (gethash 'RESULT (gethash 'SYN newht))) 
-			    (gethash 'MODAL (gethash 'RESULT (gethash 'SYN ht2))))
-		      (setf (gethash 'ARG (gethash 'RESULT (gethash 'SYN newht)))
-			    (realize-binds (gethash 'ARG (gethash 'RESULT (gethash 'SYN ht2))) b2))
-		      (setf (gethash 'RESULT (gethash 'RESULT (gethash 'SYN newht))) newsyn3)
-		      (setf (gethash 'RESULT (gethash 'RESULT (gethash 'RESULT (gethash 'SYN newht))))
-			    (realize-binds (gethash 'RESULT (gethash 'SYN ht1)) b1))
-		      (setf (gethash 'ARG (gethash 'RESULT (gethash 'RESULT (gethash 'SYN newht))))
-			    (realize-binds (gethash 'ARG (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht2)))) b2))
-		      (setf (gethash 'DIR (gethash 'RESULT (gethash 'RESULT (gethash 'SYN newht))))
-			    (gethash 'DIR (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht2)))))
-		      (setf (gethash 'MODAL (gethash 'RESULT (gethash 'RESULT (gethash 'SYN newht))))
-			    (gethash 'MODAL (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht2)))))
+		      (setf (machash 'SEM newht) (&b3 (machash 'SEM ht1) (machash 'SEM ht2)))
+		      (setf (machash 'INDEX newht) '|>Bx3|) ; ht2 dir and modality projects
+		      (setf (machash 'SYN newht) newsyn1)
+		      (setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht2))
+		      (setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht2))
+		      (setf (machash 'ARG 'SYN newht)
+			    (realize-binds (machash 'ARG 'SYN ht2) b2))
+		      (setf (machash 'RESULT 'SYN newht) newsyn2)
+		      (setf (machash 'DIR 'RESULT 'SYN newht) 
+			    (machash 'DIR 'RESULT 'SYN ht2))
+		      (setf (machash 'MODAL 'RESULT 'SYN newht) 
+			    (machash 'MODAL 'RESULT 'SYN ht2))
+		      (setf (machash 'ARG 'RESULT 'SYN newht)
+			    (realize-binds (machash 'ARG 'RESULT 'SYN ht2) b2))
+		      (setf (machash 'RESULT 'RESULT 'SYN newht) newsyn3)
+		      (setf (machash 'RESULT 'RESULT 'RESULT 'SYN newht)
+			    (realize-binds (machash 'RESULT 'SYN ht1) b1))
+		      (setf (machash 'ARG 'RESULT 'RESULT 'SYN newht)
+			    (realize-binds (machash 'ARG 'RESULT 'RESULT 'SYN ht2) b2))
+		      (setf (machash 'DIR 'RESULT 'RESULT 'SYN newht)
+			    (machash 'DIR 'RESULT 'RESULT 'SYN ht2))
+		      (setf (machash 'MODAL 'RESULT 'RESULT 'SYN newht)
+			    (machash 'MODAL 'RESULT 'RESULT 'SYN ht2))
 		      newht)))))
 
 (defun b3-comp (ht1 ht2) 
   "<B^3"
-  (and (complexp-hash (gethash 'SYN ht1))
-       (complexp-hash (gethash 'SYN ht2))
-       (eql (gethash 'DIR (gethash 'SYN ht2)) 'BS)
-       (member (gethash 'MODAL (gethash 'SYN ht2)) '(ALL HARMONIC))
-       (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht1))) ; ht1 must have a really complex result
-       (gethash 'DIR (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht1))))
-       (eql (gethash 'DIR (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht1)))) 'BS)
-       (not (eql (gethash 'MODAL (gethash 'SYN ht1)) 'STAR)) ; main functor must allow composition
-       (member (gethash 'MODAL (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht1)))) '(ALL HARMONIC))
+  (and (complexp-hash (machash 'SYN ht1))
+       (complexp-hash (machash 'SYN ht2))
+       (eql (machash 'DIR 'SYN ht2) 'BS)
+       (member (machash 'MODAL 'SYN ht2) '(ALL HARMONIC))
+       (machash 'DIR 'RESULT 'SYN ht1) ; ht1 must have a really complex result
+       (machash 'DIR 'RESULT 'RESULT 'SYN ht1)
+       (eql (machash 'DIR 'RESULT 'RESULT 'SYN ht1) 'BS)
+       (not (eql (machash 'MODAL 'SYN ht1) 'STAR)) ; main functor must allow composition
+       (member (machash 'MODAL 'RESULT 'RESULT 'SYN ht1) '(ALL HARMONIC))
        (multiple-value-bind (match b1 b2)
-	 (cat-match (gethash 'RESULT (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht1))))
-		    (gethash 'ARG (gethash 'SYN ht2))) 
+	 (cat-match (machash 'RESULT 'RESULT 'RESULT 'SYN ht1)
+		    (machash 'ARG 'SYN ht2)) 
 	 (and match (let ((newht (make-cky-entry-hashtable))
 			  (newsyn1 (make-complex-cat-hashtable))
 			  (newsyn2 (make-complex-cat-hashtable))
 			  (newsyn3 (make-complex-cat-hashtable)))
-		      (setf (gethash 'SEM newht) (&b3 (gethash 'SEM ht2) (gethash 'SEM ht1)))
-		      (setf (gethash 'INDEX newht) '|<B3|) ; ht1 dir and modality projects
-		      (setf (gethash 'SYN newht) newsyn1)
-		      (setf (gethash 'DIR (gethash 'SYN newht)) (gethash 'DIR (gethash 'SYN ht1)))
-		      (setf (gethash 'MODAL (gethash 'SYN newht)) (gethash 'MODAL (gethash 'SYN ht1)))
-		      (setf (gethash 'ARG (gethash 'SYN newht))
-			    (realize-binds (gethash 'ARG (gethash 'SYN ht1)) b1))
-		      (setf (gethash 'RESULT (gethash 'SYN newht)) newsyn2)
-		      (setf (gethash 'DIR (gethash 'RESULT (gethash 'SYN newht))) 
-			    (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht1))))
-		      (setf (gethash 'MODAL (gethash 'RESULT (gethash 'SYN newht))) 
-			    (gethash 'MODAL (gethash 'RESULT (gethash 'SYN ht1))))
-		      (setf (gethash 'ARG (gethash 'RESULT (gethash 'SYN newht)))
-			    (realize-binds (gethash 'ARG (gethash 'RESULT (gethash 'SYN ht1))) b1))
-		      (setf (gethash 'RESULT (gethash 'RESULT (gethash 'SYN newht))) newsyn3)
-		      (setf (gethash 'RESULT (gethash 'RESULT (gethash 'RESULT (gethash 'SYN newht))))
-			    (realize-binds (gethash 'RESULT (gethash 'SYN ht2)) b2))
-		      (setf (gethash 'ARG (gethash 'RESULT (gethash 'RESULT (gethash 'SYN newht))))
-			    (realize-binds (gethash 'ARG (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht1)))) b1))
-		      (setf (gethash 'DIR (gethash 'RESULT (gethash 'RESULT (gethash 'SYN newht))))
-			    (gethash 'DIR (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht1)))))
-		      (setf (gethash 'MODAL (gethash 'RESULT (gethash 'RESULT (gethash 'SYN newht))))
-			    (gethash 'MODAL (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht1)))))
+		      (setf (machash 'SEM newht) (&b3 (machash 'SEM ht2) (machash 'SEM ht1)))
+		      (setf (machash 'INDEX newht) '|<B3|) ; ht1 dir and modality projects
+		      (setf (machash 'SYN newht) newsyn1)
+		      (setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht1))
+		      (setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht1))
+		      (setf (machash 'ARG 'SYN newht)
+			    (realize-binds (machash 'ARG 'SYN ht1) b1))
+		      (setf (machash 'RESULT 'SYN newht) newsyn2)
+		      (setf (machash 'DIR 'RESULT 'SYN newht) 
+			    (machash 'DIR 'RESULT 'SYN ht1))
+		      (setf (machash 'MODAL 'RESULT 'SYN newht) 
+			    (machash 'MODAL 'RESULT 'SYN ht1))
+		      (setf (machash 'ARG 'RESULT 'SYN newht)
+			    (realize-binds (machash 'ARG 'RESULT 'SYN ht1) b1))
+		      (setf (machash 'RESULT 'RESULT 'SYN newht) newsyn3)
+		      (setf (machash 'RESULT 'RESULT 'RESULT 'SYN newht)
+			    (realize-binds (machash 'RESULT 'SYN ht2) b2))
+		      (setf (machash 'ARG 'RESULT 'RESULT 'SYN newht)
+			    (realize-binds (machash 'ARG 'RESULT 'RESULT 'SYN ht1) b1))
+		      (setf (machash 'DIR 'RESULT 'RESULT 'SYN newht)
+			    (machash 'DIR 'RESULT 'RESULT 'SYN ht1))
+		      (setf (machash 'MODAL 'RESULT 'RESULT 'SYN newht)
+			    (machash 'MODAL 'RESULT 'RESULT 'SYN ht1))
 		      newht)))))
 
 (defun bx3-comp (ht1 ht2) 
   "<Bx^3"
-  (and (complexp-hash (gethash 'SYN ht1))
-       (complexp-hash (gethash 'SYN ht2))
-       (eql (gethash 'DIR (gethash 'SYN ht2)) 'BS)
-       (member (gethash 'MODAL (gethash 'SYN ht2)) '(ALL CROSS))
-       (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht1))) ; ht1 must have a really complex result
-       (gethash 'DIR (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht1))))
-       (eql (gethash 'DIR (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht1)))) 'FS)
-       (not (eql (gethash 'MODAL (gethash 'SYN ht1)) 'STAR)) ; main functor must allow composition
-       (member (gethash 'MODAL (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht1)))) '(ALL CROSS))
+  (and (complexp-hash (machash 'SYN ht1))
+       (complexp-hash (machash 'SYN ht2))
+       (eql (machash 'DIR 'SYN ht2) 'BS)
+       (member (machash 'MODAL 'SYN ht2) '(ALL CROSS))
+       (machash 'DIR 'RESULT 'SYN ht1) ; ht1 must have a really complex result
+       (machash 'DIR 'RESULT 'RESULT 'SYN ht1)
+       (eql (machash 'DIR 'RESULT 'RESULT 'SYN ht1) 'FS)
+       (not (eql (machash 'MODAL 'SYN ht1) 'STAR)) ; main functor must allow composition
+       (member (machash 'MODAL 'RESULT 'RESULT 'SYN ht1) '(ALL CROSS))
        (multiple-value-bind (match b1 b2)
-	 (cat-match (gethash 'RESULT (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht1))))
-		    (gethash 'ARG (gethash 'SYN ht2))) 
+	 (cat-match (machash 'RESULT 'RESULT 'RESULT 'SYN ht1)
+		    (machash 'ARG 'SYN ht2)) 
 	 (and match (let ((newht (make-cky-entry-hashtable))
 			  (newsyn1 (make-complex-cat-hashtable))
 			  (newsyn2 (make-complex-cat-hashtable))
 			  (newsyn3 (make-complex-cat-hashtable)))
-		      (setf (gethash 'SEM newht) (&b3 (gethash 'SEM ht2) (gethash 'SEM ht1)))
-		      (setf (gethash 'INDEX newht) '|<Bx3|) ; ht1 dir and modality projects
-		      (setf (gethash 'SYN newht) newsyn1)
-		      (setf (gethash 'DIR (gethash 'SYN newht)) (gethash 'DIR (gethash 'SYN ht1)))
-		      (setf (gethash 'MODAL (gethash 'SYN newht)) (gethash 'MODAL (gethash 'SYN ht1)))
-		      (setf (gethash 'ARG (gethash 'SYN newht))
-			    (realize-binds (gethash 'ARG (gethash 'SYN ht1)) b1))
-		      (setf (gethash 'RESULT (gethash 'SYN newht)) newsyn2)
-		      (setf (gethash 'DIR (gethash 'RESULT (gethash 'SYN newht))) 
-			    (gethash 'DIR (gethash 'RESULT (gethash 'SYN ht1))))
-		      (setf (gethash 'MODAL (gethash 'RESULT (gethash 'SYN newht))) 
-			    (gethash 'MODAL (gethash 'RESULT (gethash 'SYN ht1))))
-		      (setf (gethash 'ARG (gethash 'RESULT (gethash 'SYN newht)))
-			    (realize-binds (gethash 'ARG (gethash 'RESULT (gethash 'SYN ht1))) b1))
-		      (setf (gethash 'RESULT (gethash 'RESULT (gethash 'SYN newht))) newsyn3)
-		      (setf (gethash 'RESULT (gethash 'RESULT (gethash 'RESULT (gethash 'SYN newht))))
-			    (realize-binds (gethash 'RESULT (gethash 'SYN ht2)) b2))
-		      (setf (gethash 'ARG (gethash 'RESULT (gethash 'RESULT (gethash 'SYN newht))))
-			    (realize-binds (gethash 'ARG (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht1)))) b1))
-		      (setf (gethash 'DIR (gethash 'RESULT (gethash 'RESULT (gethash 'SYN newht))))
-			    (gethash 'DIR (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht1)))))
-		      (setf (gethash 'MODAL (gethash 'RESULT (gethash 'RESULT (gethash 'SYN newht))))
-			    (gethash 'MODAL (gethash 'RESULT (gethash 'RESULT (gethash 'SYN ht1)))))
+		      (setf (machash 'SEM newht) (&b3 (machash 'SEM ht2) (machash 'SEM ht1)))
+		      (setf (machash 'INDEX newht) '|<Bx3|) ; ht1 dir and modality projects
+		      (setf (machash 'SYN newht) newsyn1)
+		      (setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht1))
+		      (setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht1))
+		      (setf (machash 'ARG 'SYN newht)
+			    (realize-binds (machash 'ARG 'SYN ht1) b1))
+		      (setf (machash 'RESULT 'SYN newht) newsyn2)
+		      (setf (machash 'DIR 'RESULT 'SYN newht) 
+			    (machash 'DIR 'RESULT 'SYN ht1))
+		      (setf (machash 'MODAL 'RESULT 'SYN newht) 
+			    (machash 'MODAL 'RESULT 'SYN ht1))
+		      (setf (machash 'ARG 'RESULT 'SYN newht)
+			    (realize-binds (machash 'ARG 'RESULT 'SYN ht1) b1))
+		      (setf (machash 'RESULT 'RESULT 'SYN newht) newsyn3)
+		      (setf (machash 'RESULT 'RESULT 'RESULT 'SYN newht)
+			    (realize-binds (machash 'RESULT 'SYN ht2) b2))
+		      (setf (machash 'ARG 'RESULT 'RESULT 'SYN newht)
+			    (realize-binds (machash 'ARG 'RESULT 'RESULT 'SYN ht1) b1))
+		      (setf (machash 'DIR 'RESULT 'RESULT 'SYN newht)
+			    (machash 'DIR 'RESULT 'RESULT 'SYN ht1))
+		      (setf (machash 'MODAL 'RESULT 'RESULT 'SYN newht)
+			    (machash 'MODAL 'RESULT 'RESULT 'SYN ht1))
 		      newht)))))
 
 (defun f-special (ht1 ht2)
   "@.. cats can only apply. We assume there is one unknown in such cats, and that all such cats are functors."
-  (and (specialp-hash (gethash 'SYN ht1))
-       (eql (gethash 'DIR (gethash 'SYN ht1)) 'FS)
-       (not (specialp-hash (gethash 'SYN ht2)))
+  (and (specialp-hash (machash 'SYN ht1))
+       (eql (machash 'DIR 'SYN ht1) 'FS)
+       (not (specialp-hash (machash 'SYN ht2)))
        (let ((newht (make-cky-entry-hashtable)))
-	 (setf (gethash 'SEM newht) (&a (gethash 'SEM ht1) (gethash 'SEM ht2)))
-	 (setf (gethash 'INDEX newht) '|>|)
-	 (setf (gethash 'SYN newht)(substitute-special-cat   ; pass on a fresh copy for substtn
-				     (gethash 'RESULT (gethash 'SYN ht1))
-				     (copy-hashtable (gethash 'SYN ht2))))
+	 (setf (machash 'SEM newht) (&a (machash 'SEM ht1) (machash 'SEM ht2)))
+	 (setf (machash 'INDEX newht) '|>|)
+	 (setf (machash 'SYN newht)(substitute-special-cat   ; pass on a fresh copy for substtn
+				     (machash 'RESULT 'SYN ht1)
+				     (copy-hashtable (machash 'SYN ht2))))
          newht)))
 
 (defun b-special (ht1 ht2)
   "@.. cats can only apply. We assume there is one unknown in such cats, and that all such cats are functors."
-  (and (specialp-hash (gethash 'SYN ht2))
-       (eql (gethash 'DIR (gethash 'SYN ht2)) 'BS)
-       (not (specialp-hash (gethash 'SYN ht1)))
+  (and (specialp-hash (machash 'SYN ht2))
+       (eql (machash 'DIR 'SYN ht2) 'BS)
+       (not (specialp-hash (machash 'SYN ht1)))
        (let ((newht (make-cky-entry-hashtable)))
-	 (setf (gethash 'SEM newht) (&a (gethash 'SEM ht2) (gethash 'SEM ht1)))
-	 (setf (gethash 'INDEX newht) '|<|)
-	 (setf (gethash 'SYN newht)(substitute-special-cat   ; pass on a fresh copy for substtn
-				     (gethash 'RESULT (gethash 'SYN ht2))
-				     (copy-hashtable (gethash 'SYN ht1))))
+	 (setf (machash 'SEM newht) (&a (machash 'SEM ht2) (machash 'SEM ht1)))
+	 (setf (machash 'INDEX newht) '|<|)
+	 (setf (machash 'SYN newht)(substitute-special-cat   ; pass on a fresh copy for substtn
+				     (machash 'RESULT 'SYN ht2)
+				     (copy-hashtable (machash 'SYN ht1))))
          newht)))
 
-(defun ccg-combine (ht1 ht2)
+(defun ccg-combine (ht1 ht2 lex1 lex2)
   "Short-circuit evaluates ccg rules one by one, to left term (ht1) and right term (ht2), which are hashtables.
   Returns the result as a hashtable.
   Note: CCG is procedurally neutral, i.e. given two cats, the other is uniquely determined
@@ -2144,16 +2185,16 @@
   x-special are for application only. So they use their switches.
   Reminder to code developers: every combination creates a new CKY hashtable entry, and as many
   complex result hashtables as there are slashes in the result."
-  (cond ((and (basicp-hash (gethash 'SYN ht1))
-	      (basicp-hash (gethash 'SYN ht2)))  ; both are basic cats, the only non-combinable case
+  (cond ((and (basicp-hash (machash 'SYN ht1))
+	      (basicp-hash (machash 'SYN ht2)))  ; both are basic cats, the only non-combinable case
 	 (return-from ccg-combine nil))
 	((and (complexp-hash ht1)
 	      (complexp-hash ht2)
-	      (eql (gethash 'DIR (gethash 'SYN ht1)) 'BS)
-	      (eql (gethash 'DIR (gethash 'SYN ht2)) 'FS)) ; the only case which no rule can combine 
+	      (eql (machash 'DIR 'SYN ht1) 'BS)
+	      (eql (machash 'DIR 'SYN ht2) 'FS)) ; the only case which no rule can combine 
 	 (return-from ccg-combine nil)))
-  (or (and *f-apply* (f-apply ht1 ht2))         ; application
-      (and *b-apply* (b-apply ht1 ht2))
+  (or (and *f-apply* (f-apply ht1 ht2 lex2))    ; application -- the only relevant case for lex slash
+      (and *b-apply* (b-apply ht1 ht2 lex1))
       (and *f-comp* (f-comp ht1 ht2))           ; composition
       (and *b-comp* (b-comp ht1 ht2))
       (and *fx-comp* (fx-comp ht1 ht2))
@@ -2185,40 +2226,47 @@
       (and *f-apply* (f-special ht1 ht2))       ; application only special cats @X, @Y ...
       (and *b-apply* (b-special ht1 ht2))))
 
-(defun apply-unary-rules (i j m)
+(defun apply-unary-rules (i j m lexp)
   "applies all the unary rules to the result in CKY cell i j k, where k=1,...m.
   Creates more types of same length in the cell i j starting with m+1.
   NB. A later rule can see results of earlier rules; the loop goes up to r, not m.
   The semantics of lexical rule is application of its 'outsem to lf of current cell.
   Hence lf 'insem is syntactic sugar, a recipe to write lfs of lexical rules compositionally."
-  (cond ((or (null (gethash (list i j 1) *cky-hashtable*)) (null *lex-rules-table*))
+  (cond ((or (null (machash (list i j 1) *cky-hashtable*)) (null *lex-rules-table*))
 	 (return-from apply-unary-rules nil))
 	(t (let ((r m))
 	     (dolist (lr *lex-rules-table*) ; i use lexical rules as synonymous with unary rules
 	       (loop for k from 1 to r do
 		     (multiple-value-bind (match b1 b2)
-		       (cat-match (gethash 'SYN (nv-list-val 'SOLUTION (gethash (list i j k) *cky-hashtable*)))
-				  (gethash 'INSYN lr))
+		       (cat-match (machash 'SYN (nv-list-val 'SOLUTION (machash (list i j k) *cky-hashtable*)))
+				  (machash 'INSYN lr))
 		       (and match	   
 			    (setf r (+ r 1))
 			    (let ((newht (make-cky-entry-hashtable))
-				  (nlr (copy-hashtable (gethash 'OUTSYN lr))))
-			      (setf (gethash 'SEM newht)      
-				    (&a (gethash 'OUTSEM lr)
-					(gethash 'SEM (nv-list-val 'SOLUTION 
-								   (gethash (list i j k) *cky-hashtable*)))))
-			      (setf (gethash 'PARAM newht) (f-param-inner-prod 
-							     (gethash 'PARAM lr)
-							     (gethash 'PARAM (nv-list-val 'SOLUTION
-							       (gethash (list i j k) *cky-hashtable*)))))
-			      (setf (gethash 'INDEX newht) (gethash 'INDEX lr))
-			      (setf (gethash 'KEY newht) (gethash 'KEY lr))
-			      (setf (gethash 'SYN newht) (realize-binds nlr b2))
-			      (setf (gethash (list i j r) *cky-hashtable*)
-				    (list 
-				      (list 'LEFT (list i j k))
-				      (list 'RIGHT (list i j k))
-				      (list 'SOLUTION newht)))))))))))
+				  (nlr (copy-hashtable (machash 'OUTSYN lr))))
+			      (setf (machash 'SEM newht)      
+				    (&a (machash 'OUTSEM lr)
+					(machash 'SEM (nv-list-val 'SOLUTION 
+								   (machash (list i j k) *cky-hashtable*)))))
+			      (setf (machash 'PARAM newht) (f-param-inner-prod 
+							     (machash 'PARAM lr)
+							     (machash 'PARAM (nv-list-val 'SOLUTION
+							       (machash (list i j k) *cky-hashtable*)))))
+			      (setf (machash 'INDEX newht) (machash 'INDEX lr))
+			      (setf (machash 'KEY newht) (machash 'KEY lr))
+			      (setf (machash 'SYN newht) (realize-binds nlr b2))
+			      (if lexp   ; slightly less consing this way -- lexical rules on lex item is also lexical, otherwise not
+                                  (setf (machash (list i j r) *cky-hashtable*)
+					(list 
+					  (list 'LEFT (list i j k))
+					  (list 'RIGHT (list i j k))
+					  (list 'SOLUTION newht)
+					  (list 'LEX t)))
+			          (setf (machash (list i j r) *cky-hashtable*)
+					(list 
+					  (list 'LEFT (list i j k))
+					  (list 'RIGHT (list i j k))
+					  (list 'SOLUTION newht))))))))))))
   t)
 
 (defun ccg-deduce (itemslist)
@@ -2241,40 +2289,48 @@
 					  (nth (- i 1) itemslist))
 			   (return-from ccg-deduce nil)))
 		   (loop for i2 from 1 to n2 do
-			 (setf (gethash (list 1 i i2) *cky-hashtable*) 
-			       (list (list 'left (list 1 i i2))
-				     (list 'right (list 1 i i2))
-				     (list 'solution (hash-lex (nth (- i2 1) matches))))))
-                   (apply-unary-rules 1 i n2))) 
+			 (setf (machash (list 1 i i2) *cky-hashtable*) 
+			       (list (list 'LEFT (list 1 i i2))
+				     (list 'RIGHT (list 1 i i2))
+				     (list 'SOLUTION (hash-lex (nth (- i2 1) matches)))
+				     (list 'LEX t))))
+                   (apply-unary-rules 1 i n2 t))) 
 	   (setf *cky-input* itemslist)
 	   (loop for i from 2 to n do ; i j k are CKY loops
              (loop for j from 1 to (+ (- n i) 1) do
 	       (setf a 0) 
 	       (loop for k from 1 to (- i 1) do
 	         (do ((p 1 (+ p 1)))  ; p q loop over multiple readings in cky slots
-		     ((not (gethash (list k j p) *cky-hashtable*)))
+		     ((not (machash (list k j p) *cky-hashtable*)))
 		     (do ((q 1 (+ q 1)))
-		         ((not (gethash (list (- i k) (+ j k) q) *cky-hashtable*)))
+		         ((not (machash (list (- i k) (+ j k) q) *cky-hashtable*)))
                          (let ((result (ccg-combine 
-                                 (nv-list-val 'SOLUTION (gethash (list k j p) *cky-hashtable*))
-				 (nv-list-val 'SOLUTION (gethash (list (- i k) (+ j k) q)
-						 *cky-hashtable*)))))
+                                 (nv-list-val 'SOLUTION (machash (list k j p) *cky-hashtable*))
+				 (nv-list-val 'SOLUTION (machash (list (- i k) (+ j k) q) *cky-hashtable*))
+				 (nv-list-val 'LEX (machash (list k j p) *cky-hashtable*))
+				 (nv-list-val 'LEX (machash (list (- i k) (+ j k) q) *cky-hashtable*))
+				 )))
 			   (and result 
-				(setf (gethash 'PARAM result)  ; calculate inner product on the fly
+				(setf (machash 'PARAM result)  ; calculate inner product on the fly
 				      (f-param-inner-prod 
-					(gethash 'PARAM 
+					(machash 'PARAM 
 						 (nv-list-val 'SOLUTION 
-								(gethash (list k j p) *cky-hashtable*)))
-					(gethash 'PARAM 
-						 (nv-list-val 'SOLUTION (gethash (list (- i k) (+ j k) q)
+								(machash (list k j p) *cky-hashtable*)))
+					(machash 'PARAM 
+						 (nv-list-val 'SOLUTION (machash (list (- i k) (+ j k) q)
 				                                   *cky-hashtable*)))))
                                 (setf a (+ a 1))
-				(setf (gethash (list i j a) *cky-hashtable*)
-				      (list (list 'left (list k j p))
-					    (list 'right (list (- i k) (+ j k) q))
-					    (list 'solution result))))))))
-	       (apply-unary-rules i j a)))
-	   (and (gethash (list n 1 1) *cky-hashtable*) t)))  ; if a rule applied, result would be in n 1 1 
+				(setf (machash (list i j a) *cky-hashtable*)
+				      (if (machash 'LEX result)  ; if result is lexical, this is marked in its hashtable, pass it on to cky
+					(list (list 'LEFT (list k j p))
+					      (list 'RIGHT (list (- i k) (+ j k) q))
+					      (list 'LEX t)
+					      (list 'SOLUTION result))
+					(list (list 'LEFT (list k j p))
+					      (list 'RIGHT (list (- i k) (+ j k) q))
+					      (list 'SOLUTION result)))))))))
+	       (apply-unary-rules i j a nil)))
+	   (and (machash (list n 1 1) *cky-hashtable*) t)))  ; if a rule applied, result would be in n 1 1 
 	(t (format t "Error: expected a list of items.~%"))))
 
 ;;;; =============================================================================
@@ -2303,8 +2359,8 @@
    (let ((lfmax most-negative-single-float)
          (maxcell nil))
      (dolist (cell *cky-argmax-lf*)
-       (cond ((> (gethash 'PARAM (nv-list-val 'SOLUTION (gethash cell *cky-hashtable*))) lfmax)
-              (setf lfmax (gethash 'PARAM (nv-list-val 'SOLUTION (gethash cell *cky-hashtable*))))
+       (cond ((> (machash 'PARAM (nv-list-val 'SOLUTION (machash cell *cky-hashtable*))) lfmax)
+              (setf lfmax (machash 'PARAM (nv-list-val 'SOLUTION (machash cell *cky-hashtable*))))
 	      (setf maxcell cell))))
      (setf *cky-argmax-lf-max* maxcell)))
 
@@ -2315,30 +2371,30 @@
     (maphash #'(lambda (savedlf val)  ; savedlf s are beta-normalized
 		 (cond ((alpha-equivalent lf savedlf)
 			(setf flag nil)
-			(setf (gethash savedlf *cky-lf-hashtable*)
-			      (list (+ (first (gethash savedlf *cky-lf-hashtable*))
-				       (gethash 'PARAM (nv-list-val 'SOLUTION (gethash cell *cky-hashtable*))))
-				    (cons cell (second (gethash savedlf *cky-lf-hashtable*))))))))
+			(setf (machash savedlf *cky-lf-hashtable*)
+			      (list (+ (first (machash savedlf *cky-lf-hashtable*))
+				       (machash 'PARAM (nv-list-val 'SOLUTION (machash cell *cky-hashtable*))))
+				    (cons cell (second (machash savedlf *cky-lf-hashtable*))))))))
 	     *cky-lf-hashtable*)
-    (and flag (setf (gethash lf *cky-lf-hashtable*)
-		    (list (gethash 'PARAM (nv-list-val 'SOLUTION (gethash cell *cky-hashtable*)))
+    (and flag (setf (machash lf *cky-lf-hashtable*)
+		    (list (machash 'PARAM (nv-list-val 'SOLUTION (machash cell *cky-hashtable*)))
 			  (list cell))))))
 
 (defun cky-show-probs (cell)
   "to show a derivation with its counts"
-  (cond ((null (gethash cell *cky-hashtable*)) 
+  (cond ((null (machash cell *cky-hashtable*)) 
 	 (format t "~%No such parse! (cky-show-probs)")
 	 (return-from cky-show-probs ""))
-	(t (let* ((solution (nv-list-val 'SOLUTION (gethash cell *cky-hashtable*)))
-		  (l (nv-list-val 'LEFT (gethash cell *cky-hashtable*)))
-		  (r (nv-list-val 'RIGHT (gethash cell *cky-hashtable*)))
-		  (lf (gethash 'SEM solution))
-		  (pr (gethash 'PARAM solution))
-		  (ix (gethash 'INDEX solution))
+	(t (let* ((solution (nv-list-val 'SOLUTION (machash cell *cky-hashtable*)))
+		  (l (nv-list-val 'LEFT (machash cell *cky-hashtable*)))
+		  (r (nv-list-val 'RIGHT (machash cell *cky-hashtable*)))
+		  (lf (machash 'SEM solution))
+		  (pr (machash 'PARAM solution))
+		  (ix (machash 'INDEX solution))
 	          (inputs (concatenate 'string
 			      (write-to-string (input-range (cell-len l)(cell-pos l)))
 			      (write-to-string (input-range (cell-len r)(cell-pos r)))))
-	          (syn (linearize-syn (gethash 'SYN solution))))
+	          (syn (linearize-syn (machash 'SYN solution))))
 	     (cond ((equal l r)   ; we've reached a lexical cell 
 		    (cond ((> (cell-len l) 1)
 			   (format t (cky-show-probs l)))) ; it may be a lex rule applying to a phrase
@@ -2355,14 +2411,14 @@
 (defun lex-rule-param (key)
   "return the parameter of the lex rule with <key>"
   (dolist (lr *lex-rules-table*)
-    (cond ((equal key (gethash 'KEY lr))
-	   (return-from lex-rule-param (gethash 'PARAM lr)))))
+    (cond ((equal key (machash 'KEY lr))
+	   (return-from lex-rule-param (machash 'PARAM lr)))))
   (format t "~%Error! no such lexical rule: ~A" key))
 
 (defun lex-rule-p (key)
   "returns true if key is the key of a lex rule, nil otherwise."
   (and key (dolist (lr *lex-rules-table*)
-	     (cond ((eql key (gethash 'KEY lr))
+	     (cond ((eql key (machash 'KEY lr))
 		    (return-from lex-rule-p t)))))
   nil)
 
@@ -2372,10 +2428,10 @@
   (cond ((eql (cell-len cell) 1)(+ subtotal lr-param))
 	;; if cell is larger than lex cell, check the child cells only but not grandchildren
 	(t (let ((lchild-par 
-		   (gethash 'PARAM (nv-list-val 'SOLUTION (gethash (nv-list-val 'LEFT (gethash in-cell *cky-hashtable*))
+		   (machash 'PARAM (nv-list-val 'SOLUTION (machash (nv-list-val 'LEFT (machash in-cell *cky-hashtable*))
 				                           *cky-hashtable*))))
                  (rchild-par 
-		   (gethash 'PARAM (nv-list-val 'SOLUTION (gethash (nv-list-val 'RIGHT (gethash in-cell *cky-hashtable*))
+		   (machash 'PARAM (nv-list-val 'SOLUTION (machash (nv-list-val 'RIGHT (machash in-cell *cky-hashtable*))
 				                           *cky-hashtable*)))))
 	     (+ subtotal lr-param (* (cell-len cell)(/ (+ (max lchild-par rchild-par) 
 							  (/ subtotal (cell-len cell))) 
@@ -2383,22 +2439,22 @@
 
 (defun sum-inner-product (cell &optional (sum 0.0))
   "local counts are in constituents cells leading to the derivation in <cell>"
-  (cond ((null (gethash cell *cky-hashtable*)) 
+  (cond ((null (machash cell *cky-hashtable*)) 
 	 (format t "~%No such parse! (sum-inner-product)")
 	 (return-from sum-inner-product sum))
-	(t (let  ((l (nv-list-val 'LEFT (gethash cell *cky-hashtable*)))
-		  (r (nv-list-val 'RIGHT (gethash cell *cky-hashtable*)))
-		  (cell-key (gethash 'KEY (nv-list-val 'SOLUTION (gethash cell *cky-hashtable*)))))
+	(t (let  ((l (nv-list-val 'LEFT (machash cell *cky-hashtable*)))
+		  (r (nv-list-val 'RIGHT (machash cell *cky-hashtable*)))
+		  (cell-key (machash 'KEY (nv-list-val 'SOLUTION (machash cell *cky-hashtable*)))))
 	     (cond ((equal l r) 
 	            (cond ((lex-rule-p cell-key)  
-			   (approximate-lr-use cell l (gethash 'PARAM (nv-list-val 'SOLUTION (gethash l *cky-hashtable*)))
+			   (approximate-lr-use cell l (machash 'PARAM (nv-list-val 'SOLUTION (machash l *cky-hashtable*)))
 					       (lex-rule-param cell-key)))
-			  (t (+ sum (gethash 'PARAM (nv-list-val 'SOLUTION 
-		                        (gethash l *cky-hashtable*)))))))   ; we've reached a lexical cell 
-		   (t (+ sum (sum-inner-product l (gethash 'PARAM 
-				        (nv-list-val 'SOLUTION (gethash l *cky-hashtable*))))
-                             (sum-inner-product r (gethash 'PARAM 
-				        (nv-list-val 'SOLUTION (gethash r *cky-hashtable*)))))))))))
+			  (t (+ sum (machash 'PARAM (nv-list-val 'SOLUTION 
+		                        (machash l *cky-hashtable*)))))))   ; we've reached a lexical cell 
+		   (t (+ sum (sum-inner-product l (machash 'PARAM 
+				        (nv-list-val 'SOLUTION (machash l *cky-hashtable*))))
+                             (sum-inner-product r (machash 'PARAM 
+				        (nv-list-val 'SOLUTION (machash r *cky-hashtable*)))))))))))
 
 (defun cky-pprint-probs (cell)
   (format t (cky-show-probs cell)))
@@ -2451,7 +2507,7 @@
 (defun count-local-structure (resultcell)
   "using the lexical counts, it does the (counts x parameters) scalar multiplication dynamic programming style.
   If you override this definition too, make sure you return non-nil."
-  (setf (gethash 'PARAM (nv-list-val 'SOLUTION (gethash resultcell *cky-hashtable*)))
+  (setf (machash 'PARAM (nv-list-val 'SOLUTION (machash resultcell *cky-hashtable*)))
 	 (sum-inner-product resultcell))
   t)
 
@@ -2467,17 +2523,17 @@
   "if the feature/lex item with key is used, return the total count in the derivation, dynamic programming style.
   We cannot use string identity of lex items here because of ambiguity--we need the key of lex item, which is unique.
   The flag is to count multiple occurences of lex rules."
-  (cond ((null (gethash cell *cky-hashtable*)) 
+  (cond ((null (machash cell *cky-hashtable*)) 
 	 (format t "~%No such parse! (count-feature)")
 	 (return-from count-feature 0.0))
-	(t (let  ((l (nv-list-val 'LEFT (gethash cell *cky-hashtable*)))
-		  (r (nv-list-val 'RIGHT (gethash cell *cky-hashtable*))))
+	(t (let  ((l (nv-list-val 'LEFT (machash cell *cky-hashtable*)))
+		  (r (nv-list-val 'RIGHT (machash cell *cky-hashtable*))))
 	     (cond ((equal l r)   ; we've reached a lexical cell. NB: lex rules' keys are saved in hashtable
-		    (cond ((lex-rule-p (gethash 'KEY (nv-list-val 'SOLUTION (gethash cell *cky-hashtable*))))
-			   (if (equal key (gethash 'KEY (nv-list-val 'SOLUTION (gethash cell *cky-hashtable*))))
+		    (cond ((lex-rule-p (machash 'KEY (nv-list-val 'SOLUTION (machash cell *cky-hashtable*))))
+			   (if (equal key (machash 'KEY (nv-list-val 'SOLUTION (machash cell *cky-hashtable*))))
 			     (count-feature key l sum t (+ lc 1)) 
 			     (count-feature key l (+ 1 sum) flag lc)))
-			  (t (cond ((equal key (gethash 'KEY (nv-list-val 'SOLUTION (gethash l *cky-hashtable*))))
+			  (t (cond ((equal key (machash 'KEY (nv-list-val 'SOLUTION (machash l *cky-hashtable*))))
 				    (+ 1 sum))
 				   (flag (/ lc 2.0))  ; counted twice because l and r are same
 				   (t 0.0)))))
@@ -2495,14 +2551,14 @@
 	      (minprob most-positive-single-float)
 	      (cmax 0)
 	      (k 1 (+ k 1)))
-	   ((null (gethash (list n 1 k) *cky-hashtable*))
+	   ((null (machash (list n 1 k) *cky-hashtable*))
 	    (setf *cky-max* (list n 1 cmax)) ; we will use next 4 information to set the beam later
 	    (setf *cky-nparses* (- k 1))
 	    t)
 	   (count-local-structure (list n 1 k)) ;update sum for results only
 	   (plugin-count-more-substructure (list n 1 k))      ; this is a plug-in to count more substructure
 	   (add-to-cky-lf-sum (list n 1 k))
-	   (let ((param (gethash 'PARAM (nv-list-val 'SOLUTION (gethash (list n 1 k) *cky-hashtable*)))))
+	   (let ((param (machash 'PARAM (nv-list-val 'SOLUTION (machash (list n 1 k) *cky-hashtable*)))))
 	     (if (> param maxprob)
 	       (progn 
 		 (setf maxprob param)
@@ -2552,7 +2608,7 @@
   "Creates a list of lists whose first el is analysis no  (3rd item of result cell r1 r2 r3) and second el is cell parameter; returns sorted list"
   (let ((solutions nil))
     (do* ((r3 1 (+ r3 1)))
-      ((null (gethash (list r1 r2 r3) *cky-hashtable*))) ; loop for every solution 
+      ((null (machash (list r1 r2 r3) *cky-hashtable*))) ; loop for every solution 
       (push (list  r3 (get-cell-param (list r1 r2 r3))) solutions))
     (sort solutions #'> :key #'second)))
 
@@ -2580,7 +2636,7 @@
 				    (push key keylist)
 				    (return-from analyses)))))))  ; finding the item in one result is enough; derivative will calculate sums
 		 *training-hashtable*)
-	(setf (gethash pairindex *training-non0-hashtable*) keylist)))))
+	(setf (machash pairindex *training-non0-hashtable*) keylist)))))
 
 (defun prepare-solutions (debug)
   "after parses for current training pair are found, this function finds the nonzero counts in them,
@@ -2599,7 +2655,7 @@
   (let* ((result (ccg-induce (sup-sentence s-lf)))   ; get all analyses. we will filter later (ie No Normal form parsing)
 	 (lf (and result (beta-normalize-outer (sup-lf s-lf))))
 	 (s (and result (prepare-solutions debug))) ; sets beam, and produces *training-sorted-solutions-list*
-	 (nonzerokeys (gethash pairindex *training-non0-hashtable*)) ; table was set by inside-outside
+	 (nonzerokeys (machash pairindex *training-non0-hashtable*)) ; table was set by inside-outside
 	 (r1 (cell-len *cky-max*))
 	 (r2 (cell-pos *cky-max*)))
     (cond (result
@@ -2726,6 +2782,7 @@
   (setf *cky-input* nil) 
   (setf *cky-max* nil)
   (show-lf)
+  (beam-off)
   (setf *cky-argmax-lf-max* nil) 
   (setf *cky-argmax-lf* nil)
   (setf *cky-lf* nil) 
