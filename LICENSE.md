@@ -1,3 +1,3 @@
 CCGlab is GNU GPL licensed public software. 
 
-One day it will be GPL'd hardware.
+One day it will be hardware.
