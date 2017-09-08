@@ -1,7 +1,7 @@
 # ccglab
 Combinatory Categorial Grammar (CCG): All combinators, native input format, parsing to logical form (aka semantic parsing), parameter estimation for probabilistic CCG.
 
-<b>Also have a look at the companion repo, <a href="git://github.com/bozsahin/ccglab-grammars">ccglab-grammars</a>, which contains grammars and models developed in CCGlab</b>.
+<b>Also have a look at the companion repo, <a href="https://github.com/bozsahin/ccglab-grammars">ccglab-grammars</a>, which contains grammars and models developed in CCGlab</b>.
 
 <em>FIRST TIME INSTALL (assuming you have <code>git</code>):</em>
 
