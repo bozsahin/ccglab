@@ -55,7 +55,9 @@
 ;; SBCL can be particularly chatty.
  
 (set-macro-character #\!     ; turns !c to "c". Used for LF constants.
-  #'(lambda (s char)char(write-to-string (read s t nil t))))
+  #'(lambda (s char)
+      (declare (ignore char))
+      (write-to-string (read s t nil t))))
 
 (defmethod print-object ((object hash-table) stream) ;this is for lisp printer to print hashtables, not for mortals
     (format stream "#HASH{~{~{(~A  ~A)~}~^ ~}}"
@@ -948,9 +950,11 @@
 ;;       The parser will replace them with FS and BS. We live in sad times.
   (defparameter grammar 
     '((gram    --> start              #'(lambda (start) (list 'defparameter '*ccg-grammar* `(quote ,start))))
-      (start   --> start lex END      #'(lambda (start lex END) (append start (list lex))))
-      (start   --> lex END            #'(lambda (lex END)(list lex)))
-      (lex     --> ID mtag SPECOP cat #'(lambda (ID mtag SPECOP cat)(progn (incf *ccg-grammar-keys*)
+      (start   --> start lex END      #'(lambda (start lex END) (declare (ignore END))(append start (list lex))))
+      (start   --> lex END            #'(lambda (lex END)(declare (ignore END))(list lex)))
+      (lex     --> ID mtag SPECOP cat #'(lambda (ID mtag SPECOP cat)
+					  (declare (ignore SPECOP))
+					  (progn (incf *ccg-grammar-keys*)
 									   (list (list 'KEY *ccg-grammar-keys*)
 										 (list 'PHON (cadr ID)) 
 										 mtag (first cat) (second cat) (list 'PARAM 1.0)))))
@@ -963,48 +967,60 @@
 									(list 'INDEX (second (first (first lrule))))  ; rule name
 									(list 'PARAM 1.0)))))
       (lrule   --> LP ID RP cat1 
-	       ARROW cat              #'(lambda (LP ID RP cat1 ARROW cat)(cons (cons ID cat1) cat))) 
+	       ARROW cat              #'(lambda (LP ID RP cat1 ARROW cat)
+					  (declare (ignore LP RP ARROW))
+					  (cons (cons ID cat1) cat))) 
       (mtag    --> ID		      #'(lambda (ID)(list 'MORPH (cadr ID))))
       (cat1    --> cat		      #'(lambda (cat)(identity cat)))
-      (cat     --> syns COLON lf      #'(lambda (syns COLON lf)(cons (list 'SYN syns) (list (list 'SEM lf)))))
+      (cat     --> syns COLON lf      #'(lambda (syns COLON lf)
+					  (declare (ignore COLON))
+					  (cons (list 'SYN syns) (list (list 'SEM lf)))))
       (syns    --> basic              #'(lambda (basic)(identity basic)))
       (syns    --> parentd            #'(lambda (parentd)(identity parentd)))
       (syns    --> syns slash syn     #'(lambda (syns slash syn)`(,syns ,@slash ,syn)))
       (syn     --> basic              #'(lambda (basic)(identity basic)))
       (syn     --> parentd            #'(lambda (parentd)(identity parentd)))
       (basic   --> ID feats           #'(lambda (ID feats)(list (list 'BCAT (cadr ID)) (list 'FEATS feats))))
-      (parentd --> LP syns RP         #'(lambda (LP syns RP) (identity syns)))
+      (parentd --> LP syns RP         #'(lambda (LP syns RP) (declare (ignore LP RP))(identity syns)))
       (slash   --> vardir varmod      #'(lambda (vardir varmod)(list vardir varmod)))
       (slash   --> vardouble          #'(lambda (vardouble)(identity vardouble)))
-      (feats   --> LB eqns RB 	      #'(lambda (LB eqns RB) (identity eqns)))
+      (feats   --> LB eqns RB 	      #'(lambda (LB eqns RB) (declare (ignore LB RB))(identity eqns)))
       (feats                          #'(lambda () nil))
-      (eqns    --> eqns COMMA eqn     #'(lambda (eqns COMMA eqn)(append  eqns (list eqn))))
+      (eqns    --> eqns COMMA eqn     #'(lambda (eqns COMMA eqn)(declare (ignore COMMA))(append  eqns (list eqn))))
       (eqns    --> eqn                #'(lambda (eqn)(list eqn)))
-      (eqn     --> ID1 EQOP ID        #'(lambda (ID1 EQOP ID)(list (cadr ID1) (cadr ID))))
+      (eqn     --> ID1 EQOP ID        #'(lambda (ID1 EQOP ID)(declare (ignore EQOP))(list (cadr ID1) (cadr ID))))
       (ID1     --> ID		      #'(lambda (ID) (identity ID)))
-      (vardouble --> VALFS2 VALFS     #'(lambda (VALFS2 VALFS)(list (list 'DIR 'FS)(list 'MODAL 'STAR)(list 'LEX t))))
-      (vardouble --> VALBS2 VALBS     #'(lambda (VALBS2 VALBS)(list (list 'DIR 'BS)(list 'MODAL 'STAR)(list 'LEX t))))
+      (vardouble --> VALFS2 VALFS     #'(lambda (VALFS2 VALFS)
+					  (declare (ignore VALFS2 VALFS))
+					  (list (list 'DIR 'FS)(list 'MODAL 'STAR)(list 'LEX t))))
+      (vardouble --> VALBS2 VALBS     #'(lambda (VALBS2 VALBS)
+					  (declare (ignore VALBS2 VALBS))
+					  (list (list 'DIR 'BS)(list 'MODAL 'STAR)(list 'LEX t))))
       (VALFS2  --> VALFS              #'(lambda (VALFS)(identity VALFS)))
       (VALBS2  --> VALBS              #'(lambda (VALBS)(identity VALBS)))
-      (vardir  --> VALFS              #'(lambda (VALFS)(list 'DIR 'FS)))
-      (vardir  --> VALBS              #'(lambda (VALBS)(list 'DIR 'BS )))
+      (vardir  --> VALFS              #'(lambda (VALFS)(declare (ignore VALFS))(list 'DIR 'FS)))
+      (vardir  --> VALBS              #'(lambda (VALBS)(declare (ignore VALBS))(list 'DIR 'BS )))
       (varmod  --> MODAL              #'(lambda (MODAL)(cond ((equalp (cadr MODAL) '^) (list 'MODAL 'HARMONIC))
 							     ((equalp (cadr MODAL) '+) (list 'MODAL 'CROSS))
 							     ((equalp (cadr MODAL) '*) (list 'MODAL 'STAR))
 							     (t (list 'MODAL '*UNKNOWN*)))))
-      (varmod  --> VALDOT             #'(lambda (VALDOT)(list 'MODAL 'ALL)))
+      (varmod  --> VALDOT             #'(lambda (VALDOT)(declare (ignore VALDOT))(list 'MODAL 'ALL)))
       (varmod  -->                    #'(lambda ()(list 'MODAL 'ALL)))
-      (vardot  --> VALDOT	      #'(lambda(VALDOT)(identity nil)))
+      (vardot  --> VALDOT	      #'(lambda(VALDOT)(declare (ignore VALDOT))(identity nil)))
       (vardot  -->                    #'(lambda()(identity nil)))
       (lf      --> bodys              #'(lambda (bodys)(identity bodys)))
       (lf      --> lterm              #'(lambda (lterm)(identity lterm)))
       (lterm   --> VALBS ID vardot 
-	       lbody                  #'(lambda (VALBS ID vardot lbody)(mk-l (mk-v (cadr ID)) lbody)))
+	       lbody                  #'(lambda (VALBS ID vardot lbody)
+					  (declare (ignore VALBS vardot))
+					  (mk-l (mk-v (cadr ID)) lbody)))
       (lbody   --> lterm              #'(lambda (lterm)(identity lterm)))           ; lambda bindings are right-associative.
       (lbody   --> bodys              #'(lambda (bodys)(identity bodys)))
       (bodys   --> bodys body         #'(lambda (bodys body)(mk-a bodys body)))     ; LF concatenation is left-associative. 
       (bodys   --> body               #'(lambda (body)(identity body)))
-      (body    --> LP bodys RP        #'(lambda (LP bodys RP)(identity bodys)))     ; in lexical specs, we don't expect inner lambdas in the LF body.
+      (body    --> LP bodys RP        #'(lambda (LP bodys RP)
+					  (declare (ignore LP RP))
+					  (identity bodys)))     ; in lexical specs, we don't expect inner lambdas in the LF body.
       (body    --> ID                 #'(lambda (ID)(cadr ID)))
       ))
   (defparameter lexforms '(VALFS ID MODAL END VALBS 
@@ -1077,22 +1093,26 @@
 ;;  NB: We must have ID tag in 'lexforms' although there is nothing with that tag in the lexicon!
   (defparameter grammar 
     '((gram    --> start              #'(lambda (start) (identity start)))
-      (start   --> start lex END      #'(lambda (start lex END) (append start (list lex))))
-      (start   --> lex END            #'(lambda (lex END)(list lex)))
-      (lex     --> ids COLON lf       #'(lambda (ids COLON lf)(append (list ids) (list lf))))
+      (start   --> start lex END      #'(lambda (start lex END) (declare (ignore END))(append start (list lex))))
+      (start   --> lex END            #'(lambda (lex END)(declare (ignore END))(list lex)))
+      (lex     --> ids COLON lf       #'(lambda (ids COLON lf)(declare (ignore COLON))(append (list ids) (list lf))))
       (ids     --> ids ID             #'(lambda (ids ID)(append ids (list (second ID)))))
       (ids     --> ID                 #'(lambda (ID)(list (second ID))))
-      (vardot  --> VALDOT             #'(lambda(VALDOT)(identity nil)))
+      (vardot  --> VALDOT             #'(lambda(VALDOT)(declare (ignore VALDOT))(identity nil)))
       (vardot  -->                    #'(lambda()(identity nil)))
       (lf      --> bodys              #'(lambda (bodys)(identity bodys)))
       (lf      --> lterm              #'(lambda (lterm)(identity lterm)))
       (lterm   --> VALBS ID vardot 
-         	       lbody          #'(lambda (VALBS ID vardot lbody)(mk-l (mk-v (second ID)) lbody)))
+         	       lbody          #'(lambda (VALBS ID vardot lbody)
+					  (declare (ignore VALBS vardot))
+					  (mk-l (mk-v (second ID)) lbody)))
       (lbody   --> lterm              #'(lambda (lterm)(identity lterm)))           ; lambda bindings are right-associative.
       (lbody   --> bodys              #'(lambda (bodys)(identity bodys)))
       (bodys   --> bodys body         #'(lambda (bodys body)(mk-a bodys body)))     ; LF concatenation is left-associative. 
       (bodys   --> body               #'(lambda (body)(identity body)))
-      (body    --> LP bodys RP        #'(lambda (LP bodys RP)(identity bodys)))     ; in lexical specs, we don't expect inner lambdas in the LF body.
+      (body    --> LP bodys RP        #'(lambda (LP bodys RP)
+					  (declare (ignore LP RP))
+					  (identity bodys)))     ; in lexical specs, we don't expect inner lambdas in the LF body.
       (body    --> ID                 #'(lambda (ID)(second ID)))
       ))
   (defparameter lexforms '(ID END VALBS 
@@ -1157,6 +1177,7 @@
   (and (complexp-hash (machash 'SYN ht1))
        (eql (machash 'DIR 'SYN ht1) 'FS) ; no need to check modality, all entries qualify for application.
        (multiple-value-bind (match b1 b2)
+;	 (declare (ignore b2))
 	 (cat-match (machash 'ARG 'SYN ht1) (machash 'SYN ht2))
 	 (and match 
 	      (lex-check (machash 'LEX 'SYN ht1) lex2)  ; if we have X//Y Y , Y must be lex
@@ -1172,6 +1193,7 @@
   (and (complexp-hash (machash 'SYN ht2))
        (eql (machash 'DIR 'SYN ht2) 'BS) ; no need to check modality, all entries qualify for application.
        (multiple-value-bind (match b1 b2)
+;	 (declare (ignore b1))
 	 (cat-match (machash 'SYN ht1) (machash 'ARG 'SYN ht2))
 	 (and match 
 	      (lex-check (machash 'LEX 'SYN ht2) lex1)  ; if we have Y X\\Y, Y must be lex
@@ -2238,6 +2260,7 @@
 	     (dolist (lr *lex-rules-table*) ; i use lexical rules as synonymous with unary rules
 	       (loop for k from 1 to r do
 		     (multiple-value-bind (match b1 b2)
+;		       (declare (ignore b1))
 		       (cat-match (machash 'SYN (nv-list-val 'SOLUTION (machash (list i j k) *cky-hashtable*)))
 				  (machash 'INSYN lr))
 		       (and match	   
@@ -2369,6 +2392,7 @@
   (let ((lf (beta-normalize-outer (cky-sem cell))) 
 	(flag t)) ; to avoid double counts because of non-equalp but beta-equalp terms 
     (maphash #'(lambda (savedlf val)  ; savedlf s are beta-normalized
+		 (declare (ignore val))
 		 (cond ((alpha-equivalent lf savedlf)
 			(setf flag nil)
 			(setf (machash savedlf *cky-lf-hashtable*)
@@ -2584,6 +2608,7 @@
 (defun estimate-parameters (k i)
   "the inner loop of Z&C's gradient ascent after the derivative is calculated."
   (maphash #'(lambda (key val)
+	       (declare (ignore key))
 	       (put-param val (+ (get-param val)
 				 (/ (* *alpha0* (get-derivative val))
 				       (+ 1 (* *c* (+ i (* k *smalln*))))))))
@@ -2624,7 +2649,9 @@
 	     (r2 (cell-pos *cky-max*))
 	     (solutions (make-sorted-solutions r1 r2)) 
 	     (keylist nil))
+	(declare (ignore b))
 	(maphash #'(lambda (key val) ; the table was prepared by set-training-parameters
+		     (declare (ignore val))
 		     (block analyses
 			    (let ((cnt 1))
 			      (dolist 
@@ -2658,6 +2685,7 @@
 	 (nonzerokeys (machash pairindex *training-non0-hashtable*)) ; table was set by inside-outside
 	 (r1 (cell-len *cky-max*))
 	 (r2 (cell-pos *cky-max*)))
+    (declare (ignore s))
     (cond (result
 	    (dolist (key nonzerokeys)
 	      (let ((in-sum 0.0)
@@ -2764,10 +2792,10 @@
 	  (format t "Done. Use save-grammar to save the changes in a file"))))))
 
 (defun show-lf ()
-  (setf *lfflag* t)(format t "All LFs will be shown"))
+  (setf *lfflag* t)(format t "All LFs will be shown~%"))
 
 (defun hide-lf ()
-  (setf *lfflag* nil)(format t "Only final LF will be shown"))
+  (setf *lfflag* nil)(format t "Only final LF will be shown~%"))
 
 (defun mklist (obj)
   (if (listp obj) obj (list obj)))
