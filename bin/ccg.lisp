@@ -819,8 +819,7 @@
 	 (infilename (concatenate 'string pname ".lisptokens")))
      (case maker ;; one of these will generate .lisptokens
        (sbcl (run-program "tokens" (list pname) :search t :wait t))
-       (ccl  (run-program "tokens" (list pname)))
-       (clisp (run-program "tokens" :arguments (list pname) :wait t))
+       (ccl  (run-program "tokens" (list pname) :wait t))
        (otherwise (format t "~%Reading from off-line generated ~A" infilename)))
      (with-open-file (strm infilename :direction :input :if-does-not-exist :error)
        (with-open-file (s ofilename  :direction :output :if-exists :supersede)
@@ -835,9 +834,8 @@
    (let ((ofilename (concatenate 'string pname ".sup"))
 	 (infilename (concatenate 'string pname ".suptokens")))
      (case maker ;; one of these will generate .suptokens
-       (sbcl (run-program "suptokens" (list pname) :search t :wait t))
-       (ccl  (run-program "suptokens" (list pname)))
-       (clisp (run-program "suptokens" :arguments (list pname) :wait t))
+       (sbcl (run-program "suptokens"  (list pname) :search t :wait t))
+       (ccl  (run-program "suptokens" (list pname) :wait t))
        (otherwise (format t "~%Reading from off-line generated ~A" infilename)))
      (with-open-file (strm infilename :direction :input :if-does-not-exist :error)
        (with-open-file (s ofilename  :direction :output :if-exists :supersede)
