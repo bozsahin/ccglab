@@ -16,14 +16,14 @@ and <a href="https://github.com/bozsahin/ccglab-models">ccglab-models</a>, which
 <li> Open a new bash terminal and run <code>ccglab</code> script from anywhere.
 </ol>
 
+<b>Please read the rest of this document before you run the script.</b>
+
 <b>NO NEED TO REINSTALL:</b> If you already have a git-installed up-and-running CCGlab, just do the following for updates:
 
 <ol>
 <li><code>cd $CCGLAB_HOME</code>
 <li><code>git pull</code>
 </ol>
-
-<b>Please read the rest of this document before you run the script.</b>
 
 This is Common Lisp code. If you already have an ANSI Common Lisp, it can work with it too.
 
