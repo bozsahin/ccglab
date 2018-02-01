@@ -84,7 +84,7 @@
   In the first case, we mark the BCAT special, as (BCONST t). Returns list of name-value pairs.
   This avoids needless repetition of string to list conversion at parse time."
   (if (stringp bcat)
-    (list '(BCONST t) (list 'BCAT (word-list-from-string bcat)))
+    (list (list 'BCAT (word-list-from-string bcat)) '(BCONST t))
     (list (list 'BCAT bcat))))
 
 (defmacro nv-list-val (key nvpl)
@@ -997,7 +997,7 @@
       (syns    --> syns slash syn     #'(lambda (syns slash syn)`(,syns ,@slash ,syn)))
       (syn     --> basic              #'(lambda (basic)(identity basic)))
       (syn     --> parentd            #'(lambda (parentd)(identity parentd)))
-      (basic   --> ID feats           #'(lambda (ID feats)(list (list 'BCAT (cadr ID)) (list 'FEATS feats))))
+      (basic   --> ID feats           #'(lambda (ID feats)(append (mk-basic-cat (cadr ID)) (list (list 'FEATS feats)))))
       (parentd --> LP syns RP         #'(lambda (LP syns RP) (declare (ignore LP RP))(identity syns)))
       (slash   --> vardir varmod      #'(lambda (vardir varmod)(list vardir varmod)))
       (slash   --> vardouble          #'(lambda (vardouble)(identity vardouble)))
