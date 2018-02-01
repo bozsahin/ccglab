@@ -65,6 +65,16 @@
 	       using (hash-value value)
 	       collect (list key value))))
 
+;; some common utilities
+
+(defun mk-basic-cat (bcat)
+  "if bcat is a string constant, BCAT feature's value is the list of lisp reader tokens in it, otherwise bcat.
+  In the first case, we mark the BCAT special, as (BCONST t). Returns list of name-value pairs.
+  This avoids repeating string to list conversion at parse time."
+  (if (stringp bcat)
+    (list '(BCONST t) (list 'BCAT (with-input-from-string (p bcat)(read p nil))))
+    (list (list 'BCAT cat))))
+
 (defmacro push-t (el st)
   "push element onto stack if el is not nil. eval el only once."
   `(let (($$elr ,el))(and $$elr (push $$elr ,st))))
@@ -326,7 +336,7 @@
   (format t "  Most weighted derivation  : ~A ~%" *cky-max*))
 
 (defun which-ccglab ()
-  "CCGlab, version 3.4")
+  "CCGlab, version 3.4.1")
 
 (defun welcome()
   (format t "~%===================================================")
@@ -356,6 +366,7 @@
 (defun beamer ()
   "use this to set beam only after a parse so that *cky-nparses* is known."
   (setf *beam* (ceiling (expt *cky-nparses* *beam-exp*))))
+
 
 ;;;; ==============================================
 ;;;; The lambda layer, whose syntax is given below.
@@ -2824,6 +2835,7 @@
 (defun write1 (fn obj)
   "writes one lisp object from file fn in one fell swoop"
   (with-open-file (s fn :direction :output :if-exists :error) (format  s "~A~%" obj)))
+
 
 ;; ======================================
 ;; some shortcuts for top-level functions
