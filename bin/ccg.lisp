@@ -67,17 +67,25 @@
 
 ;; some common utilities
 
-(defun mk-basic-cat (bcat)
-  "if bcat is a string constant, BCAT feature's value is the list of lisp reader tokens in it, otherwise bcat.
-  In the first case, we mark the BCAT special, as (BCONST t). Returns list of name-value pairs.
-  This avoids repeating string to list conversion at parse time."
-  (if (stringp bcat)
-    (list '(BCONST t) (list 'BCAT (with-input-from-string (p bcat)(read p nil))))
-    (list (list 'BCAT cat))))
-
 (defmacro push-t (el st)
   "push element onto stack if el is not nil. eval el only once."
   `(let (($$elr ,el))(and $$elr (push $$elr ,st))))
+
+(defun word-list-from-string (st)
+  "from a string to list of its words as dictated by the Lisp reader"
+  (with-input-from-string (p st)
+    (do* ((w (read p nil) (read p nil))
+	  (wl nil))
+      ((null w) (reverse wl))
+      (push-t w wl))))
+
+(defun mk-basic-cat (bcat)
+  "if bcat is a string constant, BCAT feature's value is the list of lisp reader tokens in it, otherwise bcat.
+  In the first case, we mark the BCAT special, as (BCONST t). Returns list of name-value pairs.
+  This avoids needless repetition of string to list conversion at parse time."
+  (if (stringp bcat)
+    (list '(BCONST t) (list 'BCAT (word-list-from-string bcat)))
+    (list (list 'BCAT bcat))))
 
 (defmacro nv-list-val (key nvpl)
   "Returns the value of a list of (name value) pairs nvpl, where each pair's SECOND is the value"
