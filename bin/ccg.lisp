@@ -589,7 +589,7 @@
   (subseq *cky-input* (- pos 1) (+ (- pos 1) len)))
 
 (defun linearize-syn (synht)
-  "turns the syn hashtable synht to a string; avoids features other than BCAT DIR MODAL"
+  "turns the syn hashtable synht to a string for output; avoids features other than BCAT DIR MODAL"
   (cond ((null synht) "")
 	((machash 'BCAT synht)(write-to-string (machash 'BCAT synht)))
 	(t (if (machash 'LEX synht)  ; don't print modality for LEX slash. it's * anyway.
@@ -676,8 +676,7 @@
   (or (eql mod1 'ALL) (eql mod2 'ALL) (eql mod1 mod2)))
 
 (defun basicp (syntype)
-  "Returns non-nil if syntype has BCAT feature at top level, which means it is basic.
-  In the morphology of description, special cats are basic. They are non-basic in parsing."
+  "Returns non-nil if syntype has BCAT feature at top level, which means it is basic."
   (nv-list-val 'BCAT syntype))
 
 (defun var? (x)
@@ -691,7 +690,7 @@
 
 (defun specialp-hash (htsyn)
   "special cats have @ prefix on BCAT and can be complex in result but not in arg.
-  This way they maintain procedural neutrality of CCG."
+  This way we maintain procedural neutrality of CCG."
   (cond ((and (machash 'BCAT htsyn)(algebraic? (machash 'BCAT htsyn))))
         ((and (machash 'ARG htsyn)(null (machash 'DIR 'ARG htsyn))
 	 (algebraic? (machash 'BCAT 'ARG htsyn))))))
@@ -716,6 +715,7 @@
   (cond ((basicp cat) 
 	 (let ((ht (make-basic-cat-hashtable (length (nv-list-val 'FEATS cat)))))
 	   (setf (machash 'BCAT ht) (nv-list-val 'BCAT cat))
+	   (if (nv-list-val 'BCONST cat) (setf (machash 'BCONST ht) (nv-list-val 'BCONST cat)))
 	   (dolist (feat-val (nv-list-val 'FEATS cat))
 	     (setf (machash (car feat-val) ht) (cadr feat-val)))
 	   (return-from create-syn-table ht)))
