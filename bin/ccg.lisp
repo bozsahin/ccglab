@@ -161,6 +161,12 @@
   `(mk-l (mk-v 'h)(mk-a ,f (mk-l (mk-v 'x)(mk-a ,g (mk-a 'h 'x))))))
 
 ;; hash tables
+
+(defmacro name-clash-report (feat)
+  "reports a warning if feat is a name that clashes with hashtables' fixed features.
+  Called during parsing .ccg to lisp code"
+  `(if (member ,feat '(BCAT BCONST)) (format t "~%== CCGlab warning == ! Your feature name ~A clashes with built-in hashtable features. Please rename" ,feat)))
+
 (defun make-lex-hashtable ()
   "keys are: index param sem syn morph phon."
   (make-hash-table :test #'equal :size 7 :rehash-size 2 :rehash-threshold 1.0))
@@ -170,7 +176,7 @@
   (make-hash-table :test #'equal :size 100 :rehash-size 2 :rehash-threshold 1.0))
 
 (defun make-basic-cat-hashtable (nfeatures)
-  "keys are: bcat, and features of the basic cat"
+  "keys are: bcat, bconst, and features of the basic cat"
   (make-hash-table :test #'equal :size (+ nfeatures 5) :rehash-size 2 :rehash-threshold 1.0))
 
 (defun make-complex-cat-hashtable ()
