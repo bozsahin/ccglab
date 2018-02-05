@@ -74,8 +74,8 @@
 (defun word-list-from-string (st)
   "from a string to list of its words as dictated by the Lisp reader"
   (with-input-from-string (p st)
-    (do* ((w (read p nil) (read p nil))
-	  (wl nil))
+    (do ((w (read p nil) (read p nil)) ;; whatever Lisp reader considers token is a word
+	 (wl nil))
       ((null w) (reverse wl))
       (push-t w wl))))
 
@@ -589,7 +589,7 @@
   (subseq *cky-input* (- pos 1) (+ (- pos 1) len)))
 
 (defun linearize-syn (synht)
-  "turns the syn hashtable synht to a string for output; avoids features other than BCAT DIR MODAL"
+  "turns the syn hashtable synht to a string for display; avoids features other than BCAT DIR MODAL"
   (cond ((null synht) "")
 	((machash 'BCAT synht)(write-to-string (machash 'BCAT synht)))
 	(t (if (machash 'LEX synht)  ; don't print modality for LEX slash. it's * anyway.
@@ -715,7 +715,7 @@
   (cond ((basicp cat) 
 	 (let ((ht (make-basic-cat-hashtable (length (nv-list-val 'FEATS cat)))))
 	   (setf (machash 'BCAT ht) (nv-list-val 'BCAT cat))
-	   (if (nv-list-val 'BCONST cat) (setf (machash 'BCONST ht) (nv-list-val 'BCONST cat)))
+	   (if (nv-list-val 'BCONST cat) (setf (machash 'BCONST ht) (nv-list-val 'BCONST cat))) ; no BCONST feature in hashtable if nil (less consing)
 	   (dolist (feat-val (nv-list-val 'FEATS cat))
 	     (setf (machash (car feat-val) ht) (cadr feat-val)))
 	   (return-from create-syn-table ht)))
@@ -756,6 +756,11 @@
     (setf (machash 'INSYN ht) (create-syn-table (nv-list-val 'INSYN lexspec)))
     (setf (machash 'OUTSYN ht) (create-syn-table (nv-list-val 'OUTSYN lexspec)))
     ht))
+
+(defun singleton-match (fht aht alex ruletype)
+  "called when functor hashtable fht's argument is singleton category; succeeds if argument hashtable aht's string
+   span matches fht's arg's singleton category. Called from function application only. Lexicality of result depends on argument's lexicality"
+   )
 
 (defun cat-match (sht1 sht2)
   "Checks to see if potentially complex syntactic cat hashtables, sht1 and sht2,
@@ -1193,8 +1198,9 @@
   "forward application"
   (and (complexp-hash (machash 'SYN ht1))
        (eql (machash 'DIR 'SYN ht1) 'FS) ; no need to check modality, all entries qualify for application.
+       (if (machash 'BCONST 'ARG 'SYN ht1) (return-from f-apply (singleton-match ht1 ht2 lex2 '|>|)) t) ; short-circuit f-apply if arg is singleton
        (multiple-value-bind (match b1 b2)
-;	 (declare (ignore b2))
+	 ;	 (declare (ignore b2))
 	 (cat-match (machash 'ARG 'SYN ht1) (machash 'SYN ht2))
 	 (and match 
 	      (lex-check (machash 'LEX 'SYN ht1) lex2)  ; if we have X//Y Y , Y must be lex
@@ -1209,8 +1215,9 @@
   "backward application"
   (and (complexp-hash (machash 'SYN ht2))
        (eql (machash 'DIR 'SYN ht2) 'BS) ; no need to check modality, all entries qualify for application.
+       (if (machash 'BCONST 'ARG 'SYN ht2) (return-from b-apply (singleton-match ht2 ht1 lex1 '|<|)) t) ; short-circuit f-apply if arg is singleton
        (multiple-value-bind (match b1 b2)
-;	 (declare (ignore b1))
+	 ;	 (declare (ignore b1))
 	 (cat-match (machash 'SYN ht1) (machash 'ARG 'SYN ht2))
 	 (and match 
 	      (lex-check (machash 'LEX 'SYN ht2) lex1)  ; if we have Y X\\Y, Y must be lex
