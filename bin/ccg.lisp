@@ -164,8 +164,10 @@
 
 (defmacro name-clash-report (feat)
   "reports a warning if feat is a name that clashes with hashtables' fixed features.
+  The only hashtable that has potential clash is the basic cat table because only there we have
+  user features.
   Called during parsing .ccg to lisp code"
-  `(if (member ,feat '(BCAT BCONST)) (format t "~%== CCGlab warning == ! Your feature name ~A clashes with built-in hashtable features. Please rename" ,feat)))
+  `(if (member ,feat '(BCAT BCONST)) (format t "~%** CCGlab warning **! Your feature name ~A clashes with built-in hashtable features. Please rename" ,feat)))
 
 (defun make-lex-hashtable ()
   "keys are: index param sem syn morph phon."
@@ -763,10 +765,22 @@
     (setf (machash 'OUTSYN ht) (create-syn-table (nv-list-val 'OUTSYN lexspec)))
     ht))
 
-(defun singleton-match (fht aht alex ruletype)
-  "called when functor hashtable fht's argument is singleton category; succeeds if argument hashtable aht's string
-   span matches fht's arg's singleton category. Called from function application only. Lexicality of result depends on argument's lexicality"
-   )
+(defun singleton-match (fht aht alex ruleindex coorda)
+  "called only when functor hashtable fht's argument is singleton category; succeeds if argument hashtable aht's string
+  span matches fht's arg's singleton category. (These categories were converted to word lists during .ccg file processing.)
+  Called from function application only. 
+  Strings coordinates are of the form (x y) for argument; 
+  they are used to access *cky-input*; x is length, y is starting pos (from 1).
+  Returns the new hashtable if succesful, otherwise nil."
+  (if (and (equal (machash 'BCAT 'ARG 'SYN fht) (subseq *cky-input* (- (second coorda) 1) (+ (first coorda)
+											     (- (second coorda) 1))))
+	   (lex-check (machash 'LEX 'SYN fht) alex))
+    (let ((newht (make-cky-entry-hashtable)))
+      (setf (machash 'SEM newht) (&a (machash 'SEM fht) (machash 'SEM aht))) ; this means lexical LFs must be compositional
+      (setf (machash 'INDEX newht) ruleindex)
+      (and (machash 'LEX 'SYN fht) (setf (machash 'LEX newht) t))
+      (setf (machash 'SYN newht) (machash 'RESULT 'SYN fht)) ; nothing to bind, assuming no features for singletons
+      newht)))
 
 (defun cat-match (sht1 sht2)
   "Checks to see if potentially complex syntactic cat hashtables, sht1 and sht2,
@@ -855,7 +869,7 @@
        (with-open-file (s ofilename  :direction :output :if-exists :supersede)
 	 (setf *ccg-grammar-keys* 0)
 	 (format s "~A" (parse/2 (read strm))))) ; this is the interface to LALR transformer's parse
-     (format t "~%=========================== p r e p a r i n g ===============================~%")
+     (format t "~2%=========================== p r e p a r i n g ===============================~%")
      (format t "~%Project name: ~A~%  Input : ~A ~%  Output: ~A ~%Check to see if output contains any spec errors.~%Fix and re-run if it does." pname infilename ofilename)
      (format t "~%You can also re/create ~A by running 'tokens ~A' sed script offline." infilename pname)))
 
@@ -1016,7 +1030,8 @@
       (feats                          #'(lambda () nil))
       (eqns    --> eqns COMMA eqn     #'(lambda (eqns COMMA eqn)(declare (ignore COMMA))(append  eqns (list eqn))))
       (eqns    --> eqn                #'(lambda (eqn)(list eqn)))
-      (eqn     --> ID1 EQOP ID        #'(lambda (ID1 EQOP ID)(declare (ignore EQOP))(list (cadr ID1) (cadr ID))))
+      (eqn     --> ID1 EQOP ID        #'(lambda (ID1 EQOP ID)(declare (ignore EQOP))(name-clash-report (cadr ID1))
+					  (list (cadr ID1) (cadr ID))))
       (ID1     --> ID		      #'(lambda (ID) (identity ID)))
       (vardouble --> VALFS2 VALFS     #'(lambda (VALFS2 VALFS)
 					  (declare (ignore VALFS2 VALFS))
@@ -1200,11 +1215,12 @@
 ;;;;  We translate all combinator instructions to lambda terms in our lambda ADT language
 ;;;;  so that LF normalizer only works with our lambdas.
 
-(defun f-apply (ht1 ht2 lex2) 
+(defun f-apply (ht1 ht2 lex2 coord2) 
   "forward application"
   (and (complexp-hash (machash 'SYN ht1))
        (eql (machash 'DIR 'SYN ht1) 'FS) ; no need to check modality, all entries qualify for application.
-       (if (machash 'BCONST 'ARG 'SYN ht1) (return-from f-apply (singleton-match ht1 ht2 lex2 '|>|)) t) ; short-circuit f-apply if arg is singleton
+       (if (machash 'BCONST 'ARG 'SYN ht1) 
+	 (return-from f-apply (singleton-match ht1 ht2 lex2 '|>| coord2)) t) ; short-circuit f-apply if arg is singleton
        (multiple-value-bind (match b1 b2)
 	 ;	 (declare (ignore b2))
 	 (cat-match (machash 'ARG 'SYN ht1) (machash 'SYN ht2))
@@ -1217,11 +1233,12 @@
 		(setf (machash 'SYN newht) (realize-binds (machash 'RESULT 'SYN ht1) b1))
 		newht)))))
 
-(defun b-apply (ht1 ht2 lex1) 
+(defun b-apply (ht1 ht2 lex1 coord1) 
   "backward application"
   (and (complexp-hash (machash 'SYN ht2))
        (eql (machash 'DIR 'SYN ht2) 'BS) ; no need to check modality, all entries qualify for application.
-       (if (machash 'BCONST 'ARG 'SYN ht2) (return-from b-apply (singleton-match ht2 ht1 lex1 '|<|)) t) ; short-circuit f-apply if arg is singleton
+       (if (machash 'BCONST 'ARG 'SYN ht2) 
+	 (return-from b-apply (singleton-match ht2 ht1 lex1 '|<| coord1)) t) ; short-circuit b-apply if arg is singleton
        (multiple-value-bind (match b1 b2)
 	 ;	 (declare (ignore b1))
 	 (cat-match (machash 'SYN ht1) (machash 'ARG 'SYN ht2))
@@ -2223,7 +2240,7 @@
 				     (copy-hashtable (machash 'SYN ht1))))
          newht)))
 
-(defun ccg-combine (ht1 ht2 lex1 lex2)
+(defun ccg-combine (ht1 ht2 lex1 lex2 coord1 coord2)
   "Short-circuit evaluates ccg rules one by one, to left term (ht1) and right term (ht2), which are hashtables.
   Returns the result as a hashtable.
   Note: CCG is procedurally neutral, i.e. given two cats, the other is uniquely determined
@@ -2235,6 +2252,9 @@
   Global switches give the model developer complete control over rule application.
   Set its switch to nil if you dont want that rule.  By default all rules are on.
   x-special are for application only. So they use their switches.
+  Coord1 and coord2 are string coordinates of ht1 and ht2, which are only relevant for singletons and x-apply.
+  They are (x y) pairs where x is length and y is starting position in string.
+  The input is available globally, in *cky-input*.
   Reminder to code developers: every combination creates a new CKY hashtable entry, and as many
   complex result hashtables as there are slashes in the result."
   (cond ((and (basicp-hash (machash 'SYN ht1))
@@ -2245,8 +2265,8 @@
 	      (eql (machash 'DIR 'SYN ht1) 'BS)
 	      (eql (machash 'DIR 'SYN ht2) 'FS)) ; the only case which no rule can combine 
 	 (return-from ccg-combine nil)))
-  (or (and *f-apply* (f-apply ht1 ht2 lex2))    ; application -- the only relevant case for lex slash
-      (and *b-apply* (b-apply ht1 ht2 lex1))
+  (or (and *f-apply* (f-apply ht1 ht2 lex2 coord2)) ; application -- the only relevant case for lex slash
+      (and *b-apply* (b-apply ht1 ht2 lex1 coord1))
       (and *f-comp* (f-comp ht1 ht2))           ; composition
       (and *b-comp* (b-comp ht1 ht2))
       (and *fx-comp* (fx-comp ht1 ht2))
@@ -2362,6 +2382,8 @@
 				 (nv-list-val 'SOLUTION (machash (list (- i k) (+ j k) q) *cky-hashtable*))
 				 (nv-list-val 'LEX (machash (list k j p) *cky-hashtable*))
 				 (nv-list-val 'LEX (machash (list (- i k) (+ j k) q) *cky-hashtable*))
+				 (list k j)             ; pass the string coordinates too, for singletons
+				 (list (- i k) (+ j k)) ;  length and position only
 				 )))
 			   (and result 
 				(setf (machash 'PARAM result)  ; calculate inner product on the fly
