@@ -74,8 +74,8 @@
 (defun word-list-from-string (st)
   "from a string to list of its words as dictated by the Lisp reader"
   (with-input-from-string (p st)
-    (do ((w (read p nil) (read p nil)) ;; whatever Lisp reader considers token is a word
-	 (wl nil))
+    (do* ((w (read p nil nil) (read p nil nil)) ; whatever Lisp reader considers token is a word
+	  (wl nil))              
       ((null w) (reverse wl))
       (push-t w wl))))
 
@@ -167,7 +167,7 @@
   The only hashtable that has potential clash is the basic cat table because only there we have
   user features.
   Called during parsing .ccg to lisp code"
-  `(if (member ,feat '(BCAT BCONST)) (format t "~%** CCGlab warning **! Your feature name ~A clashes with built-in hashtable features. Please rename" ,feat)))
+  `(if (member ,feat '(BCAT BCONST)) (format t "~%** CCGlab warning ** Your feature name clashes with built-in features; please rename : ~A" ,feat)))
 
 (defun make-lex-hashtable ()
   "keys are: index param sem syn morph phon."
@@ -228,6 +228,7 @@
 ;;; globals
 ;;; =======
 
+(defparameter *singletonp* nil)  ; singleton (string constant) category is potentially dangerous, esp. empty ones!
 (defparameter *hash-data-size* 65536)  ; for CKY and LF argmax tables. Make IT REALLY BIG for training sets
                                        ; involving LOOOONG sentences.
 				       ; default is 64K entries
@@ -867,8 +868,10 @@
        (otherwise (format t "~%Reading from off-line generated ~A" infilename)))
      (with-open-file (strm infilename :direction :input :if-does-not-exist :error)
        (with-open-file (s ofilename  :direction :output :if-exists :supersede)
+	 (setf *singletonp* nil)
 	 (setf *ccg-grammar-keys* 0)
 	 (format s "~A" (parse/2 (read strm))))) ; this is the interface to LALR transformer's parse
+     (and *singletonp* (format t "~%** CCGlab FINAL warning ** There are string constants as categories in your grammar, make sure they are not void"))
      (format t "~2%=========================== p r e p a r i n g ===============================~%")
      (format t "~%Project name: ~A~%  Input : ~A ~%  Output: ~A ~%Check to see if output contains any spec errors.~%Fix and re-run if it does." pname infilename ofilename)
      (format t "~%You can also re/create ~A by running 'tokens ~A' sed script offline." infilename pname)))
@@ -1022,11 +1025,11 @@
       (syns    --> syns slash syn     #'(lambda (syns slash syn)`(,syns ,@slash ,syn)))
       (syn     --> basic              #'(lambda (basic)(identity basic)))
       (syn     --> parentd            #'(lambda (parentd)(identity parentd)))
-      (basic   --> ID feats           #'(lambda (ID feats)
-					  (let ((mbc (mk-basic-cat (cadr ID))))
-					    (if (null (nv-list-val 'BCAT mbc))
-					      (format t "~%** CCGlab warning! ** singleton category ~A is empty." (car ID))) 
-					    (append mbc (list (list 'FEATS feats))))))
+      (basic   --> ID feats           #'(lambda (ID feats) (let ((mbc (mk-basic-cat (cadr ID))))
+							     (if (nv-list-val 'BCONST mbc)
+							       (progn (setf *singletonp* t)
+								      (format t "~%** CCGlab warning ** string category : ~A" (cadr ID))))
+							     (append mbc (list (list 'FEATS feats))))))
       (parentd --> LP syns RP         #'(lambda (LP syns RP) (declare (ignore LP RP))(identity syns)))
       (slash   --> vardir varmod      #'(lambda (vardir varmod)(list vardir varmod)))
       (slash   --> vardouble          #'(lambda (vardouble)(identity vardouble)))
