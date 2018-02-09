@@ -228,7 +228,7 @@
 ;;; globals
 ;;; =======
 
-(defparameter *singletonp* nil)  ; singleton (string constant) category is potentially dangerous, esp. empty ones!
+(defparameter *singletons* 0)  ; singleton (string constant) category is potentially dangerous, esp. empty ones!
 (defparameter *hash-data-size* 65536)  ; for CKY and LF argmax tables. Make IT REALLY BIG for training sets
                                        ; involving LOOOONG sentences.
 				       ; default is 64K entries
@@ -868,10 +868,10 @@
        (otherwise (format t "~%Reading from off-line generated ~A" infilename)))
      (with-open-file (strm infilename :direction :input :if-does-not-exist :error)
        (with-open-file (s ofilename  :direction :output :if-exists :supersede)
-	 (setf *singletonp* nil)
+	 (setf *singletons* 0)
 	 (setf *ccg-grammar-keys* 0)
 	 (format s "~A" (parse/2 (read strm))))) ; this is the interface to LALR transformer's parse
-     (and *singletonp* (format t "~%** CCGlab FINAL warning ** There are string constants as categories in your grammar, make sure they are not void"))
+     (and (> *singletons* 0) (format t "~%** CCGlab warning ** There are ~A string-constant categories in your grammar, make sure none are void" *singletons*))
      (format t "~2%=========================== p r e p a r i n g ===============================~%")
      (format t "~%Project name: ~A~%  Input : ~A ~%  Output: ~A ~%Check to see if output contains any spec errors.~%Fix and re-run if it does." pname infilename ofilename)
      (format t "~%You can also re/create ~A by running 'tokens ~A' sed script offline." infilename pname)))
@@ -1027,8 +1027,7 @@
       (syn     --> parentd            #'(lambda (parentd)(identity parentd)))
       (basic   --> ID feats           #'(lambda (ID feats) (let ((mbc (mk-basic-cat (cadr ID))))
 							     (if (nv-list-val 'BCONST mbc)
-							       (progn (setf *singletonp* t)
-								      (format t "~%** CCGlab warning ** string category : ~A" (cadr ID))))
+							       (incf *singletons*))
 							     (append mbc (list (list 'FEATS feats))))))
       (parentd --> LP syns RP         #'(lambda (LP syns RP) (declare (ignore LP RP))(identity syns)))
       (slash   --> vardir varmod      #'(lambda (vardir varmod)(list vardir varmod)))
