@@ -61,7 +61,7 @@ To make sure, do e.g. <code>which apt-get</code> to find out. If you don't get a
 Ubuntu has built-in packages for SBCL and rlwrap, which <code>apt-get</code> in the ccglab install script
 can install very easily. 
 
-It's just that Ubuntu starts with non-basic packages turned off so that it can't seem to find SBCL/rlwrap
+It's just that Ubuntu starts with non-basic packages turned off so it can't seem to find SBCL/rlwrap
 in the beginning. Do the following to enable them before running
 the ccglab install completion script.
 
