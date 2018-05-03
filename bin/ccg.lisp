@@ -353,7 +353,7 @@
   (format t "  Most weighted derivation  : ~A ~%" *cky-max*))
 
 (defun which-ccglab ()
-  "CCGlab, version 3.4.1r")
+  "CCGlab, version 3.5")
 
 (defun welcome()
   (format t "~%===================================================")
