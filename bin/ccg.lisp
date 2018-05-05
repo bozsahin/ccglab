@@ -65,9 +65,27 @@
 	       using (hash-value value)
 	       collect (list key value))))
 
+;; some common utilities
+
 (defmacro push-t (el st)
   "push element onto stack if el is not nil. eval el only once."
   `(let (($$elr ,el))(and $$elr (push $$elr ,st))))
+
+(defun word-list-from-string (st)
+  "from a string to list of its words as dictated by the Lisp reader"
+  (with-input-from-string (p st)
+    (do* ((w (read p nil nil) (read p nil nil)) ; whatever Lisp reader considers token is a word
+	  (wl nil))              
+      ((null w) (reverse wl))
+      (push-t w wl))))
+
+(defun mk-basic-cat (bcat)
+  "if bcat is a string constant, BCAT feature's value is the list of lisp reader tokens in it, otherwise bcat.
+  In the first case, we mark the BCAT special, as (BCONST t). Returns list of name-value pairs.
+  This avoids needless repetition of string to list conversion at parse time."
+  (if (stringp bcat)
+    (list (list 'BCAT (word-list-from-string bcat)) '(BCONST t))
+    (list (list 'BCAT bcat))))
 
 (defmacro nv-list-val (key nvpl)
   "Returns the value of a list of (name value) pairs nvpl, where each pair's SECOND is the value"
@@ -143,6 +161,14 @@
   `(mk-l (mk-v 'h)(mk-a ,f (mk-l (mk-v 'x)(mk-a ,g (mk-a 'h 'x))))))
 
 ;; hash tables
+
+(defmacro name-clash-report (feat)
+  "reports a warning if feat is a name that clashes with hashtables' fixed features.
+  The only hashtable that has potential clash is the basic cat table because only there we have
+  user features.
+  Called during parsing .ccg to lisp code"
+  `(if (member ,feat '(BCAT BCONST)) (format t "~%** CCGlab warning ** Your feature name clashes with built-in features; please rename : ~A" ,feat)))
+
 (defun make-lex-hashtable ()
   "keys are: index param sem syn morph phon."
   (make-hash-table :test #'equal :size 7 :rehash-size 2 :rehash-threshold 1.0))
@@ -152,7 +178,7 @@
   (make-hash-table :test #'equal :size 100 :rehash-size 2 :rehash-threshold 1.0))
 
 (defun make-basic-cat-hashtable (nfeatures)
-  "keys are: bcat, and features of the basic cat"
+  "keys are: bcat, bconst, and features of the basic cat"
   (make-hash-table :test #'equal :size (+ nfeatures 5) :rehash-size 2 :rehash-threshold 1.0))
 
 (defun make-complex-cat-hashtable ()
@@ -202,6 +228,7 @@
 ;;; globals
 ;;; =======
 
+(defparameter *singletons* 0)  ; singleton (string constant) category is potentially dangerous, esp. empty ones!
 (defparameter *hash-data-size* 65536)  ; for CKY and LF argmax tables. Make IT REALLY BIG for training sets
                                        ; involving LOOOONG sentences.
 				       ; default is 64K entries
@@ -326,7 +353,7 @@
   (format t "  Most weighted derivation  : ~A ~%" *cky-max*))
 
 (defun which-ccglab ()
-  "CCGlab, version 3.4")
+  "CCGlab, version 3.5")
 
 (defun welcome()
   (format t "~%===================================================")
@@ -356,6 +383,7 @@
 (defun beamer ()
   "use this to set beam only after a parse so that *cky-nparses* is known."
   (setf *beam* (ceiling (expt *cky-nparses* *beam-exp*))))
+
 
 ;;;; ==============================================
 ;;;; The lambda layer, whose syntax is given below.
@@ -570,7 +598,7 @@
   (subseq *cky-input* (- pos 1) (+ (- pos 1) len)))
 
 (defun linearize-syn (synht)
-  "turns the syn hashtable synht to a string; avoids features other than BCAT DIR MODAL"
+  "turns the syn hashtable synht to a string for display; avoids features other than BCAT DIR MODAL"
   (cond ((null synht) "")
 	((machash 'BCAT synht)(write-to-string (machash 'BCAT synht)))
 	(t (if (machash 'LEX synht)  ; don't print modality for LEX slash. it's * anyway.
@@ -657,8 +685,7 @@
   (or (eql mod1 'ALL) (eql mod2 'ALL) (eql mod1 mod2)))
 
 (defun basicp (syntype)
-  "Returns non-nil if syntype has BCAT feature at top level, which means it is basic.
-  In the morphology of description, special cats are basic. They are non-basic in parsing."
+  "Returns non-nil if syntype has BCAT feature at top level, which means it is basic."
   (nv-list-val 'BCAT syntype))
 
 (defun var? (x)
@@ -672,7 +699,7 @@
 
 (defun specialp-hash (htsyn)
   "special cats have @ prefix on BCAT and can be complex in result but not in arg.
-  This way they maintain procedural neutrality of CCG."
+  This way we maintain procedural neutrality of CCG."
   (cond ((and (machash 'BCAT htsyn)(algebraic? (machash 'BCAT htsyn))))
         ((and (machash 'ARG htsyn)(null (machash 'DIR 'ARG htsyn))
 	 (algebraic? (machash 'BCAT 'ARG htsyn))))))
@@ -697,6 +724,7 @@
   (cond ((basicp cat) 
 	 (let ((ht (make-basic-cat-hashtable (length (nv-list-val 'FEATS cat)))))
 	   (setf (machash 'BCAT ht) (nv-list-val 'BCAT cat))
+	   (if (nv-list-val 'BCONST cat) (setf (machash 'BCONST ht) (nv-list-val 'BCONST cat))) ; no BCONST feature in hashtable if nil (less consing)
 	   (dolist (feat-val (nv-list-val 'FEATS cat))
 	     (setf (machash (car feat-val) ht) (cadr feat-val)))
 	   (return-from create-syn-table ht)))
@@ -737,6 +765,23 @@
     (setf (machash 'INSYN ht) (create-syn-table (nv-list-val 'INSYN lexspec)))
     (setf (machash 'OUTSYN ht) (create-syn-table (nv-list-val 'OUTSYN lexspec)))
     ht))
+
+(defun singleton-match (fht aht alex ruleindex coorda)
+  "called only when functor hashtable fht's argument is singleton category; succeeds if argument hashtable aht's string
+  span matches fht's arg's singleton category. (These categories were converted to word lists during .ccg file processing.)
+  Called from function application only. 
+  Strings coordinates are of the form (x y) for argument; 
+  they are used to access *cky-input*; x is length, y is starting pos (from 1).
+  Returns the new hashtable if succesful, otherwise nil."
+  (if (and (equal (machash 'BCAT 'ARG 'SYN fht) (subseq *cky-input* (- (second coorda) 1) (+ (first coorda)
+											     (- (second coorda) 1))))
+	   (lex-check (machash 'LEX 'SYN fht) alex))
+    (let ((newht (make-cky-entry-hashtable)))
+      (setf (machash 'SEM newht) (&a (machash 'SEM fht) (machash 'SEM aht))) ; this means lexical LFs must be compositional
+      (setf (machash 'INDEX newht) ruleindex)
+      (and (machash 'LEX 'SYN fht) (setf (machash 'LEX newht) t))
+      (setf (machash 'SYN newht) (machash 'RESULT 'SYN fht)) ; nothing to bind, assuming no features for singletons
+      newht)))
 
 (defun cat-match (sht1 sht2)
   "Checks to see if potentially complex syntactic cat hashtables, sht1 and sht2,
@@ -823,9 +868,11 @@
        (otherwise (format t "~%Reading from off-line generated ~A" infilename)))
      (with-open-file (strm infilename :direction :input :if-does-not-exist :error)
        (with-open-file (s ofilename  :direction :output :if-exists :supersede)
+	 (setf *singletons* 0)
 	 (setf *ccg-grammar-keys* 0)
 	 (format s "~A" (parse/2 (read strm))))) ; this is the interface to LALR transformer's parse
-     (format t "~%=========================== p r e p a r i n g ===============================~%")
+     (and (> *singletons* 0) (format t "~%** CCGlab warning ** There are ~A string-constant categories in your grammar, make sure none are void" *singletons*))
+     (format t "~2%=========================== p r e p a r i n g ===============================~%")
      (format t "~%Project name: ~A~%  Input : ~A ~%  Output: ~A ~%Check to see if output contains any spec errors.~%Fix and re-run if it does." pname infilename ofilename)
      (format t "~%You can also re/create ~A by running 'tokens ~A' sed script offline." infilename pname)))
 
@@ -978,7 +1025,10 @@
       (syns    --> syns slash syn     #'(lambda (syns slash syn)`(,syns ,@slash ,syn)))
       (syn     --> basic              #'(lambda (basic)(identity basic)))
       (syn     --> parentd            #'(lambda (parentd)(identity parentd)))
-      (basic   --> ID feats           #'(lambda (ID feats)(list (list 'BCAT (cadr ID)) (list 'FEATS feats))))
+      (basic   --> ID feats           #'(lambda (ID feats) (let ((mbc (mk-basic-cat (cadr ID))))
+							     (if (nv-list-val 'BCONST mbc)
+							       (incf *singletons*))
+							     (append mbc (list (list 'FEATS feats))))))
       (parentd --> LP syns RP         #'(lambda (LP syns RP) (declare (ignore LP RP))(identity syns)))
       (slash   --> vardir varmod      #'(lambda (vardir varmod)(list vardir varmod)))
       (slash   --> vardouble          #'(lambda (vardouble)(identity vardouble)))
@@ -986,7 +1036,8 @@
       (feats                          #'(lambda () nil))
       (eqns    --> eqns COMMA eqn     #'(lambda (eqns COMMA eqn)(declare (ignore COMMA))(append  eqns (list eqn))))
       (eqns    --> eqn                #'(lambda (eqn)(list eqn)))
-      (eqn     --> ID1 EQOP ID        #'(lambda (ID1 EQOP ID)(declare (ignore EQOP))(list (cadr ID1) (cadr ID))))
+      (eqn     --> ID1 EQOP ID        #'(lambda (ID1 EQOP ID)(declare (ignore EQOP))(name-clash-report (cadr ID1))
+					  (list (cadr ID1) (cadr ID))))
       (ID1     --> ID		      #'(lambda (ID) (identity ID)))
       (vardouble --> VALFS2 VALFS     #'(lambda (VALFS2 VALFS)
 					  (declare (ignore VALFS2 VALFS))
@@ -1170,12 +1221,14 @@
 ;;;;  We translate all combinator instructions to lambda terms in our lambda ADT language
 ;;;;  so that LF normalizer only works with our lambdas.
 
-(defun f-apply (ht1 ht2 lex2) 
+(defun f-apply (ht1 ht2 lex2 coord2) 
   "forward application"
   (and (complexp-hash (machash 'SYN ht1))
        (eql (machash 'DIR 'SYN ht1) 'FS) ; no need to check modality, all entries qualify for application.
+       (if (machash 'BCONST 'ARG 'SYN ht1) 
+	 (return-from f-apply (singleton-match ht1 ht2 lex2 '|>| coord2)) t) ; short-circuit f-apply if arg is singleton
        (multiple-value-bind (match b1 b2)
-;	 (declare (ignore b2))
+	 ;	 (declare (ignore b2))
 	 (cat-match (machash 'ARG 'SYN ht1) (machash 'SYN ht2))
 	 (and match 
 	      (lex-check (machash 'LEX 'SYN ht1) lex2)  ; if we have X//Y Y , Y must be lex
@@ -1186,12 +1239,14 @@
 		(setf (machash 'SYN newht) (realize-binds (machash 'RESULT 'SYN ht1) b1))
 		newht)))))
 
-(defun b-apply (ht1 ht2 lex1) 
+(defun b-apply (ht1 ht2 lex1 coord1) 
   "backward application"
   (and (complexp-hash (machash 'SYN ht2))
        (eql (machash 'DIR 'SYN ht2) 'BS) ; no need to check modality, all entries qualify for application.
+       (if (machash 'BCONST 'ARG 'SYN ht2) 
+	 (return-from b-apply (singleton-match ht2 ht1 lex1 '|<| coord1)) t) ; short-circuit b-apply if arg is singleton
        (multiple-value-bind (match b1 b2)
-;	 (declare (ignore b1))
+	 ;	 (declare (ignore b1))
 	 (cat-match (machash 'SYN ht1) (machash 'ARG 'SYN ht2))
 	 (and match 
 	      (lex-check (machash 'LEX 'SYN ht2) lex1)  ; if we have Y X\\Y, Y must be lex
@@ -2191,7 +2246,7 @@
 				     (copy-hashtable (machash 'SYN ht1))))
          newht)))
 
-(defun ccg-combine (ht1 ht2 lex1 lex2)
+(defun ccg-combine (ht1 ht2 lex1 lex2 coord1 coord2)
   "Short-circuit evaluates ccg rules one by one, to left term (ht1) and right term (ht2), which are hashtables.
   Returns the result as a hashtable.
   Note: CCG is procedurally neutral, i.e. given two cats, the other is uniquely determined
@@ -2203,6 +2258,9 @@
   Global switches give the model developer complete control over rule application.
   Set its switch to nil if you dont want that rule.  By default all rules are on.
   x-special are for application only. So they use their switches.
+  Coord1 and coord2 are string coordinates of ht1 and ht2, which are only relevant for singletons and x-apply.
+  They are (x y) pairs where x is length and y is starting position in string.
+  The input is available globally, in *cky-input*.
   Reminder to code developers: every combination creates a new CKY hashtable entry, and as many
   complex result hashtables as there are slashes in the result."
   (cond ((and (basicp-hash (machash 'SYN ht1))
@@ -2213,8 +2271,8 @@
 	      (eql (machash 'DIR 'SYN ht1) 'BS)
 	      (eql (machash 'DIR 'SYN ht2) 'FS)) ; the only case which no rule can combine 
 	 (return-from ccg-combine nil)))
-  (or (and *f-apply* (f-apply ht1 ht2 lex2))    ; application -- the only relevant case for lex slash
-      (and *b-apply* (b-apply ht1 ht2 lex1))
+  (or (and *f-apply* (f-apply ht1 ht2 lex2 coord2)) ; application -- the only relevant case for lex slash
+      (and *b-apply* (b-apply ht1 ht2 lex1 coord1))
       (and *f-comp* (f-comp ht1 ht2))           ; composition
       (and *b-comp* (b-comp ht1 ht2))
       (and *fx-comp* (fx-comp ht1 ht2))
@@ -2330,6 +2388,8 @@
 				 (nv-list-val 'SOLUTION (machash (list (- i k) (+ j k) q) *cky-hashtable*))
 				 (nv-list-val 'LEX (machash (list k j p) *cky-hashtable*))
 				 (nv-list-val 'LEX (machash (list (- i k) (+ j k) q) *cky-hashtable*))
+				 (list k j)             ; pass the string coordinates too, for singletons
+				 (list (- i k) (+ j k)) ;  length and position only
 				 )))
 			   (and result 
 				(setf (machash 'PARAM result)  ; calculate inner product on the fly
@@ -2824,6 +2884,7 @@
 (defun write1 (fn obj)
   "writes one lisp object from file fn in one fell swoop"
   (with-open-file (s fn :direction :output :if-exists :error) (format  s "~A~%" obj)))
+
 
 ;; ======================================
 ;; some shortcuts for top-level functions
