@@ -67,6 +67,17 @@
 
 ;; some common utilities
 
+(defun add-dummy-lex-entries (phon)
+  "two dummy entries-- @X/*@X and @X\*@X"
+  (let ((k1 (gensym))
+	(k2 (gensym)))
+    (push `((KEY ,k1) (PHON ,phon) (MORPH X)
+		      (SYN (((BCAT @X) (FEATS NIL)) (DIR BS) (MODAL STAR) ((BCAT @X) (FEATS NIL))))
+		      (SEM (LAM P ("UNKNOWN" P))) (PARAM 1.0)) *ccg-grammar*)
+    (push `((KEY ,k2) (PHON ,phon) (MORPH X)
+		      (SYN (((BCAT @X) (FEATS NIL)) (DIR FS) (MODAL STAR) ((BCAT @X) (FEATS NIL))))
+		      (SEM (LAM P ("UNKNOWN" P))) (PARAM 1.0)) *ccg-grammar*)))
+
 (defmacro push-t (el st)
   "push element onto stack if el is not nil. eval el only once."
   `(let (($$elr ,el))(and $$elr (push $$elr ,st))))
@@ -264,6 +275,8 @@
 
 (defparameter *lfflag* t) ; whether to show intermediate LFs in the output (final one always shown)
 (defparameter *abv* nil) ; list of shortcuts for common functions-- see the bottom
+(defparameter *oovp* nil) ; set it to t to avoid out of vocabulary errors---two entries with uknown LFs will be created 
+                          ;  to get partial parses as much as possible in a knowledge-poor way.
 ;; rule switches
 
 (defparameter *f-apply* t)   ;application
@@ -338,6 +351,7 @@
 (defun status()
   (format t "~%To see rule switches, do (switches)~%")
   (format t "  To beam or not to beam    : ~A~%" *beamp*)
+  (format t "  Out of vocabulary flag    : ~A~%" *oovp*)
   (format t " *PRINT-READABLY*           : ~A~%" *print-readably*)
   (format t " *PRINT-PRETTY*             : ~A~%" *print-pretty*)
   (format t "  Currently loaded grammar  : ~A~%" *loaded-grammar*)
@@ -2364,9 +2378,11 @@
 		 (let* ((matches (get-gram-items (nth (- i 1) itemslist)))
 			(n2 (length matches)))
 		   (cond  ((eql n2 0)
-			   (format t "No lex entry for ~A! Exiting without parse.~%"
-					  (nth (- i 1) itemslist))
-			   (return-from ccg-deduce nil)))
+			   (if *oovp* 
+			     (add-dummy-lex-entries (nth (- i 1) itemslist))
+			     (progn 
+			       (format t "No lex entry for ~A! Exiting without parse.~%" (nth (- i 1) itemslist))
+			       (return-from ccg-deduce nil)))))
 		   (loop for i2 from 1 to n2 do
 			 (setf (machash (list 1 i i2) *cky-hashtable*) 
 			       (list (list 'LEFT (list 1 i i2))
