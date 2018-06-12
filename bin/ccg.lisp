@@ -2879,11 +2879,14 @@
   (if (listp obj) obj (list obj)))
 
 (defmacro oov-off ()
-  (setf *oovp* nil))
+  (format t "OOV is reset (OOV errors reported)~%")
+  (setf *oovp* nil)
+  nil)
+
 
 (defmacro oov-on ()
   (setf *oovp* t)
-  (format t "OOV is set (OOV errors not reported)")
+  (format t "OOV is set (OOV errors not reported)~%")
   t)
 
 (defun reset-globals()
