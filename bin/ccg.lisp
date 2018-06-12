@@ -67,16 +67,16 @@
 
 ;; some common utilities
 
-(defun add-dummy-lex-entries (phon)
+(defun make-dummy-lex-entries (phon)
   "two dummy entries-- @X/*@X and @X\*@X"
   (let ((k1 (gensym))
 	(k2 (gensym)))
-    (push `((KEY ,k1) (PHON ,phon) (MORPH X)
+    `(((KEY ,k1) (PHON ,phon) (MORPH X)
 		      (SYN (((BCAT @X) (FEATS NIL)) (DIR BS) (MODAL STAR) ((BCAT @X) (FEATS NIL))))
-		      (SEM (LAM P ("UNKNOWN" P))) (PARAM 1.0)) *ccg-grammar*)
-    (push `((KEY ,k2) (PHON ,phon) (MORPH X)
+		      (SEM (LAM P ("UNKNOWN" P))) (PARAM 1.0))
+      ((KEY ,k2) (PHON ,phon) (MORPH X)
 		      (SYN (((BCAT @X) (FEATS NIL)) (DIR FS) (MODAL STAR) ((BCAT @X) (FEATS NIL))))
-		      (SEM (LAM P ("UNKNOWN" P))) (PARAM 1.0)) *ccg-grammar*)))
+		      (SEM (LAM P ("UNKNOWN" P))) (PARAM 1.0)))))
 
 (defmacro push-t (el st)
   "push element onto stack if el is not nil. eval el only once."
@@ -277,6 +277,7 @@
 (defparameter *abv* nil) ; list of shortcuts for common functions-- see the bottom
 (defparameter *oovp* nil) ; set it to t to avoid out of vocabulary errors---two entries with uknown LFs will be created 
                           ;  to get partial parses as much as possible in a knowledge-poor way.
+
 ;; rule switches
 
 (defparameter *f-apply* t)   ;application
@@ -2374,12 +2375,15 @@
 	 (setf *cky-argmax-lf-max* nil)(setf *cky-max* nil)
 	 (let ((n (length itemslist))
 	       (a 0))  ; number of readings per CKY cell
-	   (loop for i from 1 to n do  ; lex loop
+	   (loop for i from 1 to n do  ; lexcal loop for picking all eligible lex items
 		 (let* ((matches (get-gram-items (nth (- i 1) itemslist)))
 			(n2 (length matches)))
 		   (cond  ((eql n2 0)
 			   (if *oovp* 
-			     (add-dummy-lex-entries (nth (- i 1) itemslist))
+			     (progn
+			       (setf matches (make-dummy-lex-entries (nth (- i 1) itemslist)))
+			       (dolist (entry matches) (push entry *ccg-grammar*))
+			       (setf n2 (length matches)))
 			     (progn 
 			       (format t "No lex entry for ~A! Exiting without parse.~%" (nth (- i 1) itemslist))
 			       (return-from ccg-deduce nil)))))
@@ -2874,6 +2878,14 @@
 (defun mklist (obj)
   (if (listp obj) obj (list obj)))
 
+(defmacro oov-off ()
+  (setf *oovp* nil))
+
+(defmacro oov-on ()
+  (setf *oovp* t)
+  (format t "OOV is set (OOV errors not reported)")
+  t)
+
 (defun reset-globals()
   (setf *print-readably* nil)
   (setf *print-pretty* t) 
@@ -2891,6 +2903,7 @@
   (setf *loaded-grammar* "")
   (setf *ccg-grammar*  nil)
   (setf *ccg-grammar-keys*  0)
+  (oov-off)
   t)
 
 (defun read1 (fn)
