@@ -67,6 +67,17 @@
 
 ;; some common utilities
 
+(defun make-dummy-lex-entries (phon)
+  "two dummy entries-- @X/*@X and @X\*@X"
+  (let ((k1 (gensym))
+	(k2 (gensym)))
+    `(((KEY ,k1) (PHON ,phon) (MORPH X)
+		      (SYN (((BCAT @X) (FEATS NIL)) (DIR BS) (MODAL STAR) ((BCAT @X) (FEATS NIL))))
+		      (SEM (LAM P ("UNKNOWN" P))) (PARAM 1.0))
+      ((KEY ,k2) (PHON ,phon) (MORPH X)
+		      (SYN (((BCAT @X) (FEATS NIL)) (DIR FS) (MODAL STAR) ((BCAT @X) (FEATS NIL))))
+		      (SEM (LAM P ("UNKNOWN" P))) (PARAM 1.0)))))
+
 (defmacro push-t (el st)
   "push element onto stack if el is not nil. eval el only once."
   `(let (($$elr ,el))(and $$elr (push $$elr ,st))))
@@ -264,6 +275,9 @@
 
 (defparameter *lfflag* t) ; whether to show intermediate LFs in the output (final one always shown)
 (defparameter *abv* nil) ; list of shortcuts for common functions-- see the bottom
+(defparameter *oovp* nil) ; set it to t to avoid out of vocabulary errors---two entries with uknown LFs will be created 
+                          ;  to get partial parses as much as possible in a knowledge-poor way.
+
 ;; rule switches
 
 (defparameter *f-apply* t)   ;application
@@ -338,6 +352,7 @@
 (defun status()
   (format t "~%To see rule switches, do (switches)~%")
   (format t "  To beam or not to beam    : ~A~%" *beamp*)
+  (format t "  Out of vocabulary flag    : ~A~%" *oovp*)
   (format t " *PRINT-READABLY*           : ~A~%" *print-readably*)
   (format t " *PRINT-PRETTY*             : ~A~%" *print-pretty*)
   (format t "  Currently loaded grammar  : ~A~%" *loaded-grammar*)
@@ -353,7 +368,7 @@
   (format t "  Most weighted derivation  : ~A ~%" *cky-max*))
 
 (defun which-ccglab ()
-  "CCGlab, version 3.5")
+  "CCGlab, version 3.6")
 
 (defun welcome()
   (format t "~%===================================================")
@@ -2360,13 +2375,18 @@
 	 (setf *cky-argmax-lf-max* nil)(setf *cky-max* nil)
 	 (let ((n (length itemslist))
 	       (a 0))  ; number of readings per CKY cell
-	   (loop for i from 1 to n do  ; lex loop
+	   (loop for i from 1 to n do  ; lexcal loop for picking all eligible lex items
 		 (let* ((matches (get-gram-items (nth (- i 1) itemslist)))
 			(n2 (length matches)))
 		   (cond  ((eql n2 0)
-			   (format t "No lex entry for ~A! Exiting without parse.~%"
-					  (nth (- i 1) itemslist))
-			   (return-from ccg-deduce nil)))
+			   (if *oovp* 
+			     (progn
+			       (setf matches (make-dummy-lex-entries (nth (- i 1) itemslist)))
+			       (dolist (entry matches) (push entry *ccg-grammar*))
+			       (setf n2 (length matches)))
+			     (progn 
+			       (format t "No lex entry for ~A! Exiting without parse.~%" (nth (- i 1) itemslist))
+			       (return-from ccg-deduce nil)))))
 		   (loop for i2 from 1 to n2 do
 			 (setf (machash (list 1 i i2) *cky-hashtable*) 
 			       (list (list 'LEFT (list 1 i i2))
@@ -2858,6 +2878,17 @@
 (defun mklist (obj)
   (if (listp obj) obj (list obj)))
 
+(defmacro oov-off ()
+  (format t "OOV is reset (OOV errors reported)~%")
+  (setf *oovp* nil)
+  nil)
+
+
+(defmacro oov-on ()
+  (setf *oovp* t)
+  (format t "OOV is set (OOV errors not reported)~%")
+  t)
+
 (defun reset-globals()
   (setf *print-readably* nil)
   (setf *print-pretty* t) 
@@ -2875,6 +2906,7 @@
   (setf *loaded-grammar* "")
   (setf *ccg-grammar*  nil)
   (setf *ccg-grammar-keys*  0)
+  (oov-off)
   t)
 
 (defun read1 (fn)

@@ -1,4 +1,1 @@
-1. Singleton categories are implemented to model MWEs.
-
-2. They also allow us to continue to avoid wrap in verb-particle constructions
-   by lexicalizing them.
+1. On/off switch is added to control out of vocabulary items.
