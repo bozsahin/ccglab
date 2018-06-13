@@ -44,16 +44,16 @@ if [ ! "$locallisp" ]; then
 	echo 'I can install SBCL and rlwrap from standard repositories'
 	read -r -p '? Do you want to install SBCL [y/n]? ' auxinstall
 	if [ $auxinstall ] && [ $auxinstall = y ] || [ $auxinstall = Y ]; then
-		echo '! CCGlab install: WARNING: you need install access now'
-		$packager install sbcl
+		echo '! CCGlab install: WARNING: you need sudo access now'
+		sudo $packager install sbcl
 		locallisp=`which sbcl`
 	fi
 	if [ -x /usr/local/bin/rlwrap ] || [ -x /usr/bin/rlwrap ] || [ -x /sw/bin/rlwrap ] || [ -x /sw/local/bin/rlwrap ]; then
 		echo 'Using local rlwrap'
 	else 
 		echo '! rlwrap not found. It is very annoying NOT to have it when you run ccglab'
-		echo '! CCGlab install: WARNING: you need install access now'
-		$packager install rlwrap
+		echo '! CCGlab install: WARNING: you need sudo access now'
+		sudo $packager install rlwrap
         fi
   else
 	echo '! apt-get or brew not found. I leave Common Lisp and rlwrap handling to you.'
