@@ -1,6 +1,8 @@
 #!/bin/bash
 # installs CCGlab externals, to go with git ccglab repo.   -cem bozsahin
 #  also sets PATH and lisp execs so that ccglab is available from anywhere
+# brew does not allow sudo anymore-- $SUDO controls that
+SUDO=sudo
 ccglabdir=`pwd`
 echo 'CCGlab external resources install and path set up'
 echo '================================================='
@@ -27,7 +29,7 @@ fi
 if [ -x "$locallisp" ]; then 
   echo 'CCGlab install: got it.'
 else
-  echo '! CCGlab install: no local SBCL, CCL or other Lisp set.'
+  echo '! CCGlab install: no local SBCL, CCL or other Lisp there.'
   echo '! Set the CCGLAB_LISP variable in .bashrc to your binary later if I cannot install SBCL below'
   unset locallisp
 fi
@@ -35,6 +37,7 @@ fi
 if [ ! "$locallisp" ]; then
   if [ -x /usr/local/bin/brew ] || [ -x /sw/bin/brew ] || [ -x /sw/local/bin/brew ]; then
     	packager=brew
+	SUDO=
   fi
   if [ -x /usr/bin/apt-get ] || [ -x /usr/local/bin/apt-get ]; then
 	packager=apt-get   # overrides brew if you have them both
@@ -44,20 +47,20 @@ if [ ! "$locallisp" ]; then
 	echo 'I can install SBCL and rlwrap from standard repositories'
 	read -r -p '? Do you want to install SBCL [y/n]? ' auxinstall
 	if [ $auxinstall ] && [ $auxinstall = y ] || [ $auxinstall = Y ]; then
-		echo '! CCGlab install: WARNING: you need sudo access now'
-		sudo $packager install sbcl
+		echo '! CCGlab install: WARNING: you need install and write access now'
+		$SUDO $packager install sbcl
 		locallisp=`which sbcl`
 	fi
 	if [ -x /usr/local/bin/rlwrap ] || [ -x /usr/bin/rlwrap ] || [ -x /sw/bin/rlwrap ] || [ -x /sw/local/bin/rlwrap ]; then
 		echo 'Using local rlwrap'
 	else 
 		echo '! rlwrap not found. It is very annoying NOT to have it when you run ccglab'
-		echo '! CCGlab install: WARNING: you need sudo access now'
-		sudo $packager install rlwrap
+		echo '! CCGlab install: WARNING: you need install and write access now'
+		$SUDO $packager install rlwrap
         fi
   else
 	echo '! apt-get or brew not found. I leave Common Lisp and rlwrap handling to you.'
-	echo '  The README.md in the git repo shows at the end how you can set them manually.'
+	echo '  The README.md in the git repo shows how you can set them manually.'
   fi
 else
   echo "Using the Lisp at $locallisp for CCGlab"
