@@ -70,13 +70,14 @@
 (defun make-dummy-lex-entries (phon)
   "two dummy entries-- @X/*@X and @X\*@X"
   (let ((k1 (gensym))
-	(k2 (gensym)))
+	(k2 (gensym))
+	(lf (gensym "unknown-")))
     `(((KEY ,k1) (PHON ,phon) (MORPH X)
 		      (SYN (((BCAT @X) (FEATS NIL)) (DIR BS) (MODAL STAR) ((BCAT @X) (FEATS NIL))))
-		      (SEM (LAM P ("UNKNOWN" P))) (PARAM 1.0))
+		      (SEM (LAM P (,lf P))) (PARAM 1.0))
       ((KEY ,k2) (PHON ,phon) (MORPH X)
 		      (SYN (((BCAT @X) (FEATS NIL)) (DIR FS) (MODAL STAR) ((BCAT @X) (FEATS NIL))))
-		      (SEM (LAM P ("UNKNOWN" P))) (PARAM 1.0)))))
+		      (SEM (LAM P (,lf P))) (PARAM 1.0)))))
 
 (defmacro push-t (el st)
   "push element onto stack if el is not nil. eval el only once."
