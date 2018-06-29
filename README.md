@@ -53,6 +53,10 @@ That will give you what CCGlab needs for fully automatic install and run:
 <code>bash, sed, apt-get/brew, wget</code>
 
 With the exception of <code>apt-get/brew</code> the rest is available out-of-the-box in most if not all linuxes. 
+
+Wget is NOT available out-of-the-box in MAcOS or Ubuntu for some reason. Please make sure you have it before
+running the script.
+
 To make sure, do e.g. <code>which apt-get</code> to find out. If you don't get a response, you don't have it.
 
 <em>NEW TO UBUNTU?</em>
