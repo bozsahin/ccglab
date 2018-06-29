@@ -12,11 +12,10 @@ and <a href="https://github.com/bozsahin/ccglab-models">ccglab-models</a>, which
 <br>This will create the repository in <code>h/ccglab</code>
 <br>This is your ccglab home.
 <li> <code>cd h/ccglab</code>
-<li> Execute <code>./run-to-complete-first-time-install</code> bash script in the repo to get the extras needed, and to set up the paths so that CCGlab is usable from anywhere in your user account.
+<li> Execute <code>./run-to-complete-first-time-install</code> bash script in the repo to get the extras needed, and to set up the paths so that CCGlab is usable from anywhere in your user account. 
+<b>Please read the rest of this document before you run the script.</b>
 <li> Open a new bash terminal and run <code>ccglab</code> script from anywhere.
 </ol>
-
-<b>Please read the rest of this document before you run the script.</b>
 
 <b>NO NEED TO REINSTALL:</b> If you already have a git-installed up-and-running CCGlab, just do the following for updates:
 
