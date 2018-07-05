@@ -354,7 +354,7 @@
   (let ((lf-list nil))
     (maphash #'(lambda (key val)(push (list key (first val) (rest val)) lf-list))
 	     *cky-lf-hashtable*)
-    lf-list))
+    (sort lf-list #'> :key #'second)))
 
 
 (defun status(&optional (all-lfs nil))
