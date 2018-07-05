@@ -350,7 +350,15 @@
           *f2-comp* *b2-comp* *fx2-comp* *bx2-comp* *f2-sub* *b2-sub* *fx2-sub* *bx2-sub* *f3-comp* *b3-comp* 
 	  *fx3-comp* *bx3-comp*))
 
-(defun status()
+(defun pack-cky-lf-hashtable ()
+  (let ((lf-list nil))
+    (maphash #'(lambda (key val)(push (list key (first val) (rest val)) lf-list))
+	     *cky-lf-hashtable*)
+    lf-list))
+
+
+(defun status(&optional (all-lfs nil))
+  "returns all equivalent LFS if all-lfs is not nil"
   (format t "~%To see rule switches, do (switches)~%")
   (format t "  To beam or not to beam    : ~A~%" *beamp*)
   (format t "  Out of vocabulary flag    : ~A~%" *oovp*)
@@ -366,10 +374,12 @@
   (format t "  Sum of weighted counts    : ~A ~%" *cky-lf-hashtable-sum*)
   (format t "  Most likely LF's cells    : ~A ~%" *cky-argmax-lf*)
   (format t "  Number of differing LFs   : ~A ~%" (hash-table-count *cky-lf-hashtable*))
-  (format t "  Most weighted derivation  : ~A ~%" *cky-max*))
+  (format t "  Most weighted derivation  : ~A ~%" *cky-max*)
+  (and all-lfs (pack-cky-lf-hashtable))
+  )
 
 (defun which-ccglab ()
-  "CCGlab, version 3.6")
+  "CCGlab, version 3.6.1")
 
 (defun welcome()
   (format t "~%===================================================")
