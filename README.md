@@ -45,7 +45,7 @@ If you want the installer to install a Common Lisp and <code>rlwrap</code> for y
            <li> <code>yum</code> (installer for redhat spin offs including Fedora)
 </ul>
 
-If you have all of them, like me, it installs with <code>yum</code>.
+If you have all of them, like me, it installs with <code>brew</code>.
 
 A virtual box can be installed in Windows, which effectively gives CCGlab in Windows.
 
@@ -53,7 +53,7 @@ Linuxes and MacOSs are native environments for CCGlab.
 
 <b> You need the following to run the install script</b>:
 
-<code>bash, sed, apt-get/brew/yum, wget</code>
+<code>apt-get/brew/yum, wget</code>
 
 To make sure, do e.g. <code>which wget</code> to find out. If you don't get a response, you don't have it.
 
