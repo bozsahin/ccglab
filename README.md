@@ -68,6 +68,13 @@ the ccglab install completion script.
 
            sudo add-apt-repository universe
            sudo apt-get update
+Then do:
+
+<code>apt-get install git</code>
+
+<code>apt-get install wget</code>
+
+if you don't have them.
 
 <em>ARE YOU FEDORAized?</em>
 
@@ -75,9 +82,17 @@ Like Ubuntu's apt-get, Fedora installer is weird; it's repos are all closed by d
 Find out where
 <code>sbcl</code> and <code>rlwrap</code> are in the yum-world; or do
 
-<code>yum-config-manager --enable \*</code>
+<code>yum-config-manager --enable \\\*</code>
 
 to enable everything at your own risk; assuming you have <code>yum-utils</code> installed. What a roundabout way, RH!
+
+Then do:
+
+<code> yum install git</code>
+
+<code> yum install wget</code>
+
+if you don't have them.
 
 <em>OTHER LINUXES</em>
 
