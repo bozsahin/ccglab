@@ -24,8 +24,12 @@ fi
 if [ -x /usr/local/bin/sbcl ] || [ -x /usr/bin/sbcl ] || [ -x /usr/local/bin/ccl ] || [ -x /usr/bin/ccl ]; then
   echo 'CCGlab install: An installed ANSI Common Lisp is found'
   echo '? Respond as NONE if you do NOT want to use it'
-  echo "You have `which sbcl`"
-  echo "You have `which ccl`"
+  if [ `which sbcl` ]; then
+  	echo "You have `which sbcl`"
+  fi
+  if [ `which ccl` ]; then
+  	echo "You have `which ccl`"
+  fi
   read -r -p '? What is the full path of your preferred Lisp executable? ' locallisp
 fi
 if [ -x "$locallisp" ]; then 
@@ -37,15 +41,15 @@ else
 fi
 #check if lisp needs installing
 if [ ! "$locallisp" ]; then
+  if [ -x /usr/bin/yum ] || [ -x /usr/local/bin/yum ]; then
+	  packager=yum   
+  fi
+  if [ -x /usr/bin/apt-get ] || [ -x /usr/local/bin/apt-get ]; then
+	packager=apt-get
+  fi
   if [ -x /usr/local/bin/brew ] || [ -x /sw/bin/brew ] || [ -x /sw/local/bin/brew ]; then
     	packager=brew
 	SUDO=
-  fi
-  if [ -x /usr/bin/apt-get ] || [ -x /usr/local/bin/apt-get ]; then
-	packager=apt-get   # overrides brew if you have them both
-  fi
-  if [ -x /usr/bin/yum ] || [ -x /usr/local/bin/yum ]; then
-	  packager=yum   # overrides all of them (redhat/fedora)
   fi
   if [ "$packager" ]; then
 	echo 'CCGLAB install: you have an installer for standard packages'
