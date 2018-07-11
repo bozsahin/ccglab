@@ -73,7 +73,11 @@ the ccglab install completion script.
 
 Like Ubuntu's apt-get, Fedora installer is weird; it's repos are all closed by default, so the installer won't work out of the box. 
 Find out where
-<code>sbcl</code> and <code>rlwrap</code> are in the yum-world.
+<code>sbcl</code> and <code>rlwrap</code> are in the yum-world; or do
+
+<code>yum-config-manager --enable \*</code>
+
+to enable everything at your own risk; assuming you have <code>yum-utils</code> installed. What a roundabout way, RH!
 
 <em>OTHER LINUXES</em>
 
