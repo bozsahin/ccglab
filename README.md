@@ -67,7 +67,6 @@ in the beginning. Do the following to enable them before running
 the ccglab install completion script.
 
            sudo add-apt-repository universe
-           sudo add-apt-repository multiverse
            sudo apt-get update
 
 <em>ARE YOU FEDORAized?</em>
