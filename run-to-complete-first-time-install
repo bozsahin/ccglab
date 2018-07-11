@@ -23,15 +23,9 @@ fi
 # check to see if a Lisp for ccglab has been installed before
 if [ -x /usr/local/bin/sbcl ] || [ -x /usr/bin/sbcl ] || [ -x /usr/local/bin/ccl ] || [ -x /usr/bin/ccl ]; then
   echo 'CCGlab install: An installed ANSI Common Lisp is found'
-  lisp1=`which sbcl`
-  lisp2=`which ccl`
   echo '? Respond as NONE if you do NOT want to use it'
-  if [ $lisp1 ]; then
-	  echo "You have $lisp"
-  fi
-  if [ $lisp2 ]; then
-	  echo "You have $lisp2"
-  fi
+  echo "You have `which sbcl`"
+  echo "You have `which ccl`"
   read -r -p '? What is the full path of your preferred Lisp executable? ' locallisp
 fi
 if [ -x "$locallisp" ]; then 
