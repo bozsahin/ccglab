@@ -77,13 +77,15 @@ Find out where
 
 <em>OTHER LINUXES</em>
 
-Arch, Mint, Suse, Debian, MacOS do not seem to have this peculiar Ubuntu and RedHat caste of packages. The packages for sbcl and rlwrap ara available. CCL too.
+Arch, Mint, Suse, Debian, MacOS do not seem to have this peculiar Ubuntu and RedHat caste of packages. 
+
+The packages for sbcl and rlwrap are available for them. CCL too.
 
 <em>MANUAL INSTALL:</em>
 
 The installer script works for several linuxes and unixes and their derivatives (Ubuntu, Debian, Mint, Fedora, Redhat, MacOS).
 
-If you're tired of weird choices of linux installers, try the safe and longer way:
+If you're tired of weird defaults of linux installers, try the safe and longer way:
 
 <ul>
 <li> If you use Windows, install virtualbox, set an Ubuntu or Mint machine (easiest ones), and follow the instructions above for install.
