@@ -1,7 +1,7 @@
 # ccglab
 Combinatory Categorial Grammar (CCG): All combinators, native input format, parsing to logical form (aka semantic parsing), parameter estimation for probabilistic CCG.
 
-<b>Also have a look at the companion repos, <a href="https://github.com/bozsahin/ccglab-grammars">ccglab-grammars</a>, 
+<b>Have a look at the companion repos, <a href="https://github.com/bozsahin/ccglab-grammars">ccglab-grammars</a>, 
 and <a href="https://github.com/bozsahin/ccglab-models">ccglab-models</a>, which contain grammars and models developed in CCGlab</b>.
 
 <em>FIRST TIME INSTALL (assuming you have <code>git</code>):</em>
@@ -12,7 +12,7 @@ and <a href="https://github.com/bozsahin/ccglab-models">ccglab-models</a>, which
 <br>This will create the repository in <code>h/ccglab</code>
 <br>This is your ccglab home.
 <li> <code>cd h/ccglab</code>
-<li> Execute <code>./run-to-complete-first-time-install</code> bash script in the repo to get the extras needed, and to set up the paths so that CCGlab is usable from anywhere in your user account. 
+<li> Execute <code>./run-to-complete-first-time-install</code> bash script in the repo to get the extras needed, and to set up the paths so that CCGlab is usable from anywhere in your user account. <br>
 <b>Please read the rest of this document before you run the script.</b>
 <li> Open a new bash terminal and run <code>ccglab</code> script from anywhere.
 </ol>
@@ -42,22 +42,20 @@ If you want the installer to install a Common Lisp and <code>rlwrap</code> for y
 <ul>
 <li> <code>apt-get</code> (the most common package installer for linuxes, at least for debian-based linuxes--ubuntu, linux mint, debian etc.).
 <li> <code>brew</code> https://brew.sh/ (a common installer for MacOS)
+           <li> <code>yum</code> (installer for redhat spin offs including Fedora)
 </ul>
+
+If you have all of them, like me, it installs with <code>yum</code>.
 
 A virtual box can be installed in Windows, which effectively gives CCGlab in Windows.
 
 Linuxes and MacOSs are native environments for CCGlab.
 
-That will give you what CCGlab needs for fully automatic install and run:
+<b> You need the following to run the install script</b>:
 
-<code>bash, sed, apt-get/brew, wget</code>
+<code>bash, sed, apt-get/brew/yum, wget</code>
 
-With the exception of <code>apt-get/brew</code> the rest is available out-of-the-box in most if not all linuxes. 
-
-Wget is NOT available out-of-the-box in MAcOS or Ubuntu for some reason. Please make sure you have it before
-running the script.
-
-To make sure, do e.g. <code>which apt-get</code> to find out. If you don't get a response, you don't have it.
+To make sure, do e.g. <code>which wget</code> to find out. If you don't get a response, you don't have it.
 
 <em>NEW TO UBUNTU?</em>
 
@@ -72,20 +70,24 @@ the ccglab install completion script.
            sudo add-apt-repository multiverse
            sudo apt-get update
 
+<em>ARE YOU FEDORAized?</em>
+
+Like Ubuntu's apt-get, Fedora installer is weird; it's repos are all closed by default, so the installer won't work out of the box. 
+Find out where
+<code>sbcl</code> and <code>rlwrap</code> are in the yum-world.
+
 <em>OTHER LINUXES</em>
 
-Arch, Mint, Suse, Debian, RH, Fedora, MacOS do not seem to have this peculiar Ubuntu caste of packages. The packages for sbcl and rlwrap ara available. CCL too.
+Arch, Mint, Suse, Debian, MacOS do not seem to have this peculiar Ubuntu caste of packages. The packages for sbcl and rlwrap ara available. CCL too.
 
-<em>INSTALLING with LEGACY ccglab</em>
+<em>MANUAL INSTALL:</em>
 
-If you have a pre-git CCGlab installed, the new install script will ask whether you want to upgrade that one.
-
-<em>OTHER LINUXES and/or MANUAL INSTALL:</em>
+If you're tired of weird choices of linux installers, try the safe and longer way:
 
 <ul>
-<li> The installer script works for Debian-based linuxes (Ubuntu, Debian, Mint etc.) and MacOS.
+<li> The installer script works for Debian-based linuxes (Ubuntu, Debian, Mint, Fedora etc.) and MacOS.
 <li> If you use Windows, install virtualbox, set an Ubuntu machine (easiest one), and follow the instructions above for install.
-<li> If you have another linux (arch, fedora, suse etc.), just clone this repo, get <a href="http://web.science.mq.edu.au/~mjohnson/code/lalrparser.lisp">lalr</a>
+<li> If you have another linux (arch, debian suse etc.), just clone this repo, get <a href="http://web.science.mq.edu.au/~mjohnson/code/lalrparser.lisp">lalr</a>
 somewhere in your machine, and set and <code>export</code> the following bash variables:
 <ol>
 <li><code>CCGLAB_HOME</code> to where the <code>ccglab</code> repo is
