@@ -77,15 +77,16 @@ Find out where
 
 <em>OTHER LINUXES</em>
 
-Arch, Mint, Suse, Debian, MacOS do not seem to have this peculiar Ubuntu caste of packages. The packages for sbcl and rlwrap ara available. CCL too.
+Arch, Mint, Suse, Debian, MacOS do not seem to have this peculiar Ubuntu and RedHat caste of packages. The packages for sbcl and rlwrap ara available. CCL too.
 
 <em>MANUAL INSTALL:</em>
+
+The installer script works for several linuxes and unixes and their derivatives (Ubuntu, Debian, Mint, Fedora, Redhat, MacOS).
 
 If you're tired of weird choices of linux installers, try the safe and longer way:
 
 <ul>
-<li> The installer script works for Debian-based linuxes (Ubuntu, Debian, Mint, Fedora etc.) and MacOS.
-<li> If you use Windows, install virtualbox, set an Ubuntu machine (easiest one), and follow the instructions above for install.
+<li> If you use Windows, install virtualbox, set an Ubuntu or Mint machine (easiest ones), and follow the instructions above for install.
 <li> If you have another linux (arch, debian suse etc.), just clone this repo, get <a href="http://web.science.mq.edu.au/~mjohnson/code/lalrparser.lisp">lalr</a>
 somewhere in your machine, and set and <code>export</code> the following bash variables:
 <ol>
