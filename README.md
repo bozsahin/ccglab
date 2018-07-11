@@ -102,8 +102,6 @@ The packages for sbcl and rlwrap are available for them. CCL too.
 
 <em>MANUAL INSTALL:</em>
 
-The installer script works for several linuxes and unixes and their derivatives (Ubuntu, Debian, Mint, Fedora, Redhat, MacOS).
-
 If you're tired of weird defaults of linux installers, try the safe and longer way:
 
 <ul>
