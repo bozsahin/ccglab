@@ -22,7 +22,7 @@ You need
 
 The installers have quirky options for finding packages that CCGlab needs.
 
-Before you run the CCGlab installer, do the following:
+Do the following to get preliminaries out of the way:
 
 <em>MACOS</em>
 
