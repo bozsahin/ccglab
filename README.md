@@ -69,7 +69,7 @@ I recommend seting up an Ubuntu virtualbox, because it allows you to try it with
 If you use CCGLAB from a virtualbox, save your machine state rather than power off the virtual machine.
 You won't have to do all of the above over and over.
 
-<B>FIRST TIME INSTALL</B>
+<B>FIRST TIME INSTALL of CCGLAB</B>
 
 <ol>
 <li> <code>cd h</code>, where <code>h</code> is your chosen parent directory for CCGlab.
