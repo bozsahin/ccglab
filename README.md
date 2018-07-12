@@ -21,8 +21,7 @@ You need
 </ol>
 
 The installers have quirky options for finding packages that CCGlab needs.
-
-Do the following to get preliminaries out of the way:
+Do the following to get the preliminaries out of the way properly:
 
 <em>MACOS</em>
 
