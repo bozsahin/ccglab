@@ -60,7 +60,7 @@ You need a linux/unix system, either real or in a virtual box such as Oracle's: 
 
 A virtual box can be installed in Windows, which effectively gives CCGlab in Windows.
 
-<B>FIRST TIME INSTALL (assuming you have <code>git</code>):</B>
+<B>FIRST TIME INSTALL</B>
 
 <ol>
 <li> <code>cd h</code>, where <code>h</code> is your chosen parent directory for CCGlab.
