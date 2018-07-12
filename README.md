@@ -64,7 +64,7 @@ A virtual box can be installed in Windows, which effectively gives CCGlab in Win
 
 <ol>
 <li> <code>cd h</code>, where <code>h</code> is your chosen parent directory for CCGlab.
-<li> <code>git clone git://github.com/bozsahin/ccglab</code>
+<li> <code>git clone https://github.com/bozsahin/ccglab</code>
 <br>This will create the repository in <code>h/ccglab</code>
 <br>This is your ccglab home.
 <li> <code>cd h/ccglab</code>
