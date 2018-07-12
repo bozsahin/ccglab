@@ -56,7 +56,7 @@ If you're not the machine's administrator, you need <code>sudo</code> priviledge
 <li> <code> yum install wget</code>
 </ol>
 
-If you're not the machine's administrator, you need <code>sudo</code> priviledges to do 2-3.
+If you're not the machine's administrator, you need <code>sudo</code> priviledges to do 3--4.
 
 <em>OTHER LINUXES</em>
 
