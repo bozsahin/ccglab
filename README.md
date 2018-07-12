@@ -60,6 +60,13 @@ You need a linux/unix system, either real or in a virtual box such as Oracle's: 
 
 A virtual box can be installed in Windows, which effectively gives CCGlab in Windows.
 
+Then follow some of the advice above for linuxes, depending on your virtual machine.
+
+I recommend seting up an Ubuntu virtualbox, because it allows you to try it without fully installing it.
+
+If you use CCGLAB from a virtualbox, save your machine state rather than power off the virtual machine.
+You won't have to do all of the above over and over.
+
 <B>FIRST TIME INSTALL</B>
 
 <ol>
