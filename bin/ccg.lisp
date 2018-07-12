@@ -970,16 +970,18 @@
   For testing purposes only."
   (maphash #'(lambda (k v) (format t "~%~A = ~A~%" k v)) *cky-hashtable*))
 
-(defun cky-show-der (row col)
+(defun cky-show-der (row col &optional (onto nil))
   "tries to print the derivations ending in CKY cell (row col) as humanly as possible. Only final result is
-  normalized in its LF."
+  normalized in its LF. Onto is assumed to be a basic cat, and if supplied only these solutions will be shown"
   (do ((m 1 (incf m)))
     ((null (machash (list row col m) *cky-hashtable*)))
-    (format t "~2%Derivation ~A~%--------------" m)
-    (format t (cky-thread (list row col m)))
-    (format t "~2&Final LF, normal-order evaluated: ~2%    ~A =~%    ~A" 
-	    (beta-normalize-outer (cky-sem (list row col m)))
-	    (display-lf (beta-normalize-outer (cky-sem (list row col m))))))
+    (if (or (not onto) (equal (machash 'BCAT 'SYN (nv-list-val 'SOLUTION (machash (list row col m) *cky-hashtable*))) onto))
+      (progn 
+	(format t "~2%Derivation ~A~%--------------" m)
+	(format t (cky-thread (list row col m)))
+	(format t "~2&Final LF, normal-order evaluated: ~2%    ~A =~%    ~A" 
+		(beta-normalize-outer (cky-sem (list row col m)))
+		(display-lf (beta-normalize-outer (cky-sem (list row col m))))))))
   (format t "~2&Try (cky-pprint) to see the details including the features and slash modalities.")
   (format t  "~&    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>."))
 
@@ -989,9 +991,9 @@
      (format t "~2%Derivation ~A~%----------------~%" m)
      (beta-normalize (cky-sem (list row col m)))))
 
-(defun cky-show-deduction ()
+(defun cky-show-deduction (&optional (onto nil))
   "the answer is in first column of row n, which is the length of the string."
-  (cky-show-der (length *cky-input*) 1))
+  (cky-show-der (length *cky-input*) 1 onto))
 
 (defun cky-show-lf-eqv ()
   "does one check: evaluate results in normal and applicative order, and report differences"
