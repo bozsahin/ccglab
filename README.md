@@ -1,10 +1,66 @@
 # ccglab
-Combinatory Categorial Grammar (CCG): All combinators, native input format, parsing to logical form (aka semantic parsing), parameter estimation for probabilistic CCG.
+Combinatory Categorial Grammar (CCG): All combinators, common grammar format, parsing to logical form (aka semantic parsing), parameter estimation for probabilistic CCG.
 
 <b>Have a look at the companion repos, <a href="https://github.com/bozsahin/ccglab-grammars">ccglab-grammars</a>, 
 and <a href="https://github.com/bozsahin/ccglab-models">ccglab-models</a>, which contain grammars and models developed in CCGlab</b>.
 
-<em>FIRST TIME INSTALL (assuming you have <code>git</code>):</em>
+This is Common Lisp code running on linux/macos. If you already have an ANSI Common Lisp, it can work with it too.
+
+(GCL is ANSI but it does not come with CLOS. This is unfortunate because some dispatch macros
+for the Lisp reader needs methods, therefore not usable in GCL out of the box.)
+
+SBCL and CCL are usable out of the box for CCGlab. 
+
+<b>PRELIMINARIES for LINUX/MACOS USERS</b>
+
+You need
+<ol>
+<li> git
+<li> wget
+<li> an installer (apt-get, yum, or brew, depending on your architecture)
+</ol>
+
+The installers have quirky options for finding packages that CCGlab needs.
+Before you run the CCGlab installer, do the following:
+
+<em>UBUNTU</em>
+
+<ol>
+<li> <code> sudo add-apt-repository universe</code>
+
+<li> <code>sudo apt-get update</code>
+
+<li> <code>apt-get install git</code>
+
+<li> <code>apt-get install wget</code>
+</ol>
+
+If you're not the machine's administrator, you need <code>sudo</code> priviledges to do these things.
+
+<em>FEDORA</em>
+
+Like Ubuntu's apt-get, Fedora installer is weird; it's repos are all closed by default, so the installer won't work out of the box. 
+
+Do the following:
+<ol>
+<li> <code>yum-config-manager --enable \\\*</code>
+<li> <code> yum install git</code>
+<li> <code> yum install wget</code>
+</ol>
+
+<em>OTHER LINUXES</em>
+
+Arch, Mint, Suse, Debian, MacOS do not seem to have this peculiar Ubuntu and RedHat caste of packages. 
+
+The packages for sbcl and rlwrap are available for them. CCL Lisp too; if you feel like using it instead of SBCL.
+
+<b>PRELIMINARIES FOR WINDOWS</b>
+
+You need a linux/unix system, either real or in a virtual box such as Oracle's: https://www.virtualbox.org/.
+
+A virtual box can be installed in Windows, which effectively gives CCGlab in Windows.
+
+<B>FIRST TIME INSTALL (assuming you have <code>git</code>):</B>
 
 <ol>
 <li> <code>cd h</code>, where <code>h</code> is your chosen parent directory for CCGlab.
@@ -13,7 +69,6 @@ and <a href="https://github.com/bozsahin/ccglab-models">ccglab-models</a>, which
 <br>This is your ccglab home.
 <li> <code>cd h/ccglab</code>
 <li> Execute <code>./run-to-complete-first-time-install</code> bash script in the repo to get the extras needed, and to set up the paths so that CCGlab is usable from anywhere in your user account. <br>
-<b>Please read the rest of this document before you run the script.</b>
 <li> Open a new bash terminal and run <code>ccglab</code> script from anywhere.
 </ol>
 
@@ -24,83 +79,10 @@ and <a href="https://github.com/bozsahin/ccglab-models">ccglab-models</a>, which
 <li><code>git pull</code>
 </ol>
 
-This is Common Lisp code. If you already have an ANSI Common Lisp, it can work with it too.
-
-(GCL is ANSI but it does not come with CLOS. This is unfortunate because some dispatch macros
-for the Lisp reader needs methods, therefore not usable in GCL out of the box.)
-
-SBCL and CCL are usable out of the box for CCGlab.
-
 Latest release is shown by <code>(which-ccglab).</code> Announced git releases may be slightly behind the latest,
 which is always this copy. Just clone this rather than download the release if you want the latest.
 
-<em>SOFTWARE REQUIREMENTS:</em>
-
-You need a linux/unix system, either real or in a virtual box such as Oracle's: https://www.virtualbox.org/.
-
-If you want the installer to install a Common Lisp and <code>rlwrap</code> for you, you need either
-<ul>
-<li> <code>apt-get</code> (the most common package installer for linuxes, at least for debian-based linuxes--ubuntu, linux mint, debian etc.).
-<li> <code>brew</code> https://brew.sh/ (a common installer for MacOS)
-           <li> <code>yum</code> (installer for redhat spin offs including Fedora)
-</ul>
-
-If you have all of them, like me, it installs with <code>brew</code>.
-
-A virtual box can be installed in Windows, which effectively gives CCGlab in Windows.
-
-Linuxes and MacOSs are native environments for CCGlab.
-
-<b> You need the following to run the install script</b>:
-
-<code>apt-get/brew/yum, wget</code>
-
-To make sure, do e.g. <code>which wget</code> to find out. If you don't get a response, you don't have it.
-
-<em>NEW TO UBUNTU?</em>
-
-Ubuntu has built-in packages for SBCL and rlwrap, which <code>apt-get</code> in the ccglab install script
-can install very easily. 
-
-It's just that Ubuntu starts with non-basic packages turned off so it can't seem to find SBCL/rlwrap
-in the beginning. Do the following to enable them before running
-the ccglab install completion script.
-
-           sudo add-apt-repository universe
-           sudo apt-get update
-Then do:
-
-<code>apt-get install git</code>
-
-<code>apt-get install wget</code>
-
-if you don't have them.
-
-<em>ARE YOU FEDORAized?</em>
-
-Like Ubuntu's apt-get, Fedora installer is weird; it's repos are all closed by default, so the installer won't work out of the box. 
-Find out where
-<code>sbcl</code> and <code>rlwrap</code> are in the yum-world; or do
-
-<code>yum-config-manager --enable \\\*</code>
-
-to enable everything at your own risk; assuming you have <code>yum-utils</code> installed. What a roundabout way, RH!
-
-Then do:
-
-<code> yum install git</code>
-
-<code> yum install wget</code>
-
-if you don't have them.
-
-<em>OTHER LINUXES</em>
-
-Arch, Mint, Suse, Debian, MacOS do not seem to have this peculiar Ubuntu and RedHat caste of packages. 
-
-The packages for sbcl and rlwrap are available for them. CCL too.
-
-<em>MANUAL INSTALL:</em>
+<B>MANUAL INSTALL:</B>
 
 If you're tired of weird defaults of linux installers, try the safe and longer way:
 
