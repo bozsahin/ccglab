@@ -72,7 +72,7 @@ A virtual box can be installed in Windows, which effectively gives CCGlab in Win
 
 Then follow one of the advices above for linuxes, depending on your virtual machine.
 
-I recommend seting up an Ubuntu virtualbox, because it allows you to try it without fully installing it.
+I recommend setting up an Ubuntu virtualbox, because it allows you to try without fully installing it.
 
 If you use CCGLAB from a virtualbox, save your machine state rather than power off the virtual machine.
 You won't have to do all of the above over and over.
