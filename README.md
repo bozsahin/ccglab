@@ -21,9 +21,10 @@ You need
 </ol>
 
 The installers have quirky options for finding packages that CCGlab needs.
+
 Before you run the CCGlab installer, do the following:
 
-<em>UBUNTU</em>
+<em>UBUNTU/DEBIAN/MINT</em>
 
 <ol>
 <li> <code> sudo add-apt-repository universe</code>
@@ -35,22 +36,21 @@ Before you run the CCGlab installer, do the following:
 <li> <code>apt-get install wget</code>
 </ol>
 
-If you're not the machine's administrator, you need <code>sudo</code> priviledges to do these things.
+If you're not the machine's administrator, you need <code>sudo</code> priviledges to do 3-4.
 
-<em>FEDORA</em>
+<em>FEDORA/RedHat</em>
 
-Like Ubuntu's apt-get, Fedora installer is weird; it's repos are all closed by default, so the installer won't work out of the box. 
-
-Do the following:
 <ol>
 <li> <code>yum-config-manager --enable \\\*</code>
 <li> <code> yum install git</code>
 <li> <code> yum install wget</code>
 </ol>
 
+If you're not the machine's administrator, you need <code>sudo</code> priviledges to do 2-3.
+
 <em>OTHER LINUXES</em>
 
-Arch, Mint, Suse, Debian, MacOS do not seem to have this peculiar Ubuntu and RedHat caste of packages. 
+Arch, Suse, MacOS do not seem to have this peculiar Ubuntu and RedHat/Fedora caste of packages. 
 
 The packages for sbcl and rlwrap are available for them. CCL Lisp too; if you feel like using it instead of SBCL.
 
