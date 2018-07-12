@@ -8,7 +8,7 @@ echo 'CCGlab external resources install and path set up'
 echo '================================================='
 # check to see if lalr has been installed before
 if [ ! "$LALR_HOME" ]; then
-  read -r -p "CCGlab install: lalrparser.lisp package is external to CCGlab and required.\nWhere do you want to install it? " lalr
+  read -r -p "CCGlab install: lalrparser.lisp package is external to CCGlab and required. Where do you want to install it? " lalr
   if [ -d "$lalr" ] && [ -w "$lalr" ]; then
     cd $lalr
     wget -v --no-check-certificate --backups=3 http://web.science.mq.edu.au/~mjohnson/code/lalrparser.lisp
@@ -23,7 +23,13 @@ fi
 # check to see if a Lisp for ccglab has been installed before
 if [ -x /usr/local/bin/sbcl ] || [ -x /usr/bin/sbcl ] || [ -x /usr/local/bin/ccl ] || [ -x /usr/bin/ccl ]; then
   echo 'CCGlab install: An installed ANSI Common Lisp is found'
-  echo '? If you do NOT want to use an existing Lisp, hit RETURN'
+  echo '? Respond as NONE if you do NOT want to use it'
+  if [ `which sbcl` ]; then
+  	echo "You have `which sbcl`"
+  fi
+  if [ `which ccl` ]; then
+  	echo "You have `which ccl`"
+  fi
   read -r -p '? What is the full path of your preferred Lisp executable? ' locallisp
 fi
 if [ -x "$locallisp" ]; then 
@@ -35,12 +41,15 @@ else
 fi
 #check if lisp needs installing
 if [ ! "$locallisp" ]; then
+  if [ -x /usr/bin/yum ] || [ -x /usr/local/bin/yum ]; then
+	  packager=yum   
+  fi
+  if [ -x /usr/bin/apt-get ] || [ -x /usr/local/bin/apt-get ]; then
+	packager=apt-get
+  fi
   if [ -x /usr/local/bin/brew ] || [ -x /sw/bin/brew ] || [ -x /sw/local/bin/brew ]; then
     	packager=brew
 	SUDO=
-  fi
-  if [ -x /usr/bin/apt-get ] || [ -x /usr/local/bin/apt-get ]; then
-	packager=apt-get   # overrides brew if you have them both
   fi
   if [ "$packager" ]; then
 	echo 'CCGLAB install: you have an installer for standard packages'
@@ -59,7 +68,7 @@ if [ ! "$locallisp" ]; then
 		$SUDO $packager install rlwrap
         fi
   else
-	echo '! apt-get or brew not found. I leave Common Lisp and rlwrap handling to you.'
+	echo '! apt-get, yum or brew not found. I leave Common Lisp and rlwrap handling to you.'
 	echo '  The README.md in the git repo shows how you can set them manually.'
   fi
 else
