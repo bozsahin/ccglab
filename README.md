@@ -24,6 +24,15 @@ The installers have quirky options for finding packages that CCGlab needs.
 
 Before you run the CCGlab installer, do the following:
 
+<em>MACOS</em>
+
+<ol>
+<li> get brew: <code>/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"</code>
+<li> <code>brew install git</code>
+<li> <code>brew install wget</code>
+</ol>
+
+
 <em>UBUNTU/DEBIAN/MINT</em>
 
 <ol>
