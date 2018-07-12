@@ -27,9 +27,9 @@ Before you run the CCGlab installer, do the following:
 <em>UBUNTU/DEBIAN/MINT</em>
 
 <ol>
-<li> <code> sudo add-apt-repository universe</code>
+<li> <code>add-apt-repository universe</code>
 
-<li> <code>sudo apt-get update</code>
+<li> <code>apt-get update</code>
 
 <li> <code>apt-get install git</code>
 
