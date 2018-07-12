@@ -40,7 +40,9 @@ If you're not the machine's administrator, you need <code>sudo</code> priviledge
 
 <em>FEDORA/RedHat</em>
 
+
 <ol>
+<li> <code>yum install yum-utils</code>
 <li> <code>yum-config-manager --enable \*</code>
 <li> <code> yum install git</code>
 <li> <code> yum install wget</code>
