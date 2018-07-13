@@ -30,7 +30,7 @@ Do the following to get the preliminaries out of the way properly:
 
 <ol>
 <li> Open the <code>terminal</code> app.
-<li> get brew by executing this from command line:
+<li> get brew by executing these from the command line:
            <br> <code>/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"</code>
 <li> <code>brew install git</code>
 <li> <code>brew install wget</code>
