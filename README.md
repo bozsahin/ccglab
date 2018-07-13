@@ -82,7 +82,7 @@ I recommend setting up an Ubuntu virtualbox, because it allows you to try withou
 If you use CCGLAB from a virtualbox, save your machine state rather than power off the virtual machine.
 You won't have to do all of the above over and over.
 
-Better yet, put a linux partition on your machine if you intend to use CCGlab quite often. You might forget
+Even better, put a linux partition on your machine if you intend to use CCGlab quite often. You might forget
 to save the machine state one day, and you'd have to start all over again.
 
 <B>FIRST TIME INSTALL of CCGLAB</B>
