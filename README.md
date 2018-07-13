@@ -6,6 +6,9 @@ and <a href="https://github.com/bozsahin/ccglab-models">ccglab-models</a>, which
 
 This is Common Lisp code running on linux/macos. If you already have an ANSI Common Lisp, it can work with it too.
 
+<b>There is an installer for ccglab, which I describe toward the bottom of readme. Please read the preliminaries first to make
+           it ready</b>
+
 (GCL is ANSI but it does not come with CLOS. This is unfortunate because some dispatch macros
 for the Lisp reader needs methods, therefore not usable in GCL out of the box.)
 
