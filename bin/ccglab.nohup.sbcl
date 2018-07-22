@@ -1,0 +1,23 @@
+#!/bin/bash
+# to run big training sessions offline without hangups.
+# call with nohup prefix.
+# -cem bozsahin, july 2018
+# $1 : Lisp code to run non-interactively.
+#      The input lisp code must be in the file $CCGLAB_HOME/bin/$1.lisp
+#      and the toplevel call in it must be to the function named $1. 
+# $2 : sbcl dynamic space size in KBytes; 
+#      make sure /proc/sys/vm/max_map_count can handle this.
+#      That is a system wide limit; not just for sbcl.
+# $3 : sbcl garbage-collect cycle size in megabytes (> 51 to rise above default)
+# $4 : grammar name (without .ind extension; that's the one located and used) 
+# $5 : Must be nil if you DONT want to save the training, t otherwise
+# $6 : N              3 learning parameters (passes, learn rate, learn rate rate)
+# $7 : alpha0
+# $8 : c
+CCGLAB_LISP="`which sbcl` --dynamic-space-size $2"
+echo '==================='
+echo "I am called as: $0 $@"
+echo "I will call sbcl as: $CCGLAB_LISP"
+echo "It will call $1 in $CCGLAB_HOME/bin/$1.lisp as: ($1 \"$4\" $3 $5 \"$4.ind.nohupped\" $6 $7 $8)"
+echo '==================='
+$RLWRAP $CCGLAB_LISP --load $LALR_HOME/lalrparser.lisp --load $CCGLAB_HOME/bin/ccg.lisp --load $CCGLAB_HOME/bin/$1.lisp --eval '(reset-globals)' --eval "($1 \"$4\" $3 $5 \"$4.ind.nohupped\" $6 $7 $8)" --eval '(sb-ext:exit)'
