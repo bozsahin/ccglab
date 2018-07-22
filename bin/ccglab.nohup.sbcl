@@ -1,6 +1,9 @@
 #!/bin/bash
+# NOHUP THIS
 # to run big training sessions offline without hangups using train-nohup-sbcl.lisp
-# MUST CALL with nohup prefix for that to work.
+# DO NOT Ctrl-c/d/z the terminal for this. It's OK if it times out; your process
+#   continues to run, not OK
+#   if you interrupt, which goes into Lisp!!
 # -cem bozsahin, july 2018
 # $1 : sbcl dynamic space size in KBytes; 
 #      make sure /proc/sys/vm/max_map_count can handle this.
