@@ -18,6 +18,7 @@ TRAIN=train-nohup-sbcl
 CCGLAB_LISP="`which sbcl` --dynamic-space-size $1"
 echo '==================='
 echo "I am called as: $0 $@"
+echo "            at: `date`"
 echo "I will call sbcl as: $CCGLAB_LISP"
 echo "It will call $TRAIN in $CCGLAB_HOME/bin/$TRAIN.lisp as: ($TRAIN \"$3\" $2 $4 \"$3.ind.nohupped\" $5 $6 $7)"
 echo '==================='
