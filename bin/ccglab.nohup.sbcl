@@ -14,12 +14,16 @@
 # $5 : N              3 learning parameters (passes, learn rate, learn rate rate)
 # $6 : alpha0
 # $7 : c
+# $8 : log file for the run (so that multi-thread runs dont override their results)
+#      This is also the reason why output .ind file has a long name to characterize
+#      the experiment.
 TRAIN=train-nohup-sbcl
 CCGLAB_LISP="`which sbcl` --dynamic-space-size $1"
-echo '==================='
-echo "I am called as: $0 $@"
-echo "            at: `date`"
-echo "I will call sbcl as: $CCGLAB_LISP"
-echo "It will call $TRAIN in $CCGLAB_HOME/bin/$TRAIN.lisp as: ($TRAIN \"$3\" $2 $4 \"$3.ind.nohupped\" $5 $6 $7)"
-echo '==================='
-$RLWRAP $CCGLAB_LISP --load $LALR_HOME/lalrparser.lisp --load $CCGLAB_HOME/bin/ccg.lisp --load $CCGLAB_HOME/bin/$TRAIN.lisp --eval '(reset-globals)' --eval "($TRAIN \"$3\" $2 $4 \"$3.ind.nohupped\" $5 $6 $7)" --eval '(sb-ext:exit)'
+echo '==================='  >> $8
+echo "I am called as: $0 $@" >> $8
+echo "            at: `date`" >> $8
+echo "Log goes to   : $8" >> $8
+echo "I will call sbcl as: $CCGLAB_LISP" >> $8
+echo "It will call $TRAIN in $CCGLAB_HOME/bin/$TRAIN.lisp as: ($TRAIN \"$3\" $2 $4 \"$3.ind.nohupped.$5N.$6a.$7c\" $5 $6 $7)" >> $8
+echo '===================' >> $8
+$RLWRAP $CCGLAB_LISP --load $LALR_HOME/lalrparser.lisp --load $CCGLAB_HOME/bin/ccg.lisp --load $CCGLAB_HOME/bin/$TRAIN.lisp --eval '(reset-globals)' --eval "($TRAIN \"$3\" $2 $4 \"$3.ind.nohupped.$5N.$6a.$7c\" $5 $6 $7)" --eval '(sb-ext:exit)' >> $8
