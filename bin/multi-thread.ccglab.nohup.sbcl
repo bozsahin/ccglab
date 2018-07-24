@@ -5,5 +5,6 @@
 #     no comments on dataset; just data. Number of threads needed is calculated from line count.
 #     It's good to have save option set to t in data otherwise you have to decipher garbled output.
 #     There is no telling in what order threads will be run.
+#  -- cem bozsahin, july 2018
 NP=`wc -l < $1`
 cat $1| nohup xargs -n 8 -P $NP ccglab.nohup.sbcl
