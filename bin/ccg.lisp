@@ -379,7 +379,7 @@
   )
 
 (defun which-ccglab ()
-  "CCGlab, version 3.6.1")
+  "CCGlab, version 4.0")
 
 (defun welcome()
   (format t "~%===================================================")
@@ -2721,12 +2721,13 @@
   (and verbose (pprint-hashtable *training-hashtable*)))
 
 (defun make-sorted-solutions (r1 r2)
-  "Creates a list of lists whose first el is analysis no  (3rd item of result cell r1 r2 r3) and second el is cell parameter; returns sorted list"
+  "Creates a list of lists whose first el is analysis no  (3rd item of result cell r1 r2 r3) and second el is cell parameter; returns sorted list
+  if beam is on; the list itself if not."
   (let ((solutions nil))
     (do* ((r3 1 (+ r3 1)))
       ((null (machash (list r1 r2 r3) *cky-hashtable*))) ; loop for every solution 
       (push (list  r3 (get-cell-param (list r1 r2 r3))) solutions))
-    (sort solutions #'> :key #'second)))
+    (if *beamp* (sort solutions #'> :key #'second) solutions)))
 
 (defun inside-outside ()
   "inside-outside algorithm to find non zero counts--all others considered 0. Go as much as beam"
@@ -2763,7 +2764,7 @@
   (let ((r1 (cell-len *cky-max*))
 	(r2 (cell-pos *cky-max*)))
     (setf *training-sorted-solutions-list* (make-sorted-solutions r1 r2)) ;do before in-out for beam effect on both find-derivative and in-out
-    (and debug (format t "~%Number of sorted solutions = ~A" (length *training-sorted-solutions-list*)))))
+    (and debug *beamp* (format t "~%Number of sorted solutions = ~A" (length *training-sorted-solutions-list*)))))
 
 (defun find-derivative-of-log-likelihood (s-lf pairindex verbose debug)
   "given (Si Li) pair find the partial derivative of log likelihood.
