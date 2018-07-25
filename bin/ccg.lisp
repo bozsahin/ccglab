@@ -382,13 +382,13 @@
   "CCGlab, version 4.0")
 
 (defun welcome()
+  (status)
   (format t "~%===================================================")
   (format t "~%Welcome to ~A" (which-ccglab))
   (format t "~%---------------------------------------------------")
-  (status)
   (format t "~%Please send bug reports to cem.bozsahin@gmail.com")
   (format t "~%  with subject line CCGlab: ...")
-  (format t "~%Ready.~%")
+  (format t "~%Ready.")
   (format t "~%===================================================~%"))
 
 (defun beam-value ()
@@ -2721,13 +2721,13 @@
   (and verbose (pprint-hashtable *training-hashtable*)))
 
 (defun make-sorted-solutions (r1 r2)
-  "Creates a list of lists whose first el is analysis no  (3rd item of result cell r1 r2 r3) and second el is cell parameter; returns sorted list
-  if beam is on; the list itself if not."
+  "Creates a list of lists whose first el is analysis no  (3rd item of result cell r1 r2 r3) and second el is cell parameter; 
+  returns sorted list"
   (let ((solutions nil))
     (do* ((r3 1 (+ r3 1)))
       ((null (machash (list r1 r2 r3) *cky-hashtable*))) ; loop for every solution 
       (push (list  r3 (get-cell-param (list r1 r2 r3))) solutions))
-    (if *beamp* (sort solutions #'> :key #'second) solutions)))
+    (if t (sort solutions #'> :key #'second) solutions)))
 
 (defun inside-outside ()
   "inside-outside algorithm to find non zero counts--all others considered 0. Go as much as beam"
@@ -2742,19 +2742,20 @@
 	     (solutions (make-sorted-solutions r1 r2)) 
 	     (keylist nil))
 	(declare (ignore b))
-	(maphash #'(lambda (key val) ; the table was prepared by set-training-parameters
-		     (declare (ignore val))
-		     (block analyses
-			    (let ((cnt 1))
-			      (dolist 
-				(solution solutions)
-				(and *beamp* (> cnt *beam*) (return-from analyses)) ; stop
-				(incf cnt)
-				(if (> (count-feature key (list r1 r2 (first solution))) 0.0) 
-				  (progn 
-				    (push key keylist)
-				    (return-from analyses)))))))  ; finding the item in one result is enough; derivative will calculate sums
-		 *training-hashtable*)
+	(block analyses
+	       (maphash #'(lambda (key val) ; the table was prepared by set-training-parameters
+			    (declare (ignore val))
+			    (block analyses2
+				   (let ((cnt 1))
+				     (dolist 
+				       (solution solutions)
+				       (and *beamp* (> cnt *beam*) (return-from analyses)) ; stop
+				       (incf cnt)
+				       (if (> (count-feature key (list r1 r2 (first solution))) 0.0) 
+					 (progn 
+					   (push key keylist)
+					   (return-from analyses2)))))))  ; finding the item in one result is enough; derivative will calculate sums
+			*training-hashtable*))
 	(setf (machash pairindex *training-non0-hashtable*) keylist)))))
 
 (defun prepare-solutions (debug)
@@ -2764,7 +2765,7 @@
   (let ((r1 (cell-len *cky-max*))
 	(r2 (cell-pos *cky-max*)))
     (setf *training-sorted-solutions-list* (make-sorted-solutions r1 r2)) ;do before in-out for beam effect on both find-derivative and in-out
-    (and debug *beamp* (format t "~%Number of sorted solutions = ~A" (length *training-sorted-solutions-list*)))))
+    (and debug (format t "~%Number of sorted solutions = ~A" (length *training-sorted-solutions-list*)))))
 
 (defun find-derivative-of-log-likelihood (s-lf pairindex verbose debug)
   "given (Si Li) pair find the partial derivative of log likelihood.
@@ -2830,6 +2831,7 @@
   "show the values of parameters per key before and after training"
   (format t "The rule set used in the experiment:~%")
   (switches)
+  (which-ccglab)
   (format t "~%Training parameters: N = ~a alpha0 = ~a c = ~a n = ~a  " 
 	  *bign*  *alpha0* *c* *smalln*)
   (beam-value)
@@ -2892,18 +2894,18 @@
 (defun mklist (obj)
   (if (listp obj) obj (list obj)))
 
-(defmacro oov-off ()
+(defun oov-off ()
   (format t "OOV is reset (OOV errors reported)~%")
   (setf *oovp* nil)
   nil)
 
-
-(defmacro oov-on ()
+(defun oov-on ()
   (setf *oovp* t)
   (format t "OOV is set (OOV errors not reported)~%")
   t)
 
 (defun reset-globals()
+  (format t "~%================ Things to note ===================~%")
   (setf *print-readably* nil)
   (setf *print-pretty* t) 
   (setf *lex-rules-table* nil)
