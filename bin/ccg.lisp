@@ -379,7 +379,7 @@
   )
 
 (defun which-ccglab ()
-  "CCGlab, version 4.0")
+  "CCGlab, version 3.6.1d")
 
 (defun welcome()
   (status)
