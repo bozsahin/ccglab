@@ -1,3 +1,4 @@
 1. On/off switch is added to control out of vocabulary items.
 2. Some scripts added for long training sessions.
 3. Multi-threading support.
+4. Report of parse rank for more selection.
