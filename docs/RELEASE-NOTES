@@ -2,3 +2,4 @@
 2. Some scripts added for long training sessions.
 3. Multi-threading support.
 4. Report of parse rank for more selection.
+5. Some of these changes are ahead of published releases. `Git pull' to see all of them.
