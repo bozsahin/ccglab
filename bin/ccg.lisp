@@ -1549,7 +1549,7 @@
 				 (newsyn (make-complex-cat-hashtable))
 				 (newsynz (make-complex-cat-hashtable)))
 			     (setf (machash 'SEM newht) (&sbar (machash 'SEM ht1) (machash 'SEM ht2)))
-			     (setf (machash 'INDEX newht) '|>xL|) 
+			     (setf (machash 'INDEX newht) '|>Lx|) 
 			     (setf (machash 'SYN newht) newsyn)
 			     (setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht2)) ; \W
 			     (setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht2)) ; \modW
@@ -1576,7 +1576,7 @@
        (eql (machash 'DIR 'RESULT 'SYN ht1) 'BS)
        (member (machash 'MODAL 'SYN ht2) '(ALL HARMONIC))
        (member (machash 'MODAL 'RESULT 'SYN ht1) '(ALL HARMONIC))
-       (multiple-value-bind (match2 b12 b22)
+       (multiple-value-bind (match2 b22 b12)
 		      (cat-match (machash 'ARG 'RESULT 'SYN ht1)  ; Y in (X\Y)|Z
 				 (machash 'RESULT 'SYN ht2))      ; Y in Y\W
 		      (and match2 
@@ -1611,7 +1611,7 @@
        (eql (machash 'DIR 'RESULT 'SYN ht1) 'BS)
        (member (machash 'MODAL 'SYN ht2) '(ALL CROSS))
        (member (machash 'MODAL 'RESULT 'SYN ht1) '(ALL CROSS))
-       (multiple-value-bind (match2 b12 b22)
+       (multiple-value-bind (match2 b22 b12)
 		      (cat-match (machash 'ARG 'RESULT 'SYN ht1)  ; Y in (X\Y)|Z
 				 (machash 'RESULT 'SYN ht2))      ; Y in Y/W
 		      (and match2 
@@ -1619,7 +1619,7 @@
 				 (newsyn (make-complex-cat-hashtable))
 				 (newsynz (make-complex-cat-hashtable)))
 			     (setf (machash 'SEM newht) (&sbar (machash 'SEM ht1) (machash 'SEM ht2)))
-			     (setf (machash 'INDEX newht) '|<xL|) 
+			     (setf (machash 'INDEX newht) '|<Lx|) 
 			     (setf (machash 'SYN newht) newsyn)
 			     (setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht2)) ; /W
 			     (setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht2)) ; /modW
