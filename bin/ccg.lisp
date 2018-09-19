@@ -164,7 +164,7 @@
   `(mk-l (mk-v 'x)(mk-a (mk-a ,f 'x) (mk-a ,g 'x))))
 (defmacro &sbar (f g)
   "Sbar combinator, aka the lost combinator"
-  `(mk-l (mk-v 'z) (mk-l (mk-v 'w) (mk-a (mk-a ,f 'z) (mk-a ,g 'w)))))
+  `(mk-l (mk-v 'w) (mk-l (mk-v 'z) (mk-a (mk-a ,f 'z) (mk-a ,g 'w)))))
 (defmacro &s2 (f g)
   "S^2 combinator. This is actually S'' not Curry's S^2. See Bozsahin 2012"
   `(mk-l (mk-v 'x)(mk-l (mk-v 'y)(mk-a (mk-a ,f 'x) (mk-a (mk-a ,g 'x)'y)))))
@@ -379,7 +379,7 @@
   )
 
 (defun which-ccglab ()
-  "CCGlab, version 3.6.1d")
+  "CCGlab, version 3.6.1.L")
 
 (defun welcome()
   (status)
@@ -1493,7 +1493,8 @@
 										     (append b1 b12)))
 			     newht)))))))
 
-;; this combinator is experimental. In most basic form it is X/Y/Z Y/W -> X/W/Z : \z\w.fz(gw) . It has C in it!
+;; this combinator is experimental. In forward form it is (X/Y)|Z:f Y/W:g -> (X|Z)/W : \w\z.fz(gw). It has C in the style of S
+;; this is MJS version; i had (X/W)|Z as result in L'
 ;; by default all its variants are turned off
 (defun f-subbar (ht1 ht2) 
   "forward substitution bar, aka the lost combinator"
@@ -1506,27 +1507,28 @@
        (member (machash 'MODAL 'SYN ht2) '(ALL HARMONIC))
        (member (machash 'MODAL 'RESULT 'SYN ht1) '(ALL HARMONIC))
        (multiple-value-bind (match2 b12 b22)
-		      (cat-match (machash 'ARG 'RESULT 'SYN ht1)
-				 (machash 'RESULT 'SYN ht2))
+		      (cat-match (machash 'ARG 'RESULT 'SYN ht1)  ; Y in (X/Y)|Z
+				 (machash 'RESULT 'SYN ht2))      ; Y in Y/W
 		      (and match2 
 			   (let ((newht (make-cky-entry-hashtable))
 				 (newsyn (make-complex-cat-hashtable))
-				 (newsynw (make-complex-cat-hashtable)))
+				 (newsynz (make-complex-cat-hashtable)))
 			     (setf (machash 'SEM newht) (&sbar (machash 'SEM ht1) (machash 'SEM ht2)))
 			     (setf (machash 'INDEX newht) '|>L|) 
 			     (setf (machash 'SYN newht) newsyn)
-			     (setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht1))
-			     (setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht1))
-			     (setf (machash 'DIR newsynw) (machash 'DIR 'SYN ht2))
-			     (setf (machash 'RESULT newsynw) (realize-binds 
+			     (setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht2)) ; /W
+			     (setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht2)) ; /modW
+			     (setf (machash 'ARG 'SYN newht) (realize-binds           ;W itself
+							       (machash 'ARG 'SYN ht2) (append nil b22)))
+			     (setf (machash 'DIR newsynz) (machash 'DIR 'SYN ht1)) ; |Z is /Z or \Z
+			     (setf (machash 'MODAL newsynz) (machash 'MODAL 'SYN ht1)) ; |modZ
+			     (setf (machash 'RESULT newsynz) (realize-binds            ; X
 							       (machash 'RESULT 'RESULT 'SYN ht1) 
 											(append nil b12)))
-			     (setf (machash 'ARG newsynw) (realize-binds 
-							    (machash 'ARG 'SYN ht2) 
-							    (append nil b22)))
-			     (setf (machash 'RESULT 'SYN newht) newsynw)
-			     (setf (machash 'ARG 'SYN newht)(realize-binds (machash 'ARG 'SYN ht1) 
-										     (append nil b12)))
+			     (setf (machash 'ARG newsynz) (realize-binds               ; Z
+							    (machash 'ARG 'SYN ht1) 
+							    (append nil b12)))
+			     (setf (machash 'RESULT 'SYN newht) newsynz)  ; result is X|Z not just |Z
 			     newht)))))
 
 (defun fx-subbar (ht1 ht2) 
@@ -1540,95 +1542,98 @@
        (member (machash 'MODAL 'SYN ht2) '(ALL CROSS))
        (member (machash 'MODAL 'RESULT 'SYN ht1) '(ALL CROSS))
        (multiple-value-bind (match2 b12 b22)
-		      (cat-match (machash 'ARG 'RESULT 'SYN ht1)
-				 (machash 'RESULT 'SYN ht2))
+		      (cat-match (machash 'ARG 'RESULT 'SYN ht1)  ; Y in (X/Y)|Z
+				 (machash 'RESULT 'SYN ht2))      ; Y in Y/W
 		      (and match2 
 			   (let ((newht (make-cky-entry-hashtable))
 				 (newsyn (make-complex-cat-hashtable))
-				 (newsynw (make-complex-cat-hashtable)))
+				 (newsynz (make-complex-cat-hashtable)))
 			     (setf (machash 'SEM newht) (&sbar (machash 'SEM ht1) (machash 'SEM ht2)))
-			     (setf (machash 'INDEX newht) '|>Lx|)
+			     (setf (machash 'INDEX newht) '|>xL|) 
 			     (setf (machash 'SYN newht) newsyn)
-			     (setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht1))
-			     (setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht1))
-			     (setf (machash 'DIR newsynw) (machash 'DIR 'SYN ht2))
-			     (setf (machash 'RESULT newsynw) (realize-binds 
+			     (setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht2)) ; \W
+			     (setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht2)) ; \modW
+			     (setf (machash 'ARG 'SYN newht) (realize-binds           ;W itself
+							       (machash 'ARG 'SYN ht2) (append nil b22)))
+			     (setf (machash 'DIR newsynz) (machash 'DIR 'SYN ht1)) ; |Z is /Z or \Z
+			     (setf (machash 'MODAL newsynz) (machash 'MODAL 'SYN ht1)) ; |modZ
+			     (setf (machash 'RESULT newsynz) (realize-binds            ; X
 							       (machash 'RESULT 'RESULT 'SYN ht1) 
 											(append nil b12)))
-			     (setf (machash 'ARG newsynw) (realize-binds 
-							    (machash 'ARG 'SYN ht2) 
-							    (append nil b22)))
-			     (setf (machash 'RESULT 'SYN newht) newsynw)
-			     (setf (machash 'ARG 'SYN newht)(realize-binds (machash 'ARG 'SYN ht1) 
-										     (append nil b12)))
+			     (setf (machash 'ARG newsynz) (realize-binds               ; Z
+							    (machash 'ARG 'SYN ht1) 
+							    (append nil b12)))
+			     (setf (machash 'RESULT 'SYN newht) newsynz)  ; result is X|Z not just |Z
 			     newht)))))
 
-(defun b-subbar (ht1 ht2) 
+(defun b-subbar (ht2 ht1) 
   "backward substitution bar"
   (and (complexp-hash (machash 'SYN ht1))
        (complexp-hash (machash 'SYN ht2))
-       (machash 'RESULT 'SYN ht2) 
-       (machash 'DIR 'RESULT 'SYN ht2) ; result must be functor too
-       (eql (machash 'DIR 'SYN ht1) 'BS)
-       (eql (machash 'DIR 'RESULT 'SYN ht2) 'BS)
-       (member (machash 'MODAL 'SYN ht1) '(ALL HARMONIC))
-       (member (machash 'MODAL 'RESULT 'SYN ht2) '(ALL HARMONIC))
-       (multiple-value-bind (match2 b22 b12)
-		      (cat-match (machash 'ARG 'RESULT 'SYN ht2)
-				 (machash 'RESULT 'SYN ht1))
+       (machash 'RESULT 'SYN ht1) 
+       (machash 'DIR 'RESULT 'SYN ht1) ; result must be functor too
+       (eql (machash 'DIR 'SYN ht2) 'BS)
+       (eql (machash 'DIR 'RESULT 'SYN ht1) 'BS)
+       (member (machash 'MODAL 'SYN ht2) '(ALL HARMONIC))
+       (member (machash 'MODAL 'RESULT 'SYN ht1) '(ALL HARMONIC))
+       (multiple-value-bind (match2 b12 b22)
+		      (cat-match (machash 'ARG 'RESULT 'SYN ht1)  ; Y in (X\Y)|Z
+				 (machash 'RESULT 'SYN ht2))      ; Y in Y\W
 		      (and match2 
 			   (let ((newht (make-cky-entry-hashtable))
 				 (newsyn (make-complex-cat-hashtable))
-				 (newsynw (make-complex-cat-hashtable)))
-			     (setf (machash 'SEM newht) (&sbar (machash 'SEM ht2) (machash 'SEM ht1)))
+				 (newsynz (make-complex-cat-hashtable)))
+			     (setf (machash 'SEM newht) (&sbar (machash 'SEM ht1) (machash 'SEM ht2)))
 			     (setf (machash 'INDEX newht) '|<L|) 
 			     (setf (machash 'SYN newht) newsyn)
-			     (setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht2))
-			     (setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht2))
-			     (setf (machash 'DIR newsynw) (machash 'DIR 'SYN ht1))
-			     (setf (machash 'RESULT newsynw) (realize-binds 
-							       (machash 'RESULT 'RESULT 'SYN ht2) 
-											(append nil b22)))
-			     (setf (machash 'ARG newsynw) (realize-binds 
+			     (setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht2)) ; \W
+			     (setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht2)) ; \modW
+			     (setf (machash 'ARG 'SYN newht) (realize-binds           ;W itself
+							       (machash 'ARG 'SYN ht2) (append nil b22)))
+			     (setf (machash 'DIR newsynz) (machash 'DIR 'SYN ht1)) ; |Z is /Z or \Z
+			     (setf (machash 'MODAL newsynz) (machash 'MODAL 'SYN ht1)) ; |modZ
+			     (setf (machash 'RESULT newsynz) (realize-binds            ; X
+							       (machash 'RESULT 'RESULT 'SYN ht1) 
+											(append nil b12)))
+			     (setf (machash 'ARG newsynz) (realize-binds               ; Z
 							    (machash 'ARG 'SYN ht1) 
 							    (append nil b12)))
-			     (setf (machash 'RESULT 'SYN newht) newsynw)
-			     (setf (machash 'ARG 'SYN newht)(realize-binds (machash 'ARG 'SYN ht2) 
-										     (append nil b22)))
+			     (setf (machash 'RESULT 'SYN newht) newsynz)  ; result is X|Z not just |Z
 			     newht)))))
 
-(defun bx-subbar (ht1 ht2) 
+(defun bx-subbar (ht2 ht1) 
   "backward crossed substitution bar"
   (and (complexp-hash (machash 'SYN ht1))
        (complexp-hash (machash 'SYN ht2))
-       (machash 'RESULT 'SYN ht2) 
-       (machash 'DIR 'RESULT  'SYN ht2) ; result must be functor too
-       (eql (machash 'DIR 'SYN ht1) 'FS)
-       (eql (machash 'DIR 'RESULT 'SYN ht2) 'BS)
-       (member (machash 'MODAL 'SYN ht1) '(ALL CROSS))
-       (member (machash 'MODAL 'RESULT 'SYN ht2) '(ALL CROSS))
-       (multiple-value-bind (match2 b22 b12)
-		      (cat-match (machash 'ARG 'RESULT 'SYN ht2)
-				 (machash 'RESULT 'SYN ht1))
+       (machash 'RESULT 'SYN ht1) 
+       (machash 'DIR 'RESULT 'SYN ht1) ; result must be functor too
+       (eql (machash 'DIR 'SYN ht2) 'FS)
+       (eql (machash 'DIR 'RESULT 'SYN ht1) 'BS)
+       (member (machash 'MODAL 'SYN ht2) '(ALL CROSS))
+       (member (machash 'MODAL 'RESULT 'SYN ht1) '(ALL CROSS))
+       (multiple-value-bind (match2 b12 b22)
+		      (cat-match (machash 'ARG 'RESULT 'SYN ht1)  ; Y in (X\Y)|Z
+				 (machash 'RESULT 'SYN ht2))      ; Y in Y/W
 		      (and match2 
 			   (let ((newht (make-cky-entry-hashtable))
 				 (newsyn (make-complex-cat-hashtable))
-				 (newsynw (make-complex-cat-hashtable)))
-			     (setf (machash 'SEM newht) (&sbar (machash 'SEM ht2) (machash 'SEM ht1)))
-			     (setf (machash 'INDEX newht) '|<Lx|) 
+				 (newsynz (make-complex-cat-hashtable)))
+			     (setf (machash 'SEM newht) (&sbar (machash 'SEM ht1) (machash 'SEM ht2)))
+			     (setf (machash 'INDEX newht) '|<xL|) 
 			     (setf (machash 'SYN newht) newsyn)
-			     (setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht2))
-			     (setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht2))
-			     (setf (machash 'DIR newsynw) (machash 'DIR 'SYN ht1))
-			     (setf (machash 'RESULT newsynw) (realize-binds 
-							       (machash 'RESULT 'RESULT 'SYN ht2) 
-											(append nil b22)))
-			     (setf (machash 'ARG newsynw) (realize-binds 
+			     (setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht2)) ; /W
+			     (setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht2)) ; /modW
+			     (setf (machash 'ARG 'SYN newht) (realize-binds           ;W itself
+							       (machash 'ARG 'SYN ht2) (append nil b22)))
+			     (setf (machash 'DIR newsynz) (machash 'DIR 'SYN ht1)) ; |Z is /Z or \Z
+			     (setf (machash 'MODAL newsynz) (machash 'MODAL 'SYN ht1)) ; |modZ
+			     (setf (machash 'RESULT newsynz) (realize-binds            ; X
+							       (machash 'RESULT 'RESULT 'SYN ht1) 
+											(append nil b12)))
+			     (setf (machash 'ARG newsynz) (realize-binds               ; Z
 							    (machash 'ARG 'SYN ht1) 
 							    (append nil b12)))
-			     (setf (machash 'RESULT 'SYN newht) newsynw)
-			     (setf (machash 'ARG 'SYN newht)(realize-binds (machash 'ARG 'SYN ht2) 
-										     (append nil b22)))
+			     (setf (machash 'RESULT 'SYN newht) newsynz)  ; result is X|Z not just |Z
 			     newht)))))
 
 (defun f-subcomp (ht1 ht2) 
