@@ -1,12 +1,12 @@
 ;;;; =========================================================================== 
-;;;; == CCGlab  -Cem Bozsahin, 2015-2017, Ankara, Lisbon                      ==
+;;;; == CCGlab  -Cem Bozsahin, 2015-2018, Ankara, Lisbon                      ==
 ;;;; ===========================================================================
 ;;;; 
 ;;;; GNU GPL license applies.
 ;;;;
 ;;;; CCGlab implements all universal rules of CCG and some experimental ones, covering all directional variants of 
-;;;;     combination: application, composition, substitution, subcomposition, powers of B, S and O/D and L, 
-;;;;     namely B, B^2, B^3 and S^2, and O^2. Type-raising can be implemented as a lexical rule, which 
+;;;;     combination: application, composition, substitution, subcomposition, powers of B, S and D and L, 
+;;;;     namely B, B^2, B^3 and S^2, and D^2. Type-raising can be implemented as a lexical rule, which 
 ;;;;     is provided as a mechanism. Meta-categories e.g. those in (X\X)/X of coordination, are assumed to be
 ;;;;     lexically headed, and allow for application only (because there is no unification, and
 ;;;;     we make maximal computational use of CCG's procedural neutrality, by which any two adjacent category
@@ -23,10 +23,11 @@
 ;;;;
 ;;;; Some CS-ey notes:
 ;;;; - It represents offline grammars serially, as lisp lists, and parse objects as hashtables, for speed.
-;;;; - CCGlab uses only one Lisp tool: LALR parser of Mark Johnson. Thanks for that. The rest is standard Common Lisp.
+;;;; - CCGlab uses only one Lisp tool: LALR parser of Mark Johnson. Thanks for that. The rest is standard Common Lisp
+;;;;    without libraries.
 ;;;; - After seeing the LALR component, you might think CCGlab is a deterministic parser.
 ;;;;     The LALR subcomponent is used to parse text descriptions of lexical items and rules to Lisp structures,
-;;;;     which is deterministic (and probably not SLR, so thanks to MJ again).
+;;;;     which are deterministic (and probably not SLR, so thanks to MJ again).
 ;;;;
 
 
@@ -40,7 +41,7 @@
   "Instead of native (gethash 'F1 (gethash 'F2 ht)), we write (machash 'F1 'F2 ht)
   if ht table has a feature named F2 and the value has feature F1.
   NB.We cannot check at compile-time whether ht is a hashtable. No-one declares them.
-  The idea is that only the outermost (F1 above) feature is not necessarily hash-valued."
+  The idea is that only the outermost (F1 above) feature is assumed to be not necessarily hash-valued."
   (let* ((p (reverse path))
 	 (ht (first p))
 	 (feats (rest p))
@@ -168,8 +169,8 @@
 (defmacro &s2 (f g)
   "S^2 combinator. This is actually S'' not Curry's S^2. See Bozsahin 2012"
   `(mk-l (mk-v 'x)(mk-l (mk-v 'y)(mk-a (mk-a ,f 'x) (mk-a (mk-a ,g 'x)'y)))))
-(defmacro &o (f g)
-  "O combinator, also called D by Hoyt & Baldridge 2008. See Bozsahin 2015 book for discussion."
+(defmacro &d (f g)
+  "D by Hoyt & Baldridge 2008. See Bozsahin 2015 book for discussion."
   `(mk-l (mk-v 'h)(mk-a ,f (mk-l (mk-v 'x)(mk-a ,g (mk-a 'h 'x))))))
 
 ;; hash tables
@@ -291,11 +292,11 @@
 (defparameter *b-sub* t)
 (defparameter *fx-sub* t)
 (defparameter *bx-sub* t)
-(defparameter *f-subbar* nil)  ;substitution bar (aka lost combinator)
-(defparameter *b-subbar* nil)
-(defparameter *fx-subbar* nil)
-(defparameter *bx-subbar* nil)
-(defparameter *f-subcomp* t) ;subcomposition (i.e. D/O)
+(defparameter *f-subbar* t)  ;substitution bar (aka lost combinator)
+(defparameter *b-subbar* t)
+(defparameter *fx-subbar* t)
+(defparameter *bx-subbar* t)
+(defparameter *f-subcomp* t) ;subcomposition (i.e. D)
 (defparameter *b-subcomp* t)
 (defparameter *fx-subcomp* t)
 (defparameter *bx-subcomp* t)
@@ -379,17 +380,17 @@
   )
 
 (defun which-ccglab ()
-  "CCGlab, version 3.6.1.L")
+  "CCGlab, version 5.0")
 
 (defun welcome()
   (status)
-  (format t "~%===================================================")
+  (format t "~%If all you've got are WARNINGS during loading,~%   you can ignore them.")
+  (format t "~%They are generated because of the LALR parser,  ~%   which generate functions on the fly.")
+  (format t "~%====================================================")
   (format t "~%Welcome to ~A" (which-ccglab))
-  (format t "~%---------------------------------------------------")
-  (format t "~%Please send bug reports to cem.bozsahin@gmail.com")
-  (format t "~%  with subject line CCGlab: ...")
+  (format t "~%----------------------------------------------------")
   (format t "~%Ready.")
-  (format t "~%===================================================~%"))
+  (format t "~%====================================================~%"))
 
 (defun beam-value ()
   (format t "*Beamp* = ~A  *Beam-exp* = ~A~%" *beamp* *beam-exp*))
@@ -1655,8 +1656,8 @@
               (let ((newht (make-cky-entry-hashtable))     ;
 		    (newsynx (make-complex-cat-hashtable))   ; new result
 		    (newsynw (make-complex-cat-hashtable)))  ; new result of new argument
-		(setf (machash 'SEM newht) (&o (machash 'SEM ht1) (machash 'SEM ht2)))
-		(setf (machash 'INDEX newht) '|>O|) ; things project from ht1 and ht2
+		(setf (machash 'SEM newht) (&d (machash 'SEM ht1) (machash 'SEM ht2)))
+		(setf (machash 'INDEX newht) '|>D|) ; things project from ht1 and ht2
 		(setf (machash 'SYN newht) newsynx)
 		(setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht2))
 		(setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht2))
@@ -1690,8 +1691,8 @@
               (let ((newht (make-cky-entry-hashtable))     ;
 		    (newsynx (make-complex-cat-hashtable))   ; new result
 		    (newsynw (make-complex-cat-hashtable)))  ; new result of new argument
-		(setf (machash 'SEM newht) (&o (machash 'SEM ht2) (machash 'SEM ht1)))
-		(setf (machash 'INDEX newht) '|<O|) ; things project from ht1 and ht2
+		(setf (machash 'SEM newht) (&d (machash 'SEM ht2) (machash 'SEM ht1)))
+		(setf (machash 'INDEX newht) '|<D|) ; things project from ht1 and ht2
 		(setf (machash 'SYN newht) newsynx)
 		(setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht1))
 		(setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht1))
@@ -1724,8 +1725,8 @@
               (let ((newht (make-cky-entry-hashtable))     ;
 		    (newsynx (make-complex-cat-hashtable))   ; new result
 		    (newsynw (make-complex-cat-hashtable)))  ; new result of new argument
-		(setf (machash 'SEM newht) (&o (machash 'SEM ht1) (machash 'SEM ht2)))
-		(setf (machash 'INDEX newht) '|>Ox|) ; things project from ht1 and ht2
+		(setf (machash 'SEM newht) (&d (machash 'SEM ht1) (machash 'SEM ht2)))
+		(setf (machash 'INDEX newht) '|>Dx|) ; things project from ht1 and ht2
 		(setf (machash 'SYN newht) newsynx)
 		(setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht2))
 		(setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht2))
@@ -1759,8 +1760,8 @@
               (let ((newht (make-cky-entry-hashtable))     ;
 		    (newsynx (make-complex-cat-hashtable))   ; new result
 		    (newsynw (make-complex-cat-hashtable)))  ; new result of new argument
-		(setf (machash 'SEM newht) (&o (machash 'SEM ht2) (machash 'SEM ht1)))
-		(setf (machash 'INDEX newht) '|<Ox|) ; things project from ht1 and ht2
+		(setf (machash 'SEM newht) (&d (machash 'SEM ht2) (machash 'SEM ht1)))
+		(setf (machash 'INDEX newht) '|<Dx|) ; things project from ht1 and ht2
 		(setf (machash 'SYN newht) newsynx)
 		(setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht1))
 		(setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht1))
@@ -2318,7 +2319,7 @@
       (and *b-subbar* (b-subbar ht1 ht2))
       (and *fx-subbar* (fx-subbar ht1 ht2))
       (and *bx-subbar* (bx-subbar ht1 ht2))
-      (and *f-subcomp* (f-subcomp ht1 ht2))     ; subcomposition (i.e. D/O)
+      (and *f-subcomp* (f-subcomp ht1 ht2))     ; subcomposition (i.e. D)
       (and *b-subcomp* (b-subcomp ht1 ht2))
       (and *fx-subcomp* (fx-subcomp ht1 ht2))
       (and *bx-subcomp* (bx-subcomp ht1 ht2))
@@ -2326,7 +2327,7 @@
       (and *b2-comp* (b2-comp ht1 ht2))
       (and *fx2-comp* (fx2-comp ht1 ht2))
       (and *bx2-comp* (bx2-comp ht1 ht2))
-      (and *f2-sub* (f2-sub ht1 ht2))           ; S'' (not S^2 of Curry; see Bozsahin CL book)
+      (and *f2-sub* (f2-sub ht1 ht2))           ; (not S^2 of Curry; see Bozsahin CL book)
       (and *b2-sub* (b2-sub ht1 ht2))
       (and *fx2-sub* (fx2-sub ht1 ht2))
       (and *bx2-sub* (bx2-sub ht1 ht2))
@@ -2421,14 +2422,15 @@
 		     ((not (machash (list k j p) *cky-hashtable*)))
 		     (do ((q 1 (+ q 1)))
 		         ((not (machash (list (- i k) (+ j k) q) *cky-hashtable*)))
-                         (let ((result (ccg-combine 
+                         (multiple-value-bind (result another)  ; all rules return one result; some return two (L)
+			   (ccg-combine 
                                  (nv-list-val 'SOLUTION (machash (list k j p) *cky-hashtable*))
 				 (nv-list-val 'SOLUTION (machash (list (- i k) (+ j k) q) *cky-hashtable*))
 				 (nv-list-val 'LEX (machash (list k j p) *cky-hashtable*))
 				 (nv-list-val 'LEX (machash (list (- i k) (+ j k) q) *cky-hashtable*))
 				 (list k j)             ; pass the string coordinates too, for singletons
 				 (list (- i k) (+ j k)) ;  length and position only
-				 )))
+				 )
 			   (and result 
 				(setf (machash 'PARAM result)  ; calculate inner product on the fly
 				      (f-param-inner-prod 
@@ -2447,7 +2449,20 @@
 					      (list 'SOLUTION result))
 					(list (list 'LEFT (list k j p))
 					      (list 'RIGHT (list (- i k) (+ j k) q))
-					      (list 'SOLUTION result)))))))))
+					      (list 'SOLUTION result))))) ; first result's code ends
+			   (and another 
+				(setf a (+ a 1)) ; do NOT add to counts for the second result, it's the same material
+				(setf (machash (list i j a) *cky-hashtable*)
+				      (if (machash 'LEX another)  ; if result is lexical, this is marked in its hashtable, pass it on to cky
+					(list (list 'LEFT (list k j p))
+					      (list 'RIGHT (list (- i k) (+ j k) q))
+					      (list 'LEX t)
+					      (list 'SOLUTION another))
+					(list (list 'LEFT (list k j p))
+					      (list 'RIGHT (list (- i k) (+ j k) q))
+					      (list 'SOLUTION another)))))
+			   )   ; end of multiple-value-bind
+			 )))
 	       (apply-unary-rules i j a nil)))
 	   (and (machash (list n 1 1) *cky-hashtable*) t)))  ; if a rule applied, result would be in n 1 1 
 	(t (format t "Error: expected a list of items.~%"))))
@@ -2910,7 +2925,7 @@
   t)
 
 (defun reset-globals()
-  (format t "~%================ Things to note ===================~%")
+  (format t "~%------------------ Things to note -------------------~%")
   (setf *print-readably* nil)
   (setf *print-pretty* t) 
   (setf *lex-rules-table* nil)
