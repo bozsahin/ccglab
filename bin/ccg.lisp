@@ -281,37 +281,72 @@
                           ;  to get partial parses as much as possible in a knowledge-poor way.
 
 ;; rule switches
+(defun basic-ccg (&optional (ok t))
+  (case ok
+    ((on t) (defparameter 
+	      *f-apply* t   ;application
+	      *b-apply* t
+	      *f-comp* t    ;composition
+	      *b-comp* t
+	      *fx-comp* t
+	      *bx-comp* t
+	      *f-sub* t     ;substitution
+	      *b-sub* t
+	      *fx-sub* t
+	      *bx-sub* t
+	      *f-subbar* nil  ;substitution bar (aka lost combinator)
+	      *b-subbar* nil
+	      *fx-subbar* nil
+	      *bx-subbar* nil
+	      *f-subcomp* nil ;subcomposition (i.e. D)
+	      *b-subcomp* nil
+	      *fx-subcomp* nil
+	      *bx-subcomp* nil
+	      *f2-comp* t   ;B^2
+	      *b2-comp* t
+	      *fx2-comp* t
+	      *bx2-comp* t
+	      *f2-sub* t    ;S'' (not S^2 of Curry)
+	      *b2-sub* t
+	      *fx2-sub* t
+	      *bx2-sub* t
+	      *f3-comp* t   ;B^3
+	      *b3-comp* t
+	      *fx3-comp* t
+	      *bx3-comp* t))
+    ((off nil) (defparameter 
+	      *f-apply* t   ;application
+	      *b-apply* t
+	      *f-comp* t    ;composition
+	      *b-comp* t
+	      *fx-comp* t
+	      *bx-comp* t
+	      *f-sub* t     ;substitution
+	      *b-sub* t
+	      *fx-sub* t
+	      *bx-sub* t
+	      *f-subbar* t  ;substitution bar (aka lost combinator)
+	      *b-subbar* t
+	      *fx-subbar* t
+	      *bx-subbar* t
+	      *f-subcomp* t ;subcomposition (i.e. D)
+	      *b-subcomp* t
+	      *fx-subcomp* t
+	      *bx-subcomp* t
+	      *f2-comp* t   ;B^2
+	      *b2-comp* t
+	      *fx2-comp* t
+	      *bx2-comp* t
+	      *f2-sub* t    ;S'' (not S^2 of Curry)
+	      *b2-sub* t
+	      *fx2-sub* t
+	      *bx2-sub* t
+	      *f3-comp* t   ;B^3
+	      *b3-comp* t
+	      *fx3-comp* t
+	      *bx3-comp* t))
+    (otherwise (format t "~%Fatal error: expecting a value on/off/t/nil for switches"))))
 
-(defparameter *f-apply* t)   ;application
-(defparameter *b-apply* t)
-(defparameter *f-comp* t)    ;composition
-(defparameter *b-comp* t)
-(defparameter *fx-comp* t)
-(defparameter *bx-comp* t)
-(defparameter *f-sub* t)     ;substitution
-(defparameter *b-sub* t)
-(defparameter *fx-sub* t)
-(defparameter *bx-sub* t)
-(defparameter *f-subbar* t)  ;substitution bar (aka lost combinator)
-(defparameter *b-subbar* t)
-(defparameter *fx-subbar* t)
-(defparameter *bx-subbar* t)
-(defparameter *f-subcomp* t) ;subcomposition (i.e. D)
-(defparameter *b-subcomp* t)
-(defparameter *fx-subcomp* t)
-(defparameter *bx-subcomp* t)
-(defparameter *f2-comp* t)   ;B^2
-(defparameter *b2-comp* t)
-(defparameter *fx2-comp* t)
-(defparameter *bx2-comp* t)
-(defparameter *f2-sub* t)    ;S'' (not S^2 of Curry)
-(defparameter *b2-sub* t)
-(defparameter *fx2-sub* t)
-(defparameter *bx2-sub* t)
-(defparameter *f3-comp* t)   ;B^3
-(defparameter *b3-comp* t)
-(defparameter *fx3-comp* t)
-(defparameter *bx3-comp* t)
 
 (defun switches ()
   (format t  "To change a switch, use (setf <switchname> <value>)
@@ -2943,6 +2978,7 @@
   (setf *ccg-grammar*  nil)
   (setf *ccg-grammar-keys*  0)
   (oov-off)
+  (basic-ccg) ; turn experimental rules off by default
   t)
 
 (defun read1 (fn)
