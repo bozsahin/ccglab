@@ -1,5 +1,5 @@
 ;;;; =========================================================================== 
-;;;; == CCGlab  -Cem Bozsahin, 2015-2018, Ankara, Lisbon                      ==
+;;;; == CCGlab  -Cem Bozsahin, 2015-2018, Lisboa, Ankara                      ==
 ;;;; ===========================================================================
 ;;;; 
 ;;;; GNU GPL license applies.
@@ -1495,7 +1495,7 @@
 			     newht)))))))
 
 ;; this combinator is experimental. In forward form it is (X/Y)|Z:f Y/W:g -> (X|Z)/W : \w\z.fz(gw). It has C in the style of S
-;; this is MJS version; i had (X/W)|Z as result in L'
+;; this is MJS version and CB version combined, to give two results; i have (X/W)|Z as result in L'
 ;; by default all its variants are turned off
 (defun f-subbar (ht1 ht2) 
   "forward substitution bar, aka the lost combinator"
