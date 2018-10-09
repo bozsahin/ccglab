@@ -281,9 +281,41 @@
                           ;  to get partial parses as much as possible in a knowledge-poor way.
 
 ;; rule switches
+(defparameter *f-apply* t)   ;application
+(defparameter *b-apply* t)
+(defparameter *f-comp* t  )  ;composition
+(defparameter *b-comp* t)
+(defparameter *fx-comp* t)
+(defparameter *bx-comp* t)
+(defparameter *f-sub* t  )   ;substitution
+(defparameter *b-sub* t)
+(defparameter *fx-sub* t)
+(defparameter *bx-sub* t)
+(defparameter *f-subbar* nil ) ;substitution bar (aka lost combinator)
+(defparameter *b-subbar* nil)
+(defparameter *fx-subbar* nil)
+(defparameter *bx-subbar* nil)
+(defparameter *f-subcomp* nil );subcomposition (i.e. D)
+(defparameter *b-subcomp* nil)
+(defparameter *fx-subcomp* nil)
+(defparameter *bx-subcomp* nil)
+(defparameter *f2-comp* t )  ;B^2
+(defparameter *b2-comp* t)
+(defparameter *fx2-comp* t)
+(defparameter *bx2-comp* t)
+(defparameter *f2-sub* t )   ;S'' (not S^2 of Curry)
+(defparameter *b2-sub* t)
+(defparameter *fx2-sub* t)
+(defparameter *bx2-sub* t)
+(defparameter *f3-comp* t )  ;B^3
+(defparameter *b3-comp* t)
+(defparameter *fx3-comp* t)
+(defparameter *bx3-comp* t)
+
+;; rule switch wholesale control
 (defun basic-ccg (&optional (ok t))
   (case ok
-    ((on t) (defparameter 
+    ((on t) (setf 
 	      *f-apply* t   ;application
 	      *b-apply* t
 	      *f-comp* t    ;composition
@@ -314,7 +346,7 @@
 	      *b3-comp* t
 	      *fx3-comp* t
 	      *bx3-comp* t))
-    ((off nil) (defparameter 
+    ((off nil) (setf 
 	      *f-apply* t   ;application
 	      *b-apply* t
 	      *f-comp* t    ;composition
@@ -345,7 +377,7 @@
 	      *b3-comp* t
 	      *fx3-comp* t
 	      *bx3-comp* t))
-    (otherwise (format t "~%Fatal error: expecting a value on/off/t/nil for switches"))))
+    (otherwise (format t "~%Fatal error: expected a value on/off/t/nil"))))
 
 
 (defun switches ()
@@ -419,8 +451,8 @@
 
 (defun welcome()
   (status)
-  (format t "~%If all you've got are WARNINGS during loading,~%   you can ignore them.")
-  (format t "~%They are generated because of the LALR parser,  ~%   which generate functions on the fly.")
+  (format t "~%If all you've got during loading are WARNINGS,~%   you can ignore them.")
+  (format t "~%They are caused  the LALR parser,  ~%   which generate functions at run-time.")
   (format t "~%====================================================")
   (format t "~%Welcome to ~A" (which-ccglab))
   (format t "~%----------------------------------------------------")
@@ -1291,8 +1323,7 @@
        (eql (machash 'DIR 'SYN ht1) 'FS) ; no need to check modality, all entries qualify for application.
        (if (machash 'BCONST 'ARG 'SYN ht1) 
 	 (return-from f-apply (singleton-match ht1 ht2 lex2 '|>| coord2)) t) ; short-circuit f-apply if arg is singleton
-       (multiple-value-bind (match b1 b2)
-	 ;	 (declare (ignore b2))
+       (multiple-value-bind (match b1) ; b2 is not needed from (values)
 	 (cat-match (machash 'ARG 'SYN ht1) (machash 'SYN ht2))
 	 (and match 
 	      (lex-check (machash 'LEX 'SYN ht1) lex2)  ; if we have X//Y Y , Y must be lex
@@ -1310,8 +1341,8 @@
        (if (machash 'BCONST 'ARG 'SYN ht2) 
 	 (return-from b-apply (singleton-match ht2 ht1 lex1 '|<| coord1)) t) ; short-circuit b-apply if arg is singleton
        (multiple-value-bind (match b1 b2)
-	 ;	 (declare (ignore b1))
 	 (cat-match (machash 'SYN ht1) (machash 'ARG 'SYN ht2))
+	 (use-value b1) ; dummy use of b1, not needed but cant be skipped in (values)
 	 (and match 
 	      (lex-check (machash 'LEX 'SYN ht2) lex1)  ; if we have Y X\\Y, Y must be lex
 	      (let ((newht (make-cky-entry-hashtable)))
@@ -2385,9 +2416,9 @@
 	     (dolist (lr *lex-rules-table*) ; i use lexical rules as synonymous with unary rules
 	       (loop for k from 1 to r do
 		     (multiple-value-bind (match b1 b2)
-;		       (declare (ignore b1))
 		       (cat-match (machash 'SYN (nv-list-val 'SOLUTION (machash (list i j k) *cky-hashtable*)))
 				  (machash 'INSYN lr))
+		       (use-value b1) ; dummy use of b1; cannot be skipped because of (values)
 		       (and match	   
 			    (setf r (+ r 1))
 			    (let ((newht (make-cky-entry-hashtable))
