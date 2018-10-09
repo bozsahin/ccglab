@@ -377,7 +377,7 @@
 	      *b3-comp* t
 	      *fx3-comp* t
 	      *bx3-comp* t))
-    (otherwise (format t "~%Fatal error: expected a value on/off/t/nil"))))
+    (otherwise (format t "~%Error: expected a value on/off/t/nil~%Continuing with current values"))))
 
 
 (defun switches ()
@@ -452,7 +452,7 @@
 (defun welcome()
   (status)
   (format t "~%If all you've got during loading are WARNINGS,~%   you can ignore them.")
-  (format t "~%They are caused  the LALR parser,  ~%   which generate functions at run-time.")
+  (format t "~%They are caused by the LALR parser,  ~%   which generate functions at run-time.")
   (format t "~%====================================================")
   (format t "~%Welcome to ~A" (which-ccglab))
   (format t "~%----------------------------------------------------")
