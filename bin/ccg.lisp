@@ -1693,7 +1693,7 @@
 			     (setf (machash 'RESULT 'SYN newht) newsynz)  ; result is X|Z not just |Z
 			     ;; now assemble the second result
 			     (setf (machash 'SEM newht2) (&sbarp (machash 'SEM ht1) (machash 'SEM ht2)))
-                             (setf (machash 'INDEX newht2) '|<L'|)
+                             (setf (machash 'INDEX newht2) '|<Lp|)
                              (setf (machash 'SYN newht2) newsyn2)
                              (setf (machash 'DIR 'SYN newht2) (machash 'DIR 'SYN ht1))
                              (setf (machash 'MODAL 'SYN newht2) (machash 'MODAL 'SYN ht1))
