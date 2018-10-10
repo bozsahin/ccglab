@@ -450,7 +450,7 @@
   )
 
 (defun which-ccglab ()
-  "CCGlab, version 5.0")
+  "CCGlab, version 5.0.0")
 
 (defun welcome()
   (status)
@@ -1564,8 +1564,8 @@
 			     newht)))))))
 
 ;; this combinator is experimental. In forward form it is (X/Y)|Z:f Y/W:g -> (X|Z)/W : \w\z.fz(gw). It has C in the style of S
-;; this is MJS version and CB version combined, to give two results; i have (X/W)|Z as result in L'
-;; by default all its variants are turned off
+;; this is MJS version and CB version combined, to give two results; i had (X/W)|Z as result in L'
+;;  which turned out to be unnecessary, given L see the AL paper for `folded the rug under'.
 (defun f-subbar (ht1 ht2) 
   "forward substitution bar, aka the lost combinator"
   (and (complexp-hash (machash 'SYN ht1))
@@ -1582,10 +1582,7 @@
 		      (and match2 
 			   (let ((newht (make-cky-entry-hashtable))
 				 (newsyn (make-complex-cat-hashtable))
-				 (newsynz (make-complex-cat-hashtable))
-				 (newht2 (make-cky-entry-hashtable))  ; for the second result
-				 (newsyn2 (make-complex-cat-hashtable))
-				 (newsynw2 (make-complex-cat-hashtable)))
+				 (newsynz (make-complex-cat-hashtable)))
 			     (setf (machash 'SEM newht) (&sbar (machash 'SEM ht1) (machash 'SEM ht2)))
 			     (setf (machash 'INDEX newht) '|>L|) 
 			     (setf (machash 'SYN newht) newsyn)
@@ -1602,23 +1599,7 @@
 							    (machash 'ARG 'SYN ht1) 
 							    (append nil b12)))
 			     (setf (machash 'RESULT 'SYN newht) newsynz)  ; result is X|Z not just |Z
- 		             ;; now for the second result
-			     (setf (machash 'SEM newht2) (&sbarp (machash 'SEM ht1) (machash 'SEM ht2)))
-                             (setf (machash 'INDEX newht2) '|>L|)
-                             (setf (machash 'SYN newht2) newsyn2)
-                             (setf (machash 'DIR 'SYN newht2) (machash 'DIR 'SYN ht1))
-                             (setf (machash 'MODAL 'SYN newht2) (machash 'MODAL 'SYN ht1))
-                             (setf (machash 'DIR newsynw2) (machash 'DIR 'SYN ht2))
-                             (setf (machash 'RESULT newsynw2) (realize-binds
-                                                               (machash 'RESULT 'RESULT 'SYN ht1)
-                                                                                        (append nil b12)))
-                             (setf (machash 'ARG newsynw2) (realize-binds
-                                                            (machash 'ARG 'SYN ht2)
-                                                            (append nil b22)))
-                             (setf (machash 'RESULT 'SYN newht2) newsynw2)
-                             (setf (machash 'ARG 'SYN newht2)(realize-binds (machash 'ARG 'SYN ht1)
-                                                                                     (append nil b12)))
-			     (values newht newht2))))))  ; return both results
+			     newht)))))  
 
 (defun fx-subbar (ht1 ht2) 
   "forward crossing substitution bar"
@@ -1671,10 +1652,7 @@
 		      (and match2 
 			   (let ((newht (make-cky-entry-hashtable))
 				 (newsyn (make-complex-cat-hashtable))
-				 (newsynz (make-complex-cat-hashtable))
-				 (newht2 (make-cky-entry-hashtable))
-				 (newsyn2 (make-complex-cat-hashtable))
-				 (newsynw2 (make-complex-cat-hashtable)))
+				 (newsynz (make-complex-cat-hashtable)))
 			     (setf (machash 'SEM newht) (&sbar (machash 'SEM ht1) (machash 'SEM ht2)))
 			     (setf (machash 'INDEX newht) '|<L|) 
 			     (setf (machash 'SYN newht) newsyn)
@@ -1691,23 +1669,7 @@
 							    (machash 'ARG 'SYN ht1) 
 							    (append nil b12)))
 			     (setf (machash 'RESULT 'SYN newht) newsynz)  ; result is X|Z not just |Z
-			     ;; now assemble the second result
-			     (setf (machash 'SEM newht2) (&sbarp (machash 'SEM ht1) (machash 'SEM ht2)))
-                             (setf (machash 'INDEX newht2) '|<Lp|)
-                             (setf (machash 'SYN newht2) newsyn2)
-                             (setf (machash 'DIR 'SYN newht2) (machash 'DIR 'SYN ht1))
-                             (setf (machash 'MODAL 'SYN newht2) (machash 'MODAL 'SYN ht1))
-                             (setf (machash 'DIR newsynw2) (machash 'DIR 'SYN ht2))
-                             (setf (machash 'RESULT newsynw2) (realize-binds
-                                                               (machash 'RESULT 'RESULT 'SYN ht1)
-                                                                                        (append nil b12)))
-                             (setf (machash 'ARG newsynw2) (realize-binds
-                                                            (machash 'ARG 'SYN ht2)
-                                                            (append nil b22)))
-                             (setf (machash 'RESULT 'SYN newht2) newsynw2)
-                             (setf (machash 'ARG 'SYN newht2)(realize-binds (machash 'ARG 'SYN ht1)
-                                                                                     (append nil b12)))
-			     (values newht newht2))))))
+			     newht)))))
 
 (defun bx-subbar (ht2 ht1) 
   "backward crossed substitution bar"
@@ -2529,15 +2491,14 @@
 		     ((not (machash (list k j p) *cky-hashtable*)))
 		     (do ((q 1 (+ q 1)))
 		         ((not (machash (list (- i k) (+ j k) q) *cky-hashtable*)))
-                         (multiple-value-bind (result another)  ; all rules return one result; some return two (L)
-			   (ccg-combine 
+                         (let ((result (ccg-combine 
                                  (nv-list-val 'SOLUTION (machash (list k j p) *cky-hashtable*))
 				 (nv-list-val 'SOLUTION (machash (list (- i k) (+ j k) q) *cky-hashtable*))
 				 (nv-list-val 'LEX (machash (list k j p) *cky-hashtable*))
 				 (nv-list-val 'LEX (machash (list (- i k) (+ j k) q) *cky-hashtable*))
 				 (list k j)             ; pass the string coordinates too, for singletons
 				 (list (- i k) (+ j k)) ;  length and position only
-				 )
+				 )))
 			   (and result 
 				(setf (machash 'PARAM result)  ; calculate inner product on the fly
 				      (f-param-inner-prod 
@@ -2557,18 +2518,7 @@
 					(list (list 'LEFT (list k j p))
 					      (list 'RIGHT (list (- i k) (+ j k) q))
 					      (list 'SOLUTION result))))) ; first result's code ends
-			   (and another 
-				(setf a (+ a 1)) ; do NOT add to counts for the second result, it's the same material
-				(setf (machash (list i j a) *cky-hashtable*)
-				      (if (machash 'LEX another)  ; if result is lexical, this is marked in its hashtable, pass it on to cky
-					(list (list 'LEFT (list k j p))
-					      (list 'RIGHT (list (- i k) (+ j k) q))
-					      (list 'LEX t)
-					      (list 'SOLUTION another))
-					(list (list 'LEFT (list k j p))
-					      (list 'RIGHT (list (- i k) (+ j k) q))
-					      (list 'SOLUTION another)))))
-			   )   ; end of multiple-value-bind
+			   )   
 			 )))
 	       (apply-unary-rules i j a nil)))
 	   (and (machash (list n 1 1) *cky-hashtable*) t)))  ; if a rule applied, result would be in n 1 1 
