@@ -1603,6 +1603,21 @@
 							    (append nil b12)))
 			     (setf (machash 'RESULT 'SYN newht) newsynz)  ; result is X|Z not just |Z
  		             ;; now for the second result
+			     (setf (machash 'SEM newht2) (&sbarp (machash 'SEM ht1) (machash 'SEM ht2)))
+                             (setf (machash 'INDEX newht2) '|>L|)
+                             (setf (machash 'SYN newht2) newsyn2)
+                             (setf (machash 'DIR 'SYN newht2) (machash 'DIR 'SYN ht1))
+                             (setf (machash 'MODAL 'SYN newht2) (machash 'MODAL 'SYN ht1))
+                             (setf (machash 'DIR newsynw2) (machash 'DIR 'SYN ht2))
+                             (setf (machash 'RESULT newsynw2) (realize-binds
+                                                               (machash 'RESULT 'RESULT 'SYN ht1)
+                                                                                        (append nil b12)))
+                             (setf (machash 'ARG newsynw2) (realize-binds
+                                                            (machash 'ARG 'SYN ht2)
+                                                            (append nil b22)))
+                             (setf (machash 'RESULT 'SYN newht2) newsynw2)
+                             (setf (machash 'ARG 'SYN newht2)(realize-binds (machash 'ARG 'SYN ht1)
+                                                                                     (append nil b12)))
 			     (values newht newht2))))))  ; return both results
 
 (defun fx-subbar (ht1 ht2) 
