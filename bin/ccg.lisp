@@ -302,7 +302,8 @@
 (defparameter *b-subcomp* nil)
 (defparameter *fx-subcomp* nil)
 (defparameter *bx-subcomp* nil)
-(defparameter *f2-comp* t )  ;B^2
+(defparameter *f-subcomp2* nil) ; D^2
+(defparameter *f2-comp* t )     ; B^2
 (defparameter *b2-comp* t)
 (defparameter *fx2-comp* t)
 (defparameter *bx2-comp* t)
@@ -334,6 +335,7 @@
 	      *fx-subbar* nil
 	      *bx-subbar* nil
 	      *f-subcomp* nil ;subcomposition (i.e. D)
+	      *f-subcomp2* nil ; D^2
 	      *b-subcomp* nil
 	      *fx-subcomp* nil
 	      *bx-subcomp* nil
@@ -365,6 +367,7 @@
 	      *fx-subbar* t
 	      *bx-subbar* t
 	      *f-subcomp* t ;subcomposition (i.e. D)
+	      *f-subcomp2* t ; D^2
 	      *b-subcomp* t
 	      *fx-subcomp* t
 	      *bx-subcomp* t
@@ -412,13 +415,14 @@
 	  *b2-sub*      ~A
 	  *fx2-sub*     ~A
 	  *bx2-sub*     ~A
+	  *f-subcomp2*  ~A
 	  *f3-comp*     ~A
 	  *b3-comp*     ~A
 	  *fx3-comp*    ~A
 	  *bx3-comp*    ~A~%"
 	  *f-apply* *b-apply* *f-comp* *b-comp* *fx-comp* *bx-comp* *f-sub* *b-sub* *fx-sub* *bx-sub*
           *f-subbar* *b-subbar* *fx-subbar* *bx-subbar* *f-subcomp* *b-subcomp* *fx-subcomp* *bx-subcomp*
-          *f2-comp* *b2-comp* *fx2-comp* *bx2-comp* *f2-sub* *b2-sub* *fx2-sub* *bx2-sub* *f3-comp* *b3-comp* 
+          *f2-comp* *b2-comp* *fx2-comp* *bx2-comp* *f2-sub* *b2-sub* *fx2-sub* *bx2-sub* *f-subcomp2* *f3-comp* *b3-comp* 
 	  *fx3-comp* *bx3-comp*))
 
 (defun pack-cky-lf-hashtable ()
@@ -1320,6 +1324,9 @@
 ;;;;  We translate all combinator instructions to lambda terms in our lambda ADT language
 ;;;;  so that LF normalizer only works with our lambdas.
 
+;; these are the CCG rules. Succesful combination creates a new cky entry with SYN SEM INDEX PARAM
+;;                          PARAM is calculated by the caller of caller (ccg-deduce), because it is a common method for all rules
+
 (defun f-apply (ht1 ht2 lex2 coord2) 
   "forward application"
   (and (complexp-hash (machash 'SYN ht1))
@@ -1708,8 +1715,7 @@
 
 (defun f-subcomp (ht1 ht2) 
   "forward subcomposition.
-   Cf. Bozsahin 2012 and Hoyt and Baldridge 2008 for subcomposition/subcombination.
-   This is what is dubbed Orifice (O) in the former, and D in the latter publication.
+   Hoyt and Baldridge's D from 2008 for subcomposition/subcombination.
    Not to be confused with combinator D of Rosenbloom 1950, which is just BB."
   (and (complexp-hash (machash 'SYN ht1))
        (complexp-hash (machash 'SYN ht2))
@@ -1982,7 +1988,7 @@
 		      newht)))))
 
 (defun f2-sub (ht1 ht2) 
-  ">S'', which is not S2, which is useless. See Bozsahin CL book ch.5"
+  ">S2 of Steedman 2011, not Curry's. see  Bozsahin CL book ch.5"
   (and (complexp-hash (machash 'SYN ht1))
        (complexp-hash (machash 'SYN ht2))
        (machash 'RESULT 'SYN ht1) 
@@ -2024,7 +2030,7 @@
 			     newht)))))))
 
 (defun b2-sub (ht1 ht2) 
-  "<S'', which is not S2, which is useless. See Bozsahin CL book ch.5"
+  "<S2"
   (and (complexp-hash (machash 'SYN ht2))
        (complexp-hash (machash 'SYN ht1))
        (machash 'RESULT 'SYN ht2) 
@@ -2067,7 +2073,7 @@
 			     newht)))))))
 
 (defun fx2-sub (ht1 ht2) 
-  ">Sx'', which is not S2, which is useless. See Bozsahin CL book ch.5"
+  ">S2"
   (and (complexp-hash (machash 'SYN ht1))
        (complexp-hash (machash 'SYN ht2))
        (machash 'RESULT 'SYN ht1) 
@@ -2109,7 +2115,7 @@
 			     newht)))))))
 
 (defun bx2-sub (ht1 ht2) 
-  "<Sx'', which is not S2, which is useless. See Bozsahin CL book ch.5"
+  "<Sx2, of Steedman 2011"
   (and (complexp-hash (machash 'SYN ht2))
        (complexp-hash (machash 'SYN ht1))
        (machash 'RESULT 'SYN ht2) 
@@ -2150,6 +2156,40 @@
 			     (setf (machash 'MODAL 'RESULT 'SYN newht)
 				   (machash 'MODAL 'RESULT  'SYN ht1))
 			     newht)))))))
+
+(defun f2-subcomp (ht1 ht2) 
+  "forward harmonic D^2: X/(Y|Z) (Y/W)|Q -> X/(W|Z)|Q
+  Creation of new complex cats is probably clearest in this function because i wrote it last!
+  We need fresh copies of these cats (hence make), because of term unification of two Y's to be reflected on X,W,Z,Q.
+  Every slash in the result needs a new make.
+  Unlike other rules, there is no indirect ref in newht by its SYN feature, e.g. DIR SYN newht.
+  They are assembled locally then assigned wholesale to SYN newht"
+  (and (complexp-hash (machash 'SYN ht1))
+       (complexp-hash (machash 'SYN ht2))
+       (eql (machash 'DIR 'ARG 'SYN ht1) 'FS) ; this one and next also means they are complex too
+       (eql (machash 'DIR 'RESULT 'SYN ht2) 'FS)
+       (member (machash 'MODAL 'RESULT 'SYN ht2) '(ALL HARMONIC))
+       (member (machash 'MODAL 'SYN ht1) '(ALL HARMONIC))
+       (multiple-value-bind (match b1 b2)
+	 (cat-match (machash 'RESULT 'ARG 'SYN ht1) (machash 'RESULT 'RESULT 'SYN ht2))
+	 (and match 
+              (let ((newht (make-cky-entry-hashtable))  ; here, complex cats are named after arguments  
+		    (newsynq (make-complex-cat-hashtable))  ; other rules are still confusing (to me) 
+		    (newsynz (make-complex-cat-hashtable))  ; because of indirect refs by SYN newht
+		    (newsynw (make-complex-cat-hashtable))) ; hey I didnt go to Lisbon for all work and nae fun
+		(setf (machash 'SEM newht) (&d2 (machash 'SEM ht1) (machash 'SEM ht2)))
+		(setf (machash 'INDEX newht) '|>D2|) ; things project from ht1 and ht2
+		(setf (machash 'DIR newsynq) (machash 'DIR 'ARG ht2))
+		(setf (machash 'MODAL newsynq) (machash 'MODAL 'ARG ht2))
+		(setf (machash 'ARG newsynq) (realize-binds (machash 'ARG ht2) b2))
+		(setf (machash 'DIR newsynz) (machash 'DIR 'ARG ht1))
+		(setf (machash 'MODAL newsynz) (machash 'MODAL 'ARG ht1))
+		(setf (machash 'ARG newsynz) (realize-binds (machash 'ARG 'ARG ht1) b1))
+		(setf (machash 'RESULT newsynz) (realize-binds (machash 'ARG 'RESULT ht2) b2))
+		(setf (machash 'ARG newsynw) newsynz)
+		(setf (machash 'RESULT newsynq) newsynw)
+		(setf (machash 'SYN newht) newsynq)
+			     newht)))))
 
 (defun f3-comp (ht1 ht2) 
   ">B^3"
@@ -2400,6 +2440,7 @@
       (and *b2-sub* (b2-sub ht1 ht2))
       (and *fx2-sub* (fx2-sub ht1 ht2))
       (and *bx2-sub* (bx2-sub ht1 ht2))
+      (and *f-subcomp2* (f2-subcomp ht1 ht2))   ; D^2
       (and *f3-comp* (f3-comp ht1 ht2))         ; B^3
       (and *b3-comp* (b3-comp ht1 ht2))
       (and *fx3-comp* (fx3-comp ht1 ht2))
