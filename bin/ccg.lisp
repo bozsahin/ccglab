@@ -461,8 +461,8 @@
 
 (defun welcome()
   (status)
-  (format t "~%If all you've got during loading are WARNINGS,~%   you can ignore them.")
-  (format t "~%They are caused by the LALR parser,  ~%   which generate functions at run-time.")
+  (format t "~%If you've got WARNINGS during loading,~%   you can ignore them.")
+  (format t "~%They are caused by the LALR parser,  ~%   which generates functions at run-time.")
   (format t "~%====================================================")
   (format t "~%Welcome to ~A" (which-ccglab))
   (format t "~%----------------------------------------------------")
