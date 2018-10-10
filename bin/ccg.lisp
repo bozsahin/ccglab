@@ -170,13 +170,16 @@
   "sbar variant; cf. lambda orders"
   `(mk-l (mk-v 'w) (mk-l (mk-v 'z) (mk-a (mk-a ,f 'w) (mk-a ,g 'z)))))
 (defmacro &s2 (f g)
-  "S^2 combinator. This is actually S'' not Curry's S^2. See Bozsahin 2012"
+  "S^2 combinator. not Curry's S^2. See Bozsahin 2012"
   `(mk-l (mk-v 'x)(mk-l (mk-v 'y)(mk-a (mk-a ,f 'x) (mk-a (mk-a ,g 'x)'y)))))
 (defmacro &d (f g)
   "D by Hoyt & Baldridge 2008. See Bozsahin 2015 book for discussion."
   `(mk-l (mk-v 'h)(mk-a ,f (mk-l (mk-v 'x)(mk-a ,g (mk-a 'h 'x))))))
+(defmacro &d2 (f g)
+  "D^2"
+  `(mk-l (mk-v 'x1) (mk-l (mk-v 'h) (mk-a ,f (mk-l (mk-v 'x2)(mk-a (mk-a ,g 'x1) (mk-a 'h 'x2)))))))
 
-;; hash tables
+;; hash tables and their keys (features)
 
 (defmacro name-clash-report (feat)
   "reports a warning if feat is a name that clashes with hashtables' fixed features.
@@ -2166,30 +2169,33 @@
   They are assembled locally then assigned wholesale to SYN newht"
   (and (complexp-hash (machash 'SYN ht1))
        (complexp-hash (machash 'SYN ht2))
-       (eql (machash 'DIR 'ARG 'SYN ht1) 'FS) ; this one and next also means they are complex too
-       (eql (machash 'DIR 'RESULT 'SYN ht2) 'FS)
-       (member (machash 'MODAL 'RESULT 'SYN ht2) '(ALL HARMONIC))
+       (complexp-hash (machash 'ARG 'SYN ht1))
+       (complexp-hash (machash 'RESULT 'SYN ht2))
+       (eql (machash 'DIR 'SYN ht1) 'FS) 
+       (eql (machash 'DIR 'ARG 'RESULT 'SYN ht2) 'FS)
        (member (machash 'MODAL 'SYN ht1) '(ALL HARMONIC))
+       (member (machash 'MODAL 'ARG 'RESULT 'SYN ht2) '(ALL HARMONIC))
        (multiple-value-bind (match b1 b2)
 	 (cat-match (machash 'RESULT 'ARG 'SYN ht1) (machash 'RESULT 'RESULT 'SYN ht2))
 	 (and match 
-              (let ((newht (make-cky-entry-hashtable))  ; here, complex cats are named after arguments  
+              (let ((newht (make-cky-entry-hashtable))      ; in this function, complex cats are named after arguments  
 		    (newsynq (make-complex-cat-hashtable))  ; other rules are still confusing (to me) 
 		    (newsynz (make-complex-cat-hashtable))  ; because of indirect refs by SYN newht
-		    (newsynw (make-complex-cat-hashtable))) ; hey I didnt go to Lisbon for all work and nae fun
+		    (newsynw (make-complex-cat-hashtable))) ; maybe one day i'll rename them all. one day
 		(setf (machash 'SEM newht) (&d2 (machash 'SEM ht1) (machash 'SEM ht2)))
 		(setf (machash 'INDEX newht) '|>D2|) ; things project from ht1 and ht2
-		(setf (machash 'DIR newsynq) (machash 'DIR 'ARG ht2))
-		(setf (machash 'MODAL newsynq) (machash 'MODAL 'ARG ht2))
-		(setf (machash 'ARG newsynq) (realize-binds (machash 'ARG ht2) b2))
-		(setf (machash 'DIR newsynz) (machash 'DIR 'ARG ht1))
-		(setf (machash 'MODAL newsynz) (machash 'MODAL 'ARG ht1))
-		(setf (machash 'ARG newsynz) (realize-binds (machash 'ARG 'ARG ht1) b1))
-		(setf (machash 'RESULT newsynz) (realize-binds (machash 'ARG 'RESULT ht2) b2))
+		(setf (machash 'DIR newsynz) (machash 'DIR 'ARG 'ARG 'SYN ht1))
+		(setf (machash 'MODAL newsynz) (machash 'MODAL 'ARG 'ARG 'SYN ht1))
+		(setf (machash 'ARG newsynz) (realize-binds (machash 'ARG 'ARG 'SYN ht1) b1))
+		(setf (machash 'RESULT newsynz) (realize-binds (machash 'ARG 'RESULT 'SYN ht2) b2))
 		(setf (machash 'ARG newsynw) newsynz)
+		(setf (machash 'RESULT newsynw) (realize-binds (machash 'RESULT 'SYN ht1) b1))
 		(setf (machash 'RESULT newsynq) newsynw)
+		(setf (machash 'DIR newsynq) (machash 'DIR 'ARG 'SYN ht2))
+		(setf (machash 'MODAL newsynq) (machash 'MODAL 'ARG 'SYN ht2))
+		(setf (machash 'ARG newsynq) (realize-binds (machash 'ARG 'SYN ht2) b2))
 		(setf (machash 'SYN newht) newsynq)
-			     newht)))))
+		newht)))))
 
 (defun f3-comp (ht1 ht2) 
   ">B^3"
