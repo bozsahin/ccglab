@@ -166,6 +166,9 @@
 (defmacro &sbar (f g)
   "Sbar combinator, aka the lost combinator"
   `(mk-l (mk-v 'w) (mk-l (mk-v 'z) (mk-a (mk-a ,f 'z) (mk-a ,g 'w)))))
+(defmacro &sbarp (f g)
+  "sbar variant; cf. lambda orders"
+  `(mk-l (mk-v 'w) (mk-l (mk-v 'z) (mk-a (mk-a ,f 'w) (mk-a ,g 'z)))))
 (defmacro &s2 (f g)
   "S^2 combinator. This is actually S'' not Curry's S^2. See Bozsahin 2012"
   `(mk-l (mk-v 'x)(mk-l (mk-v 'y)(mk-a (mk-a ,f 'x) (mk-a (mk-a ,g 'x)'y)))))
@@ -1579,7 +1582,10 @@
 		      (and match2 
 			   (let ((newht (make-cky-entry-hashtable))
 				 (newsyn (make-complex-cat-hashtable))
-				 (newsynz (make-complex-cat-hashtable)))
+				 (newsynz (make-complex-cat-hashtable))
+				 (newht2 (make-cky-entry-hashtable))  ; for the second result
+				 (newsyn2 (make-complex-cat-hashtable))
+				 (newsynw2 (make-complex-cat-hashtable)))
 			     (setf (machash 'SEM newht) (&sbar (machash 'SEM ht1) (machash 'SEM ht2)))
 			     (setf (machash 'INDEX newht) '|>L|) 
 			     (setf (machash 'SYN newht) newsyn)
@@ -1596,7 +1602,8 @@
 							    (machash 'ARG 'SYN ht1) 
 							    (append nil b12)))
 			     (setf (machash 'RESULT 'SYN newht) newsynz)  ; result is X|Z not just |Z
-			     newht)))))
+ 		             ;; now for the second result
+			     (values newht newht2))))))  ; return both results
 
 (defun fx-subbar (ht1 ht2) 
   "forward crossing substitution bar"
