@@ -1671,7 +1671,10 @@
 		      (and match2 
 			   (let ((newht (make-cky-entry-hashtable))
 				 (newsyn (make-complex-cat-hashtable))
-				 (newsynz (make-complex-cat-hashtable)))
+				 (newsynz (make-complex-cat-hashtable))
+				 (newht2 (make-cky-entry-hashtable))
+				 (newsyn2 (make-complex-cat-hashtable))
+				 (newsynw2 (make-complex-cat-hashtable)))
 			     (setf (machash 'SEM newht) (&sbar (machash 'SEM ht1) (machash 'SEM ht2)))
 			     (setf (machash 'INDEX newht) '|<L|) 
 			     (setf (machash 'SYN newht) newsyn)
@@ -1688,7 +1691,23 @@
 							    (machash 'ARG 'SYN ht1) 
 							    (append nil b12)))
 			     (setf (machash 'RESULT 'SYN newht) newsynz)  ; result is X|Z not just |Z
-			     newht)))))
+			     ;; now assemble the second result
+			     (setf (machash 'SEM newht2) (&sbarp (machash 'SEM ht1) (machash 'SEM ht2)))
+                             (setf (machash 'INDEX newht2) '|<L'|)
+                             (setf (machash 'SYN newht2) newsyn2)
+                             (setf (machash 'DIR 'SYN newht2) (machash 'DIR 'SYN ht1))
+                             (setf (machash 'MODAL 'SYN newht2) (machash 'MODAL 'SYN ht1))
+                             (setf (machash 'DIR newsynw2) (machash 'DIR 'SYN ht2))
+                             (setf (machash 'RESULT newsynw2) (realize-binds
+                                                               (machash 'RESULT 'RESULT 'SYN ht1)
+                                                                                        (append nil b12)))
+                             (setf (machash 'ARG newsynw2) (realize-binds
+                                                            (machash 'ARG 'SYN ht2)
+                                                            (append nil b22)))
+                             (setf (machash 'RESULT 'SYN newht2) newsynw2)
+                             (setf (machash 'ARG 'SYN newht2)(realize-binds (machash 'ARG 'SYN ht1)
+                                                                                     (append nil b12)))
+			     (values newht newht2))))))
 
 (defun bx-subbar (ht2 ht1) 
   "backward crossed substitution bar"
