@@ -450,7 +450,7 @@
   )
 
 (defun which-ccglab ()
-  "CCGlab, version 5.0.0")
+  "CCGlab, version 5.0")
 
 (defun welcome()
   (status)
