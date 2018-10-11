@@ -1,12 +1,12 @@
 ;;;; =========================================================================== 
-;;;; == CCGlab  -Cem Bozsahin, 2015-2017, Ankara, Lisbon                      ==
+;;;; == CCGlab  -Cem Bozsahin, 2015-2018, Lisboa, Ankara                      ==
 ;;;; ===========================================================================
 ;;;; 
 ;;;; GNU GPL license applies.
 ;;;;
 ;;;; CCGlab implements all universal rules of CCG and some experimental ones, covering all directional variants of 
-;;;;     combination: application, composition, substitution, subcomposition, powers of B, S and O/D and L, 
-;;;;     namely B, B^2, B^3 and S^2, and O^2. Type-raising can be implemented as a lexical rule, which 
+;;;;     combination: application, composition, substitution, subcomposition, powers of B, S and D and L, 
+;;;;     namely B, B^2, B^3 and S^2, and D^2. Type-raising can be implemented as a lexical rule, which 
 ;;;;     is provided as a mechanism. Meta-categories e.g. those in (X\X)/X of coordination, are assumed to be
 ;;;;     lexically headed, and allow for application only (because there is no unification, and
 ;;;;     we make maximal computational use of CCG's procedural neutrality, by which any two adjacent category
@@ -23,10 +23,11 @@
 ;;;;
 ;;;; Some CS-ey notes:
 ;;;; - It represents offline grammars serially, as lisp lists, and parse objects as hashtables, for speed.
-;;;; - CCGlab uses only one Lisp tool: LALR parser of Mark Johnson. Thanks for that. The rest is standard Common Lisp.
+;;;; - CCGlab uses only one Lisp tool: LALR parser of Mark Johnson. Thanks for that. The rest is standard Common Lisp
+;;;;    without libraries.
 ;;;; - After seeing the LALR component, you might think CCGlab is a deterministic parser.
 ;;;;     The LALR subcomponent is used to parse text descriptions of lexical items and rules to Lisp structures,
-;;;;     which is deterministic (and probably not SLR, so thanks to MJ again).
+;;;;     which are deterministic (and probably not SLR, so thanks to MJ again).
 ;;;;
 
 
@@ -40,7 +41,7 @@
   "Instead of native (gethash 'F1 (gethash 'F2 ht)), we write (machash 'F1 'F2 ht)
   if ht table has a feature named F2 and the value has feature F1.
   NB.We cannot check at compile-time whether ht is a hashtable. No-one declares them.
-  The idea is that only the outermost (F1 above) feature is not necessarily hash-valued."
+  The idea is that only the outermost (F1 above) feature is assumed to be not necessarily hash-valued."
   (let* ((p (reverse path))
 	 (ht (first p))
 	 (feats (rest p))
@@ -165,14 +166,20 @@
 (defmacro &sbar (f g)
   "Sbar combinator, aka the lost combinator"
   `(mk-l (mk-v 'w) (mk-l (mk-v 'z) (mk-a (mk-a ,f 'z) (mk-a ,g 'w)))))
+(defmacro &sbarp (f g)
+  "sbar variant; cf. lambda orders"
+  `(mk-l (mk-v 'w) (mk-l (mk-v 'z) (mk-a (mk-a ,f 'w) (mk-a ,g 'z)))))
 (defmacro &s2 (f g)
-  "S^2 combinator. This is actually S'' not Curry's S^2. See Bozsahin 2012"
+  "S^2 combinator. not Curry's S^2. See Bozsahin 2012"
   `(mk-l (mk-v 'x)(mk-l (mk-v 'y)(mk-a (mk-a ,f 'x) (mk-a (mk-a ,g 'x)'y)))))
-(defmacro &o (f g)
-  "O combinator, also called D by Hoyt & Baldridge 2008. See Bozsahin 2015 book for discussion."
+(defmacro &d (f g)
+  "D by Hoyt & Baldridge 2008. See Bozsahin 2015 book for discussion."
   `(mk-l (mk-v 'h)(mk-a ,f (mk-l (mk-v 'x)(mk-a ,g (mk-a 'h 'x))))))
+(defmacro &d2 (f g)
+  "D^2"
+  `(mk-l (mk-v 'x1) (mk-l (mk-v 'h) (mk-a ,f (mk-l (mk-v 'x2)(mk-a (mk-a ,g 'x1) (mk-a 'h 'x2)))))))
 
-;; hash tables
+;; hash tables and their keys (features)
 
 (defmacro name-clash-report (feat)
   "reports a warning if feat is a name that clashes with hashtables' fixed features.
@@ -280,37 +287,107 @@
                           ;  to get partial parses as much as possible in a knowledge-poor way.
 
 ;; rule switches
-
 (defparameter *f-apply* t)   ;application
 (defparameter *b-apply* t)
-(defparameter *f-comp* t)    ;composition
+(defparameter *f-comp* t  )  ;composition
 (defparameter *b-comp* t)
 (defparameter *fx-comp* t)
 (defparameter *bx-comp* t)
-(defparameter *f-sub* t)     ;substitution
+(defparameter *f-sub* t  )   ;substitution
 (defparameter *b-sub* t)
 (defparameter *fx-sub* t)
 (defparameter *bx-sub* t)
-(defparameter *f-subbar* nil)  ;substitution bar (aka lost combinator)
+(defparameter *f-subbar* nil ) ;substitution bar (aka lost combinator)
 (defparameter *b-subbar* nil)
 (defparameter *fx-subbar* nil)
 (defparameter *bx-subbar* nil)
-(defparameter *f-subcomp* t) ;subcomposition (i.e. D/O)
-(defparameter *b-subcomp* t)
-(defparameter *fx-subcomp* t)
-(defparameter *bx-subcomp* t)
-(defparameter *f2-comp* t)   ;B^2
+(defparameter *f-subcomp* nil );subcomposition (i.e. D)
+(defparameter *b-subcomp* nil)
+(defparameter *fx-subcomp* nil)
+(defparameter *bx-subcomp* nil)
+(defparameter *f2-subcomp* nil) ; D^2
+(defparameter *f2-comp* t )     ; B^2
 (defparameter *b2-comp* t)
 (defparameter *fx2-comp* t)
 (defparameter *bx2-comp* t)
-(defparameter *f2-sub* t)    ;S'' (not S^2 of Curry)
+(defparameter *f2-sub* t )   ;S'' (not S^2 of Curry)
 (defparameter *b2-sub* t)
 (defparameter *fx2-sub* t)
 (defparameter *bx2-sub* t)
-(defparameter *f3-comp* t)   ;B^3
+(defparameter *f3-comp* t )  ;B^3
 (defparameter *b3-comp* t)
 (defparameter *fx3-comp* t)
 (defparameter *bx3-comp* t)
+
+;; rule switch wholesale control
+(defun basic-ccg (&optional (ok t))
+  (case ok
+    ((on t) (setf 
+	      *f-apply* t   ;application
+	      *b-apply* t
+	      *f-comp* t    ;composition
+	      *b-comp* t
+	      *fx-comp* t
+	      *bx-comp* t
+	      *f-sub* t     ;substitution
+	      *b-sub* t
+	      *fx-sub* t
+	      *bx-sub* t
+	      *f-subbar* nil  ;substitution bar (aka lost combinator)
+	      *b-subbar* nil
+	      *fx-subbar* nil
+	      *bx-subbar* nil
+	      *f-subcomp* nil ;subcomposition (i.e. D)
+	      *f2-subcomp* nil ; D^2
+	      *b-subcomp* nil
+	      *fx-subcomp* nil
+	      *bx-subcomp* nil
+	      *f2-comp* t   ;B^2
+	      *b2-comp* t
+	      *fx2-comp* t
+	      *bx2-comp* t
+	      *f2-sub* t    ;S'' (not S^2 of Curry)
+	      *b2-sub* t
+	      *fx2-sub* t
+	      *bx2-sub* t
+	      *f3-comp* t   ;B^3
+	      *b3-comp* t
+	      *fx3-comp* t
+	      *bx3-comp* t))
+    ((off nil) (setf 
+	      *f-apply* t   ;application
+	      *b-apply* t
+	      *f-comp* t    ;composition
+	      *b-comp* t
+	      *fx-comp* t
+	      *bx-comp* t
+	      *f-sub* t     ;substitution
+	      *b-sub* t
+	      *fx-sub* t
+	      *bx-sub* t
+	      *f-subbar* t  ;substitution bar (aka lost combinator)
+	      *b-subbar* t
+	      *fx-subbar* t
+	      *bx-subbar* t
+	      *f-subcomp* t ;subcomposition (i.e. D)
+	      *f2-subcomp* t ; D^2
+	      *b-subcomp* t
+	      *fx-subcomp* t
+	      *bx-subcomp* t
+	      *f2-comp* t   ;B^2
+	      *b2-comp* t
+	      *fx2-comp* t
+	      *bx2-comp* t
+	      *f2-sub* t    ;S'' (not S^2 of Curry)
+	      *b2-sub* t
+	      *fx2-sub* t
+	      *bx2-sub* t
+	      *f3-comp* t   ;B^3
+	      *b3-comp* t
+	      *fx3-comp* t
+	      *bx3-comp* t))
+    (otherwise (format t "~%Error: expected a value on/off/t/nil~%Continuing with current values"))))
+
 
 (defun switches ()
   (format t  "To change a switch, use (setf <switchname> <value>)
@@ -341,13 +418,14 @@
 	  *b2-sub*      ~A
 	  *fx2-sub*     ~A
 	  *bx2-sub*     ~A
+	  *f2-subcomp*  ~A
 	  *f3-comp*     ~A
 	  *b3-comp*     ~A
 	  *fx3-comp*    ~A
 	  *bx3-comp*    ~A~%"
 	  *f-apply* *b-apply* *f-comp* *b-comp* *fx-comp* *bx-comp* *f-sub* *b-sub* *fx-sub* *bx-sub*
           *f-subbar* *b-subbar* *fx-subbar* *bx-subbar* *f-subcomp* *b-subcomp* *fx-subcomp* *bx-subcomp*
-          *f2-comp* *b2-comp* *fx2-comp* *bx2-comp* *f2-sub* *b2-sub* *fx2-sub* *bx2-sub* *f3-comp* *b3-comp* 
+          *f2-comp* *b2-comp* *fx2-comp* *bx2-comp* *f2-sub* *b2-sub* *fx2-sub* *bx2-sub* *f2-subcomp* *f3-comp* *b3-comp* 
 	  *fx3-comp* *bx3-comp*))
 
 (defun pack-cky-lf-hashtable ()
@@ -379,17 +457,17 @@
   )
 
 (defun which-ccglab ()
-  "CCGlab, version 3.6.1.L")
+  "CCGlab, version 5.0")
 
 (defun welcome()
   (status)
-  (format t "~%===================================================")
+  (format t "~%If you've got WARNINGS during loading,~%   you can ignore them.")
+  (format t "~%They are caused by the LALR parser,  ~%   which generates functions at run-time.")
+  (format t "~%====================================================")
   (format t "~%Welcome to ~A" (which-ccglab))
-  (format t "~%---------------------------------------------------")
-  (format t "~%Please send bug reports to cem.bozsahin@gmail.com")
-  (format t "~%  with subject line CCGlab: ...")
+  (format t "~%----------------------------------------------------")
   (format t "~%Ready.")
-  (format t "~%===================================================~%"))
+  (format t "~%====================================================~%"))
 
 (defun beam-value ()
   (format t "*Beamp* = ~A  *Beam-exp* = ~A~%" *beamp* *beam-exp*))
@@ -1249,14 +1327,16 @@
 ;;;;  We translate all combinator instructions to lambda terms in our lambda ADT language
 ;;;;  so that LF normalizer only works with our lambdas.
 
+;; these are the CCG rules. Succesful combination creates a new cky entry with SYN SEM INDEX PARAM
+;;                          PARAM is calculated by the caller of caller (ccg-deduce), because it is a common method for all rules
+
 (defun f-apply (ht1 ht2 lex2 coord2) 
   "forward application"
   (and (complexp-hash (machash 'SYN ht1))
        (eql (machash 'DIR 'SYN ht1) 'FS) ; no need to check modality, all entries qualify for application.
        (if (machash 'BCONST 'ARG 'SYN ht1) 
 	 (return-from f-apply (singleton-match ht1 ht2 lex2 '|>| coord2)) t) ; short-circuit f-apply if arg is singleton
-       (multiple-value-bind (match b1 b2)
-	 ;	 (declare (ignore b2))
+       (multiple-value-bind (match b1) ; b2 is not needed from (values)
 	 (cat-match (machash 'ARG 'SYN ht1) (machash 'SYN ht2))
 	 (and match 
 	      (lex-check (machash 'LEX 'SYN ht1) lex2)  ; if we have X//Y Y , Y must be lex
@@ -1274,8 +1354,8 @@
        (if (machash 'BCONST 'ARG 'SYN ht2) 
 	 (return-from b-apply (singleton-match ht2 ht1 lex1 '|<| coord1)) t) ; short-circuit b-apply if arg is singleton
        (multiple-value-bind (match b1 b2)
-	 ;	 (declare (ignore b1))
 	 (cat-match (machash 'SYN ht1) (machash 'ARG 'SYN ht2))
+	 (use-value b1) ; dummy use of b1, not needed but cant be skipped in (values)
 	 (and match 
 	      (lex-check (machash 'LEX 'SYN ht2) lex1)  ; if we have Y X\\Y, Y must be lex
 	      (let ((newht (make-cky-entry-hashtable)))
@@ -1494,8 +1574,8 @@
 			     newht)))))))
 
 ;; this combinator is experimental. In forward form it is (X/Y)|Z:f Y/W:g -> (X|Z)/W : \w\z.fz(gw). It has C in the style of S
-;; this is MJS version; i had (X/W)|Z as result in L'
-;; by default all its variants are turned off
+;; this is MJS version and CB version combined, to give two results; i had (X/W)|Z as result in L'
+;;  which turned out to be unnecessary, given L see the AL paper for `folded the rug under'.
 (defun f-subbar (ht1 ht2) 
   "forward substitution bar, aka the lost combinator"
   (and (complexp-hash (machash 'SYN ht1))
@@ -1529,7 +1609,7 @@
 							    (machash 'ARG 'SYN ht1) 
 							    (append nil b12)))
 			     (setf (machash 'RESULT 'SYN newht) newsynz)  ; result is X|Z not just |Z
-			     newht)))))
+			     newht)))))  
 
 (defun fx-subbar (ht1 ht2) 
   "forward crossing substitution bar"
@@ -1638,8 +1718,7 @@
 
 (defun f-subcomp (ht1 ht2) 
   "forward subcomposition.
-   Cf. Bozsahin 2012 and Hoyt and Baldridge 2008 for subcomposition/subcombination.
-   This is what is dubbed Orifice (O) in the former, and D in the latter publication.
+   Hoyt and Baldridge's D from 2008 for subcomposition/subcombination.
    Not to be confused with combinator D of Rosenbloom 1950, which is just BB."
   (and (complexp-hash (machash 'SYN ht1))
        (complexp-hash (machash 'SYN ht2))
@@ -1655,8 +1734,8 @@
               (let ((newht (make-cky-entry-hashtable))     ;
 		    (newsynx (make-complex-cat-hashtable))   ; new result
 		    (newsynw (make-complex-cat-hashtable)))  ; new result of new argument
-		(setf (machash 'SEM newht) (&o (machash 'SEM ht1) (machash 'SEM ht2)))
-		(setf (machash 'INDEX newht) '|>O|) ; things project from ht1 and ht2
+		(setf (machash 'SEM newht) (&d (machash 'SEM ht1) (machash 'SEM ht2)))
+		(setf (machash 'INDEX newht) '|>D|) ; things project from ht1 and ht2
 		(setf (machash 'SYN newht) newsynx)
 		(setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht2))
 		(setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht2))
@@ -1690,8 +1769,8 @@
               (let ((newht (make-cky-entry-hashtable))     ;
 		    (newsynx (make-complex-cat-hashtable))   ; new result
 		    (newsynw (make-complex-cat-hashtable)))  ; new result of new argument
-		(setf (machash 'SEM newht) (&o (machash 'SEM ht2) (machash 'SEM ht1)))
-		(setf (machash 'INDEX newht) '|<O|) ; things project from ht1 and ht2
+		(setf (machash 'SEM newht) (&d (machash 'SEM ht2) (machash 'SEM ht1)))
+		(setf (machash 'INDEX newht) '|<D|) ; things project from ht1 and ht2
 		(setf (machash 'SYN newht) newsynx)
 		(setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht1))
 		(setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht1))
@@ -1724,8 +1803,8 @@
               (let ((newht (make-cky-entry-hashtable))     ;
 		    (newsynx (make-complex-cat-hashtable))   ; new result
 		    (newsynw (make-complex-cat-hashtable)))  ; new result of new argument
-		(setf (machash 'SEM newht) (&o (machash 'SEM ht1) (machash 'SEM ht2)))
-		(setf (machash 'INDEX newht) '|>Ox|) ; things project from ht1 and ht2
+		(setf (machash 'SEM newht) (&d (machash 'SEM ht1) (machash 'SEM ht2)))
+		(setf (machash 'INDEX newht) '|>Dx|) ; things project from ht1 and ht2
 		(setf (machash 'SYN newht) newsynx)
 		(setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht2))
 		(setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht2))
@@ -1759,8 +1838,8 @@
               (let ((newht (make-cky-entry-hashtable))     ;
 		    (newsynx (make-complex-cat-hashtable))   ; new result
 		    (newsynw (make-complex-cat-hashtable)))  ; new result of new argument
-		(setf (machash 'SEM newht) (&o (machash 'SEM ht2) (machash 'SEM ht1)))
-		(setf (machash 'INDEX newht) '|<Ox|) ; things project from ht1 and ht2
+		(setf (machash 'SEM newht) (&d (machash 'SEM ht2) (machash 'SEM ht1)))
+		(setf (machash 'INDEX newht) '|<Dx|) ; things project from ht1 and ht2
 		(setf (machash 'SYN newht) newsynx)
 		(setf (machash 'DIR 'SYN newht) (machash 'DIR 'SYN ht1))
 		(setf (machash 'MODAL 'SYN newht) (machash 'MODAL 'SYN ht1))
@@ -1912,7 +1991,7 @@
 		      newht)))))
 
 (defun f2-sub (ht1 ht2) 
-  ">S'', which is not S2, which is useless. See Bozsahin CL book ch.5"
+  ">S2 of Steedman 2011, not Curry's. see  Bozsahin CL book ch.5"
   (and (complexp-hash (machash 'SYN ht1))
        (complexp-hash (machash 'SYN ht2))
        (machash 'RESULT 'SYN ht1) 
@@ -1954,7 +2033,7 @@
 			     newht)))))))
 
 (defun b2-sub (ht1 ht2) 
-  "<S'', which is not S2, which is useless. See Bozsahin CL book ch.5"
+  "<S2"
   (and (complexp-hash (machash 'SYN ht2))
        (complexp-hash (machash 'SYN ht1))
        (machash 'RESULT 'SYN ht2) 
@@ -1997,7 +2076,7 @@
 			     newht)))))))
 
 (defun fx2-sub (ht1 ht2) 
-  ">Sx'', which is not S2, which is useless. See Bozsahin CL book ch.5"
+  ">S2"
   (and (complexp-hash (machash 'SYN ht1))
        (complexp-hash (machash 'SYN ht2))
        (machash 'RESULT 'SYN ht1) 
@@ -2039,7 +2118,7 @@
 			     newht)))))))
 
 (defun bx2-sub (ht1 ht2) 
-  "<Sx'', which is not S2, which is useless. See Bozsahin CL book ch.5"
+  "<Sx2, of Steedman 2011"
   (and (complexp-hash (machash 'SYN ht2))
        (complexp-hash (machash 'SYN ht1))
        (machash 'RESULT 'SYN ht2) 
@@ -2080,6 +2159,46 @@
 			     (setf (machash 'MODAL 'RESULT 'SYN newht)
 				   (machash 'MODAL 'RESULT  'SYN ht1))
 			     newht)))))))
+
+(defun f2-subcomp (ht1 ht2) 
+  "Forward harmonic D^2: X/(Y|Z) (Y/W)|Q -> X/(W|Z)|Q
+  Creation of new complex cats is probably clearest in this function because i wrote it last!
+  We need fresh copies of these cats if match is successful (hence make), because of the need 
+  coming from term unification of two Y's to be reflected on X,W,Z,Q.
+  Every slash in the result needs a new make.
+  Unlike other rules, there is no indirect ref in newht by its SYN feature, e.g. DIR SYN newht.
+  They are assembled locally then assigned wholesale to SYN newht."
+  (and (complexp-hash (machash 'SYN ht1))
+       (complexp-hash (machash 'SYN ht2))
+       (complexp-hash (machash 'ARG 'SYN ht1))
+       (complexp-hash (machash 'RESULT 'SYN ht2))
+       (eql (machash 'DIR 'SYN ht1) 'FS) 
+       (eql (machash 'DIR 'RESULT 'SYN ht2) 'FS)
+       (member (machash 'MODAL 'SYN ht1) '(ALL HARMONIC))
+       (member (machash 'MODAL 'RESULT 'SYN ht2) '(ALL HARMONIC))
+       (multiple-value-bind (match b1 b2)
+	 (cat-match (machash 'RESULT 'ARG 'SYN ht1) (machash 'RESULT 'RESULT 'SYN ht2))
+	 (and match 
+              (let ((newht (make-cky-entry-hashtable))      ; in this function, complex cats are named after arguments  
+		    (newsynq (make-complex-cat-hashtable))  ; other rules are still confusing (to me) 
+		    (newsynz (make-complex-cat-hashtable))  ; because of indirect refs by SYN newht
+		    (newsynw (make-complex-cat-hashtable))) ; maybe one day i'll rename them all. one day
+		(setf (machash 'SEM newht) (&d2 (machash 'SEM ht1) (machash 'SEM ht2)))
+		(setf (machash 'INDEX newht) '|>D2|) ; things project from ht1 and ht2
+		(setf (machash 'DIR newsynz) (machash 'DIR 'ARG 'SYN ht1))
+		(setf (machash 'MODAL newsynz) (machash 'MODAL 'ARG 'SYN ht1))
+		(setf (machash 'ARG newsynz) (realize-binds (machash 'ARG 'ARG 'SYN ht1) b1))
+		(setf (machash 'RESULT newsynz) (realize-binds (machash 'ARG 'RESULT 'SYN ht2) b2))
+		(setf (machash 'ARG newsynw) newsynz)
+		(setf (machash 'DIR newsynw) (machash 'DIR 'SYN ht1))
+		(setf (machash 'MODAL newsynw) (machash 'MODAL 'SYN ht1))
+		(setf (machash 'RESULT newsynw) (realize-binds (machash 'RESULT 'SYN ht1) b1))
+		(setf (machash 'RESULT newsynq) newsynw) ; that i hope is clearer now
+		(setf (machash 'DIR newsynq) (machash 'DIR 'SYN ht2))
+		(setf (machash 'MODAL newsynq) (machash 'MODAL 'SYN ht2))
+		(setf (machash 'ARG newsynq) (realize-binds (machash 'ARG 'SYN ht2) b2))
+		(setf (machash 'SYN newht) newsynq)
+		newht)))))
 
 (defun f3-comp (ht1 ht2) 
   ">B^3"
@@ -2318,7 +2437,7 @@
       (and *b-subbar* (b-subbar ht1 ht2))
       (and *fx-subbar* (fx-subbar ht1 ht2))
       (and *bx-subbar* (bx-subbar ht1 ht2))
-      (and *f-subcomp* (f-subcomp ht1 ht2))     ; subcomposition (i.e. D/O)
+      (and *f-subcomp* (f-subcomp ht1 ht2))     ; subcomposition (i.e. D)
       (and *b-subcomp* (b-subcomp ht1 ht2))
       (and *fx-subcomp* (fx-subcomp ht1 ht2))
       (and *bx-subcomp* (bx-subcomp ht1 ht2))
@@ -2326,10 +2445,11 @@
       (and *b2-comp* (b2-comp ht1 ht2))
       (and *fx2-comp* (fx2-comp ht1 ht2))
       (and *bx2-comp* (bx2-comp ht1 ht2))
-      (and *f2-sub* (f2-sub ht1 ht2))           ; S'' (not S^2 of Curry; see Bozsahin CL book)
+      (and *f2-sub* (f2-sub ht1 ht2))           ; (not S^2 of Curry; see Bozsahin CL book)
       (and *b2-sub* (b2-sub ht1 ht2))
       (and *fx2-sub* (fx2-sub ht1 ht2))
       (and *bx2-sub* (bx2-sub ht1 ht2))
+      (and *f2-subcomp* (f2-subcomp ht1 ht2))   ; D^2
       (and *f3-comp* (f3-comp ht1 ht2))         ; B^3
       (and *b3-comp* (b3-comp ht1 ht2))
       (and *fx3-comp* (fx3-comp ht1 ht2))
@@ -2349,9 +2469,9 @@
 	     (dolist (lr *lex-rules-table*) ; i use lexical rules as synonymous with unary rules
 	       (loop for k from 1 to r do
 		     (multiple-value-bind (match b1 b2)
-;		       (declare (ignore b1))
 		       (cat-match (machash 'SYN (nv-list-val 'SOLUTION (machash (list i j k) *cky-hashtable*)))
 				  (machash 'INSYN lr))
+		       (use-value b1) ; dummy use of b1; cannot be skipped because of (values)
 		       (and match	   
 			    (setf r (+ r 1))
 			    (let ((newht (make-cky-entry-hashtable))
@@ -2447,7 +2567,9 @@
 					      (list 'SOLUTION result))
 					(list (list 'LEFT (list k j p))
 					      (list 'RIGHT (list (- i k) (+ j k) q))
-					      (list 'SOLUTION result)))))))))
+					      (list 'SOLUTION result))))) ; first result's code ends
+			   )   
+			 )))
 	       (apply-unary-rules i j a nil)))
 	   (and (machash (list n 1 1) *cky-hashtable*) t)))  ; if a rule applied, result would be in n 1 1 
 	(t (format t "Error: expected a list of items.~%"))))
@@ -2910,7 +3032,7 @@
   t)
 
 (defun reset-globals()
-  (format t "~%================ Things to note ===================~%")
+  (format t "~%------------------ Things to note -------------------~%")
   (setf *print-readably* nil)
   (setf *print-pretty* t) 
   (setf *lex-rules-table* nil)
@@ -2928,6 +3050,7 @@
   (setf *ccg-grammar*  nil)
   (setf *ccg-grammar-keys*  0)
   (oov-off)
+  (basic-ccg) ; turn experimental rules off by default
   t)
 
 (defun read1 (fn)
