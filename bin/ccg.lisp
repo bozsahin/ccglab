@@ -2161,21 +2161,21 @@
 			     newht)))))))
 
 (defun f2-subcomp (ht1 ht2) 
-  "forward harmonic D^2: X/(Y|Z) (Y/W)|Q -> X/(W|Z)|Q
+  "Forward harmonic D^2: X/(Y|Z) (Y/W)|Q -> X/(W|Z)|Q
   Creation of new complex cats is probably clearest in this function because i wrote it last!
-  We need fresh copies of these cats if match is successful (hence make), because of term unification of 
-  two Y's to be reflected on X,W,Z,Q.
+  We need fresh copies of these cats if match is successful (hence make), because of the need 
+  coming from term unification of two Y's to be reflected on X,W,Z,Q.
   Every slash in the result needs a new make.
   Unlike other rules, there is no indirect ref in newht by its SYN feature, e.g. DIR SYN newht.
-  They are assembled locally then assigned wholesale to SYN newht"
+  They are assembled locally then assigned wholesale to SYN newht."
   (and (complexp-hash (machash 'SYN ht1))
        (complexp-hash (machash 'SYN ht2))
        (complexp-hash (machash 'ARG 'SYN ht1))
        (complexp-hash (machash 'RESULT 'SYN ht2))
        (eql (machash 'DIR 'SYN ht1) 'FS) 
-       (eql (machash 'DIR 'ARG 'RESULT 'SYN ht2) 'FS)
+       (eql (machash 'DIR 'RESULT 'SYN ht2) 'FS)
        (member (machash 'MODAL 'SYN ht1) '(ALL HARMONIC))
-       (member (machash 'MODAL 'ARG 'RESULT 'SYN ht2) '(ALL HARMONIC))
+       (member (machash 'MODAL 'RESULT 'SYN ht2) '(ALL HARMONIC))
        (multiple-value-bind (match b1 b2)
 	 (cat-match (machash 'RESULT 'ARG 'SYN ht1) (machash 'RESULT 'RESULT 'SYN ht2))
 	 (and match 
@@ -2185,15 +2185,17 @@
 		    (newsynw (make-complex-cat-hashtable))) ; maybe one day i'll rename them all. one day
 		(setf (machash 'SEM newht) (&d2 (machash 'SEM ht1) (machash 'SEM ht2)))
 		(setf (machash 'INDEX newht) '|>D2|) ; things project from ht1 and ht2
-		(setf (machash 'DIR newsynz) (machash 'DIR 'ARG 'ARG 'SYN ht1))
-		(setf (machash 'MODAL newsynz) (machash 'MODAL 'ARG 'ARG 'SYN ht1))
+		(setf (machash 'DIR newsynz) (machash 'DIR 'ARG 'SYN ht1))
+		(setf (machash 'MODAL newsynz) (machash 'MODAL 'ARG 'SYN ht1))
 		(setf (machash 'ARG newsynz) (realize-binds (machash 'ARG 'ARG 'SYN ht1) b1))
 		(setf (machash 'RESULT newsynz) (realize-binds (machash 'ARG 'RESULT 'SYN ht2) b2))
 		(setf (machash 'ARG newsynw) newsynz)
+		(setf (machash 'DIR newsynw) (machash 'DIR 'SYN ht1))
+		(setf (machash 'MODAL newsynw) (machash 'MODAL 'SYN ht1))
 		(setf (machash 'RESULT newsynw) (realize-binds (machash 'RESULT 'SYN ht1) b1))
-		(setf (machash 'RESULT newsynq) newsynw)
-		(setf (machash 'DIR newsynq) (machash 'DIR 'ARG 'SYN ht2))
-		(setf (machash 'MODAL newsynq) (machash 'MODAL 'ARG 'SYN ht2))
+		(setf (machash 'RESULT newsynq) newsynw) ; that i hope is clearer now
+		(setf (machash 'DIR newsynq) (machash 'DIR 'SYN ht2))
+		(setf (machash 'MODAL newsynq) (machash 'MODAL 'SYN ht2))
 		(setf (machash 'ARG newsynq) (realize-binds (machash 'ARG 'SYN ht2) b2))
 		(setf (machash 'SYN newht) newsynq)
 		newht)))))
