@@ -305,7 +305,7 @@
 (defparameter *b-subcomp* nil)
 (defparameter *fx-subcomp* nil)
 (defparameter *bx-subcomp* nil)
-(defparameter *f-subcomp2* nil) ; D^2
+(defparameter *f2-subcomp* nil) ; D^2
 (defparameter *f2-comp* t )     ; B^2
 (defparameter *b2-comp* t)
 (defparameter *fx2-comp* t)
@@ -338,7 +338,7 @@
 	      *fx-subbar* nil
 	      *bx-subbar* nil
 	      *f-subcomp* nil ;subcomposition (i.e. D)
-	      *f-subcomp2* nil ; D^2
+	      *f2-subcomp* nil ; D^2
 	      *b-subcomp* nil
 	      *fx-subcomp* nil
 	      *bx-subcomp* nil
@@ -370,7 +370,7 @@
 	      *fx-subbar* t
 	      *bx-subbar* t
 	      *f-subcomp* t ;subcomposition (i.e. D)
-	      *f-subcomp2* t ; D^2
+	      *f2-subcomp* t ; D^2
 	      *b-subcomp* t
 	      *fx-subcomp* t
 	      *bx-subcomp* t
@@ -418,14 +418,14 @@
 	  *b2-sub*      ~A
 	  *fx2-sub*     ~A
 	  *bx2-sub*     ~A
-	  *f-subcomp2*  ~A
+	  *f2-subcomp*  ~A
 	  *f3-comp*     ~A
 	  *b3-comp*     ~A
 	  *fx3-comp*    ~A
 	  *bx3-comp*    ~A~%"
 	  *f-apply* *b-apply* *f-comp* *b-comp* *fx-comp* *bx-comp* *f-sub* *b-sub* *fx-sub* *bx-sub*
           *f-subbar* *b-subbar* *fx-subbar* *bx-subbar* *f-subcomp* *b-subcomp* *fx-subcomp* *bx-subcomp*
-          *f2-comp* *b2-comp* *fx2-comp* *bx2-comp* *f2-sub* *b2-sub* *fx2-sub* *bx2-sub* *f-subcomp2* *f3-comp* *b3-comp* 
+          *f2-comp* *b2-comp* *fx2-comp* *bx2-comp* *f2-sub* *b2-sub* *fx2-sub* *bx2-sub* *f2-subcomp* *f3-comp* *b3-comp* 
 	  *fx3-comp* *bx3-comp*))
 
 (defun pack-cky-lf-hashtable ()
@@ -2163,7 +2163,8 @@
 (defun f2-subcomp (ht1 ht2) 
   "forward harmonic D^2: X/(Y|Z) (Y/W)|Q -> X/(W|Z)|Q
   Creation of new complex cats is probably clearest in this function because i wrote it last!
-  We need fresh copies of these cats (hence make), because of term unification of two Y's to be reflected on X,W,Z,Q.
+  We need fresh copies of these cats if match is successful (hence make), because of term unification of 
+  two Y's to be reflected on X,W,Z,Q.
   Every slash in the result needs a new make.
   Unlike other rules, there is no indirect ref in newht by its SYN feature, e.g. DIR SYN newht.
   They are assembled locally then assigned wholesale to SYN newht"
@@ -2446,7 +2447,7 @@
       (and *b2-sub* (b2-sub ht1 ht2))
       (and *fx2-sub* (fx2-sub ht1 ht2))
       (and *bx2-sub* (bx2-sub ht1 ht2))
-      (and *f-subcomp2* (f2-subcomp ht1 ht2))   ; D^2
+      (and *f2-subcomp* (f2-subcomp ht1 ht2))   ; D^2
       (and *f3-comp* (f3-comp ht1 ht2))         ; B^3
       (and *b3-comp* (b3-comp ht1 ht2))
       (and *fx3-comp* (fx3-comp ht1 ht2))
