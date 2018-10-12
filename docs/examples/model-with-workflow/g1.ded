@@ -1,0 +1,103 @@
+(DEFPARAMETER *CCG-GRAMMAR*
+  '(((KEY 1) (PHON KNOWS) (MORPH V)
+     (SYN
+      ((((BCAT S) (FEATS NIL)) (DIR BS) (MODAL STAR) ((BCAT NP) (FEATS NIL)))
+       (DIR FS) (MODAL HARMONIC) ((BCAT NP) (FEATS NIL))))
+     (SEM (LAM X (LAM Y (("KNOW" X) Y)))) (PARAM 1.0))
+    ((KEY 2) (PHON KNOWS) (MORPH V)
+     (SYN
+      ((((BCAT S) (FEATS NIL)) (DIR BS) (MODAL STAR) ((BCAT NP) (FEATS NIL)))
+       (DIR FS) (MODAL HARMONIC) ((BCAT S) (FEATS NIL))))
+     (SEM (LAM S (LAM X (("KNOW" S) X)))) (PARAM 1.0))
+    ((KEY 3) (PHON KNOWS) (MORPH V)
+     (SYN
+      ((((BCAT S) (FEATS NIL)) (DIR BS) (MODAL STAR) ((BCAT NP) (FEATS NIL)))
+       (DIR FS) (MODAL HARMONIC) ((BCAT NP) (FEATS NIL))))
+     (SEM (LAM X (LAM Y (("KNOW" Y) X)))) (PARAM 1.0))
+    ((KEY 4) (PHON KNOWS) (MORPH V)
+     (SYN
+      ((((BCAT S) (FEATS NIL)) (DIR BS) (MODAL STAR) ((BCAT NP) (FEATS NIL)))
+       (DIR FS) (MODAL HARMONIC) ((BCAT S) (FEATS NIL))))
+     (SEM (LAM S (LAM X (("KNOW" X) S)))) (PARAM 1.0))
+    ((KEY 5) (PHON LOVES) (MORPH V)
+     (SYN
+      ((((BCAT S) (FEATS NIL)) (DIR BS) (MODAL STAR) ((BCAT NP) (FEATS NIL)))
+       (DIR FS) (MODAL HARMONIC) ((BCAT NP) (FEATS NIL))))
+     (SEM (LAM X (LAM Y (("LOVE" X) Y)))) (PARAM 1.0))
+    ((KEY 6) (PHON LOVES) (MORPH V)
+     (SYN
+      ((((BCAT S) (FEATS NIL)) (DIR BS) (MODAL STAR) ((BCAT NP) (FEATS NIL)))
+       (DIR FS) (MODAL HARMONIC) ((BCAT NP) (FEATS NIL))))
+     (SEM (LAM X (LAM Y (("LOVE" Y) X)))) (PARAM 1.0))
+    ((KEY 7) (PHON JOHN) (MORPH N)
+     (SYN
+      (((BCAT S) (FEATS NIL)) (DIR FS) (MODAL ALL)
+       (((BCAT S) (FEATS NIL)) (DIR BS) (MODAL ALL) ((BCAT NP) (FEATS NIL)))))
+     (SEM (LAM P (P "JOHN"))) (PARAM 1.0))
+    ((KEY 8) (PHON JOHN) (MORPH N)
+     (SYN
+      (((BCAT S) (FEATS NIL)) (DIR BS) (MODAL ALL)
+       (((BCAT S) (FEATS NIL)) (DIR FS) (MODAL ALL) ((BCAT NP) (FEATS NIL)))))
+     (SEM (LAM P (P "JOHN"))) (PARAM 1.0))
+    ((KEY 9) (PHON JOHN) (MORPH N)
+     (SYN
+      ((((BCAT S) (FEATS NIL)) (DIR BS) (MODAL ALL) ((BCAT NP) (FEATS NIL)))
+       (DIR BS) (MODAL ALL)
+       ((((BCAT S) (FEATS NIL)) (DIR BS) (MODAL ALL) ((BCAT NP) (FEATS NIL)))
+        (DIR FS) (MODAL ALL) ((BCAT NP) (FEATS NIL)))))
+     (SEM (LAM P (P "JOHN"))) (PARAM 1.0))
+    ((KEY 10) (PHON JOHN) (MORPH N)
+     (SYN
+      ((((BCAT S) (FEATS NIL)) (DIR BS) (MODAL ALL) ((BCAT NP) (FEATS NIL)))
+       (DIR BS) (MODAL ALL)
+       ((((BCAT S) (FEATS NIL)) (DIR BS) (MODAL ALL) ((BCAT NP) (FEATS NIL)))
+        (DIR FS) (MODAL ALL) ((BCAT NP) (FEATS NIL)))))
+     (SEM (LAM P (LAM X (("JOHN" P) X)))) (PARAM 1.0))
+    ((KEY 11) (PHON MARY) (MORPH N)
+     (SYN
+      (((BCAT S) (FEATS NIL)) (DIR FS) (MODAL ALL)
+       (((BCAT S) (FEATS NIL)) (DIR BS) (MODAL ALL) ((BCAT NP) (FEATS NIL)))))
+     (SEM (LAM P (P "MARY"))) (PARAM 1.0))
+    ((KEY 12) (PHON MARY) (MORPH N)
+     (SYN
+      (((BCAT S) (FEATS NIL)) (DIR BS) (MODAL ALL)
+       (((BCAT S) (FEATS NIL)) (DIR FS) (MODAL ALL) ((BCAT NP) (FEATS NIL)))))
+     (SEM (LAM P (P "MARY"))) (PARAM 1.0))
+    ((KEY 13) (PHON MARY) (MORPH N)
+     (SYN
+      ((((BCAT S) (FEATS NIL)) (DIR BS) (MODAL ALL) ((BCAT NP) (FEATS NIL)))
+       (DIR BS) (MODAL ALL)
+       ((((BCAT S) (FEATS NIL)) (DIR BS) (MODAL ALL) ((BCAT NP) (FEATS NIL)))
+        (DIR FS) (MODAL ALL) ((BCAT NP) (FEATS NIL)))))
+     (SEM (LAM P (P "MARY"))) (PARAM 1.0))
+    ((KEY 14) (PHON MARY) (MORPH N)
+     (SYN
+      ((((BCAT S) (FEATS NIL)) (DIR BS) (MODAL ALL) ((BCAT NP) (FEATS NIL)))
+       (DIR BS) (MODAL ALL)
+       ((((BCAT S) (FEATS NIL)) (DIR BS) (MODAL ALL) ((BCAT NP) (FEATS NIL)))
+        (DIR FS) (MODAL ALL) ((BCAT NP) (FEATS NIL)))))
+     (SEM (LAM P (LAM X (("MARY" P) X)))) (PARAM 1.0))
+    ((KEY 15) (PHON JOHN) (MORPH N)
+     (SYN
+      (((BCAT S) (FEATS NIL)) (DIR FS) (MODAL ALL)
+       (((BCAT S) (FEATS NIL)) (DIR BS) (MODAL ALL) ((BCAT NP) (FEATS NIL)))))
+     (SEM (LAM P (P "DOG"))) (PARAM 1.0))
+    ((KEY 16) (PHON JOHN) (MORPH N)
+     (SYN
+      ((((BCAT S) (FEATS NIL)) (DIR BS) (MODAL ALL) ((BCAT NP) (FEATS NIL)))
+       (DIR BS) (MODAL ALL)
+       ((((BCAT S) (FEATS NIL)) (DIR BS) (MODAL ALL) ((BCAT NP) (FEATS NIL)))
+        (DIR FS) (MODAL ALL) ((BCAT NP) (FEATS NIL)))))
+     (SEM (LAM P (P "DOG"))) (PARAM 1.0))
+    ((KEY 17) (PHON MARY) (MORPH N)
+     (SYN
+      (((BCAT S) (FEATS NIL)) (DIR FS) (MODAL ALL)
+       (((BCAT S) (FEATS NIL)) (DIR BS) (MODAL ALL) ((BCAT NP) (FEATS NIL)))))
+     (SEM (LAM P (P "CAT"))) (PARAM 1.0))
+    ((KEY 18) (PHON MARY) (MORPH N)
+     (SYN
+      ((((BCAT S) (FEATS NIL)) (DIR BS) (MODAL ALL) ((BCAT NP) (FEATS NIL)))
+       (DIR BS) (MODAL ALL)
+       ((((BCAT S) (FEATS NIL)) (DIR BS) (MODAL ALL) ((BCAT NP) (FEATS NIL)))
+        (DIR FS) (MODAL ALL) ((BCAT NP) (FEATS NIL)))))
+     (SEM (LAM P (P "CAT"))) (PARAM 1.0))))

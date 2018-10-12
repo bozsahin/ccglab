@@ -1,0 +1,12 @@
+% some training data to swerve the grammar toward forward subject raising
+% and backward object raising (i.e. plain old English)
+% Note that there is no syntactic information in training. Its a latent variable.
+% -cem bozsahin 2017
+
+john loves mary : !love !mary !john;
+mary loves john : !love !john !mary;
+john knows mary : !know !mary !john;
+mary knows john : !know !john !mary;
+mary knows john loves mary : !know (!love !mary !john) !mary;
+john knows mary loves john : !know (!love !john !mary) !john;
+
