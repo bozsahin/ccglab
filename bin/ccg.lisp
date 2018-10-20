@@ -457,7 +457,7 @@
   )
 
 (defun which-ccglab ()
-  "CCGlab, version 5.0")
+  "CCGlab, version 5.0.1")
 
 (defun welcome()
   (status)
@@ -903,8 +903,8 @@
 	       (binds2 nil))
 	   (maphash #'(lambda (feat1 v1)  ; check sht1 feats and find binds
 			(let ((v2 (machash feat1 sht2)))
-			  (and v1 v2 (not (var? v1))(not (var? v2))(not (eql v1 v2)) 
-			       (return-from cat-match (values nil nil nil)))
+			  (and v1 v2 (not (var? v1))(not (var? v2))(not (equal v1 v2))  ; changed eql to equal. (BCAT v)
+			       (return-from cat-match (values nil nil nil)))            ; can have list value for v because of singletons
 			  (and v2 (var? v1)(not (var? v2))(push (list feat1 v2) binds1))))
 		    sht1)
 	   (maphash #'(lambda (feat2 v2)  ; find sht2 binds, common features are by now known to match
