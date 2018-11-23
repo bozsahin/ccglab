@@ -247,6 +247,7 @@
 ;;; globals
 ;;; =======
 
+(defparameter *lispsys* nil)   ; the lisp system you are using; detected automatically by ccglab script
 (defparameter *singletons* 0)  ; singleton (string constant) category is potentially dangerous, esp. empty ones!
 (defparameter *hash-data-size* 65536)  ; for CKY and LF argmax tables. Make IT REALLY BIG for training sets
                                        ; involving LOOOONG sentences.
@@ -457,15 +458,25 @@
   )
 
 (defun which-ccglab ()
-  "CCGlab, version 5.0.1")
+  "CCGlab, version 5.0.2")
 
-(defun welcome()
+(defun set-lisp-system (lispsys)
+  (case lispsys
+    (sbcl (setf *lispsys* 'sbcl))
+    ((ccl ccl64 ccl32) (setf *lispsys* 'ccl))
+    (otherwise (setf *lispsys* 'UNKNOWN)))
+  (format t "~%Your Lisp is ~A" *lispsys*)
+  (if (eql *lispsys* 'UNKNOWN)
+    (format t "~%You will not be able to re-make .ded or .sup files; but you can load them")))
+
+(defun welcome (&optional (lispsys *lispsys*))
   (status)
   (format t "~%If you've got WARNINGS during loading,~%   you can ignore them.")
   (format t "~%They are caused by the LALR parser,  ~%   which generates functions at run-time.")
   (format t "~%====================================================")
   (format t "~%Welcome to ~A" (which-ccglab))
   (format t "~%----------------------------------------------------")
+  (set-lisp-system lispsys)
   (format t "~%Ready.")
   (format t "~%====================================================~%"))
 
@@ -1032,9 +1043,9 @@
   (load-project pname 'model))
 
 
-(defun load-grammar (pname &key (maker nil))
+(defun load-grammar (pname &key (make nil))
   "Prepares and loads a Lisp-translated CCG grammar, and prepares the lexical rule hashtable for the project."
-  (and maker (lispify-project pname maker)) ; generates the .ded file and/or .lisptokens file 
+  (and make (lispify-project pname *lispsys*)) ; generates the .ded file and/or .lisptokens file 
   (load-project pname 'grammar))
 
 (defun get-ht (phon ht-list)
@@ -1291,14 +1302,13 @@
   (load-transformer/sup)
   (make-lalrparser))
 
-(defun make-supervision (pname &key (maker nil))
+(defun make-supervision (pname)
   "Makes a lisp-ready pname.sup file from pname.supervision and pname.suptokens."
-  (or maker (format t "Need a maker!~%") (return-from make-supervision))
   (let ((ofilename (concatenate 'string pname ".sup"))
 	(sourcefile (concatenate 'string pname ".supervision"))
 	(infilename (concatenate 'string pname ".suptokens")))
     (make-transformer/sup)
-    (lispify-supervision pname maker)
+    (lispify-supervision pname *lispsys*)
     (make-transformer/ccg) ; reset to CCG input parsing because there can be one LALR grammar at any time
     (format t "~%=========================== p r e p a r i n g ===============================~%")
     (format t "~%Project name: ~A~%  Input : ~A and ~A~%  Output: ~A ~%Check to see if output contains any spec errors.~%Fix and re-run if it does." pname sourcefile infilename ofilename)
@@ -3052,6 +3062,8 @@
   (oov-off)
   (basic-ccg) ; turn experimental rules off by default
   t)
+
+
 
 (defun read1 (fn)
   "reads one lisp object from file fn in one fell swoop"
