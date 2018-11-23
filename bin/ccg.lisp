@@ -469,6 +469,11 @@
   (if (eql *lispsys* 'UNKNOWN)
     (format t "~%You will not be able to re-make .ded or .sup files; but you can load them")))
 
+(defun flash-news ()
+  "change t to nil to not report anything."
+  (and t 
+       (format t "~%':maker' keyword in load-grammar and make-supervision is now redundant.~%Use ':make t' for load-grammar to remake.~%Lisp system is automatically detected.")))
+
 (defun welcome (&optional (lispsys *lispsys*))
   (status)
   (format t "~%If you've got WARNINGS during loading,~%   you can ignore them.")
@@ -477,6 +482,7 @@
   (format t "~%Welcome to ~A" (which-ccglab))
   (format t "~%----------------------------------------------------")
   (set-lisp-system lispsys)
+  (flash-news)
   (format t "~%Ready.")
   (format t "~%====================================================~%"))
 
@@ -1043,8 +1049,9 @@
   (load-project pname 'model))
 
 
-(defun load-grammar (pname &key (make nil))
-  "Prepares and loads a Lisp-translated CCG grammar, and prepares the lexical rule hashtable for the project."
+(defun load-grammar (pname &key (maker nil) (make (if maker t nil)))
+  "Prepares and loads a Lisp-translated CCG grammar, and prepares the lexical rule hashtable for the project.
+  Maker is a legacy argument; I kept it for people who have scripts with e.g. (load-grammar .. :maker 'sbcl)."
   (and make (lispify-project pname *lispsys*)) ; generates the .ded file and/or .lisptokens file 
   (load-project pname 'grammar))
 
@@ -1302,13 +1309,14 @@
   (load-transformer/sup)
   (make-lalrparser))
 
-(defun make-supervision (pname)
-  "Makes a lisp-ready pname.sup file from pname.supervision and pname.suptokens."
+(defun make-supervision (pname &key (maker t))
+  "Makes a lisp-ready pname.sup file from pname.supervision and pname.suptokens.
+  Maker is a legacy argument; its value is no longer used in finding the lisp system."
   (let ((ofilename (concatenate 'string pname ".sup"))
 	(sourcefile (concatenate 'string pname ".supervision"))
 	(infilename (concatenate 'string pname ".suptokens")))
     (make-transformer/sup)
-    (lispify-supervision pname *lispsys*)
+    (and maker (lispify-supervision pname *lispsys*))
     (make-transformer/ccg) ; reset to CCG input parsing because there can be one LALR grammar at any time
     (format t "~%=========================== p r e p a r i n g ===============================~%")
     (format t "~%Project name: ~A~%  Input : ~A and ~A~%  Output: ~A ~%Check to see if output contains any spec errors.~%Fix and re-run if it does." pname sourcefile infilename ofilename)
