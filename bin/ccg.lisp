@@ -465,9 +465,9 @@
     (sbcl (setf *lispsys* 'sbcl))
     ((ccl ccl64 ccl32) (setf *lispsys* 'ccl))
     (otherwise (setf *lispsys* 'UNKNOWN)))
-  (format t "~%Your Lisp is ~A" *lispsys*)
+  (format t "~%Your Lisp is ~A." *lispsys*)
   (if (eql *lispsys* 'UNKNOWN)
-    (format t "~%You will not be able to re-make .ded or .sup files; but you can load them")))
+    (format t "~%You will not be able to re-make .ded or .sup files; but you can load them.")))
 
 (defun flash-news ()
   "change t to nil to not report anything."
