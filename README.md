@@ -9,7 +9,7 @@ This is Common Lisp code running on linux/macos. If you already have an ANSI Com
 <b>There is an installer for ccglab, which I describe toward the bottom of README. Please read the preliminaries first to make
            it ready.</b>
 
-(GCL and CLisp are ANSI but the first one does not come with CLOS, and CLisp has weird locks on standard package files. This is unfortunate because some dispatch macros
+(GCL and CLisp are ANSI but the first one does not come with CLOS, and CLisp has weird locks on standard package files to turn them on. This is unfortunate because some dispatch macros
 for the Lisp reader needs methods, therefore not usable in GCL/Clisp out of the box.)
 
 SBCL and CCL are usable out of the box for CCGlab. Design and development of CCGlab continues to be in SBCL; then checked with CCL.
