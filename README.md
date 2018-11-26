@@ -1,9 +1,6 @@
 # ccglab
 Combinatory Categorial Grammar (CCG): All combinators, common grammar format, parsing to logical form, parameter estimation for probabilistic CCG.
 
-<b>Have a look at the companion repos, <a href="https://github.com/bozsahin/ccglab-grammars">ccglab-grammars</a>, 
-and <a href="https://github.com/bozsahin/ccglab-models">ccglab-models</a>, which contain grammars and models developed in CCGlab</b>.
-
 This is Common Lisp code running on linux/macos. If you already have an ANSI Common Lisp, it can work with it too.
 
 <b>There is an installer for ccglab, which I describe toward the bottom of README. Please read the preliminaries first to make
@@ -13,6 +10,22 @@ This is Common Lisp code running on linux/macos. If you already have an ANSI Com
 for the Lisp reader needs methods, therefore not usable in GCL/Clisp out of the box.)
 
 SBCL and CCL are usable out of the box for CCGlab. Design and development of CCGlab continues to be in SBCL; then checked with CCL.
+
+<b>PRELIMINARIES FOR WINDOWS</b>
+
+You need a linux/unix system, either real or in a virtual box such as Oracle's: https://www.virtualbox.org/.
+
+A virtual box can be installed in Windows, which effectively gives CCGlab in Windows.
+
+Then follow one of the advices above for linuxes, depending on your virtual machine.
+
+I recommend setting up an Ubuntu virtualbox, because it allows you to try without fully installing it.
+
+If you use CCGLAB from a virtualbox, save your machine state rather than power off the virtual machine.
+You won't have to do all of the above over and over.
+
+Even better, put a linux partition on your machine if you intend to use CCGlab quite often. You might forget
+to save the machine state one day, and you'd have to start all over again.
 
 <b>PRELIMINARIES for LINUX/MACOS USERS</b>
 
@@ -68,22 +81,6 @@ If you're not the machine's administrator, you need <code>sudo</code> priviledge
 Arch, Suse, MacOS do not seem to have this peculiar Ubuntu and RedHat/Fedora caste of packages. 
 
 The packages for sbcl and rlwrap are available for them. CCL Lisp too; if you feel like using it instead of SBCL.
-
-<b>PRELIMINARIES FOR WINDOWS</b>
-
-You need a linux/unix system, either real or in a virtual box such as Oracle's: https://www.virtualbox.org/.
-
-A virtual box can be installed in Windows, which effectively gives CCGlab in Windows.
-
-Then follow one of the advices above for linuxes, depending on your virtual machine.
-
-I recommend setting up an Ubuntu virtualbox, because it allows you to try without fully installing it.
-
-If you use CCGLAB from a virtualbox, save your machine state rather than power off the virtual machine.
-You won't have to do all of the above over and over.
-
-Even better, put a linux partition on your machine if you intend to use CCGlab quite often. You might forget
-to save the machine state one day, and you'd have to start all over again.
 
 <B>FIRST TIME INSTALL of CCGLAB</B>
 
@@ -141,5 +138,9 @@ And here is my <code>~/.bash_profile</code> file (create one if you don't have i
 
 The installer does all that and more, from fetching lalrparser.lisp to setting variables, paths and bash files and installing
 SBCL and rlwrap.
+
+<b>Have a look at the companion repos, <a href="https://github.com/bozsahin/ccglab-grammars">ccglab-grammars</a>, 
+and <a href="https://github.com/bozsahin/ccglab-models">ccglab-models</a>, which contain grammars and models developed in CCGlab</b>.
+
 
 enjoy.--Cem Bozsahin
