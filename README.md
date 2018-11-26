@@ -14,7 +14,7 @@ SBCL and CCL are usable out of the box for CCGlab. Design and development of CCG
 
 <b>PRELIMINARIES FOR WINDOWS</b>
 
-You need a linux/unix system, either real or in a virtual box such as Oracle's: https://www.virtualbox.org/.
+You need a linux/unix system for CCGlab, either real or in a virtual box such as Oracle's: https://www.virtualbox.org/.
 
 A virtual box can be installed in Windows, which effectively gives CCGlab in Windows.
 
