@@ -1,8 +1,9 @@
 # ccglab
 Combinatory Categorial Grammar (CCG): All combinators, common grammar format, parsing to logical form, parameter estimation for probabilistic CCG.
 
-<b>There is an installer for ccglab, which I describe toward the bottom of README. Please read the preliminaries first to make
-           it ready.</b>
+<b>There is an installer for ccglab, which I describe toward the bottom of README.
+           
+Please read the preliminaries first to make it ready.</b>
            
 This is Common Lisp code running on linux/macos. If you already have an ANSI Common Lisp, it can work with it too.
 
