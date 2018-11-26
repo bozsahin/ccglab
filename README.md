@@ -18,7 +18,7 @@ You need a linux/unix system for CCGlab, either real or in a virtual box such as
 
 A virtual box can be installed in Windows, which effectively gives CCGlab in Windows.
 
-Then follow one of the advices above for linuxes, depending on your virtual machine.
+Then follow one of the advices below for linuxes, depending on your virtual machine.
 
 I recommend setting up an Ubuntu virtualbox, because it allows you to try without fully installing it.
 
