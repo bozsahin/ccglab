@@ -472,7 +472,7 @@
 (defun flash-news ()
   "change t to nil to not report anything."
   (and t 
-       (format t "~%':maker' keyword in load-grammar and make-supervision is now redundant.~%Use ':make t' for load-grammar to remake.~%Lisp system is automatically detected.")))
+       (format t "~%':maker' keyword in load-grammar and make-supervision functions is now redundant.~%Use ':make t' for load-grammar to remake.~%This is because the Lisp system is now automatically detected (see above).")))
 
 (defun welcome (&optional (lispsys *lispsys*))
   (status)
