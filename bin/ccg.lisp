@@ -186,7 +186,7 @@
   The only hashtable that has potential clash is the basic cat table because only there we have
   user features.
   Called during parsing .ccg to lisp code"
-  `(if (member ,feat '(BCAT BCONST)) (format t "~%** CCGlab warning ** Your feature name clashes with built-in features; please rename : ~A" ,feat)))
+  `(if (member ,feat *ccglab-reserved*) (format t "~%*** CCGlab warning ** Your feature name clashes with built-in features; please rename : ~A" ,feat)))
 
 (defun make-lex-hashtable ()
   "keys are: index param sem syn morph phon."
@@ -247,6 +247,8 @@
 ;;; globals
 ;;; =======
 
+(defparameter *ccglab-reserved* '(phon morph syn sem param insyn insem outsyn outsem bcat dir feats modal
+				  left right solution result arg index lex bconst key id)) ; reserved words
 (defparameter *lispsys* nil)   ; the lisp system you are using; detected automatically by ccglab script
 (defparameter *singletons* 0)  ; singleton (string constant) category is potentially dangerous, esp. empty ones!
 (defparameter *hash-data-size* 65536)  ; for CKY and LF argmax tables. Make IT REALLY BIG for training sets
@@ -458,7 +460,7 @@
   )
 
 (defun which-ccglab ()
-  "CCGlab, version 5.0.2")
+  "CCGlab, version 5.0.3")
 
 (defun set-lisp-system (lispsys)
   (case lispsys
