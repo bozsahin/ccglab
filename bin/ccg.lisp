@@ -477,7 +477,7 @@
 (defun welcome (&optional (lispsys *lispsys*))
   (status)
   (format t "~%If you've got WARNINGS during loading,~%   you can ignore them.")
-  (format t "~%They are caused by the LALR parser,  ~%   which generates functions at run-time.")
+  (format t "~%They are caused by the LALR parser,  ~%   which refers to functions generated at run-time.")
   (format t "~%====================================================")
   (format t "~%Welcome to ~A" (which-ccglab))
   (format t "~%----------------------------------------------------")
