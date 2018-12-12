@@ -3112,6 +3112,9 @@
 
 ;; shortcuts for common functions. they become macros.
 
+(defun ab ()
+  (dolist (a *abv*) (format t "~5A ~A~%" (first a) (second a))))
+
 (abbrevs lg load-grammar 
          lm load-model
 	 cd ccg-deduce
@@ -3134,7 +3137,5 @@
 	 z z-score-grammar
 	 beta beta-normalize-outer
 	 ms make-supervision
+	 help ab
 	 )
-
-(defun ab ()
-  (dolist (a *abv*) (format t "~5A ~A~%" (first a) (second a))))
