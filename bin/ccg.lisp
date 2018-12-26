@@ -469,7 +469,10 @@
     (otherwise (setf *lispsys* 'UNKNOWN)))
   (format t "~%Your Lisp is ~A." *lispsys*)
   (if (eql *lispsys* 'UNKNOWN)
-    (format t "~%You will not be able to re-make .ded or .sup files; but you can load them.")))
+    (progn 
+      (setf *lispsys* 'sbcl)
+      (format t "~%I am using run-program API as ~A does." *lispsys*)
+      (format t "~%You may not be able to re-make .ded or .sup files if this is wrong."))))
 
 (defun flash-news (&optional (report nil))
   (and report 
