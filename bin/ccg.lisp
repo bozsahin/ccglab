@@ -460,7 +460,7 @@
   )
 
 (defun which-ccglab ()
-  "CCGlab, version 5.0.3")
+  "CCGlab, version 5.1")
 
 (defun set-lisp-system (lispsys)
   (case lispsys
@@ -471,10 +471,9 @@
   (if (eql *lispsys* 'UNKNOWN)
     (format t "~%You will not be able to re-make .ded or .sup files; but you can load them.")))
 
-(defun flash-news ()
-  "change t to nil to not report anything."
-  (and t 
-       (format t "~%':maker' keyword in load-grammar and make-supervision functions is now redundant.~%Use ':make t' for load-grammar to remake.~%This is because the Lisp system is now automatically detected (see above).")))
+(defun flash-news (&optional (report nil))
+  (and report 
+       (format t "~%':maker' keyword in load-grammar and make-supervision ~%  functions is deprecating.~%Use ':make t' for load-grammar to remake.~%Call make-supervision without a maker.~%This is because the Lisp system is now automatically ~%  detected (see above).")))
 
 (defun welcome (&optional (lispsys *lispsys*))
   (status)
@@ -484,7 +483,7 @@
   (format t "~%Welcome to ~A" (which-ccglab))
   (format t "~%----------------------------------------------------")
   (set-lisp-system lispsys)
-  (flash-news)
+  (flash-news t)
   (format t "~%Ready.")
   (format t "~%====================================================~%"))
 
@@ -1186,16 +1185,19 @@
       (lf      --> bodys              #'(lambda (bodys)(identity bodys)))
       (lf      --> lterm              #'(lambda (lterm)(identity lterm)))
       (lterm   --> VALBS ID vardot 
-	       lbody                  #'(lambda (VALBS ID vardot lbody)
+	                    lbody     #'(lambda (VALBS ID vardot lbody)
 					  (declare (ignore VALBS vardot))
 					  (mk-l (mk-v (cadr ID)) lbody)))
       (lbody   --> lterm              #'(lambda (lterm)(identity lterm)))           ; lambda bindings are right-associative.
-      (lbody   --> bodys              #'(lambda (bodys)(identity bodys)))
+      (lbody   --> bodys              #'(lambda (bodys)(identity bodys))) 
       (bodys   --> bodys body         #'(lambda (bodys body)(mk-a bodys body)))     ; LF concatenation is left-associative. 
       (bodys   --> body               #'(lambda (body)(identity body)))
       (body    --> LP bodys RP        #'(lambda (LP bodys RP)
 					  (declare (ignore LP RP))
 					  (identity bodys)))     ; in lexical specs, we don't expect inner lambdas in the LF body.
+      (body    --> LP lterm  RP       #'(lambda (LP lterm RP) 
+					  (declare (ignore LP RP))
+					  (identity lterm)))  ; there can be lots of inner lambdas as long as parenthesised
       (body    --> ID                 #'(lambda (ID)(cadr ID)))
       ))
   (defparameter lexforms '(VALFS ID MODAL END VALBS 
@@ -1231,7 +1233,9 @@
   (compile (eval (make-parser grammar lexforms *ENDMARKER*)))) 
 
 (defun make-transformer/ccg ()
+  (terpri) ; to clean up Lisp warnings
   (load-transformer/ccg)
+  (terpri)
   (make-lalrparser))
 
 (make-transformer/ccg)
@@ -1278,17 +1282,20 @@
       (lf      --> bodys              #'(lambda (bodys)(identity bodys)))
       (lf      --> lterm              #'(lambda (lterm)(identity lterm)))
       (lterm   --> VALBS ID vardot 
-         	       lbody          #'(lambda (VALBS ID vardot lbody)
+	                    lbody     #'(lambda (VALBS ID vardot lbody)
 					  (declare (ignore VALBS vardot))
-					  (mk-l (mk-v (second ID)) lbody)))
+					  (mk-l (mk-v (cadr ID)) lbody)))
       (lbody   --> lterm              #'(lambda (lterm)(identity lterm)))           ; lambda bindings are right-associative.
-      (lbody   --> bodys              #'(lambda (bodys)(identity bodys)))
+      (lbody   --> bodys              #'(lambda (bodys)(identity bodys))) 
       (bodys   --> bodys body         #'(lambda (bodys body)(mk-a bodys body)))     ; LF concatenation is left-associative. 
       (bodys   --> body               #'(lambda (body)(identity body)))
       (body    --> LP bodys RP        #'(lambda (LP bodys RP)
 					  (declare (ignore LP RP))
 					  (identity bodys)))     ; in lexical specs, we don't expect inner lambdas in the LF body.
-      (body    --> ID                 #'(lambda (ID)(second ID)))
+      (body    --> LP lterm  RP       #'(lambda (LP lterm RP) 
+					  (declare (ignore LP RP))
+					  (identity lterm)))  ; there can be lots of inner lambdas as long as parenthesised
+      (body    --> ID                 #'(lambda (ID)(cadr ID)))
       ))
   (defparameter lexforms '(ID END VALBS 
 				 VALDOT COLON 
@@ -1308,7 +1315,9 @@
   )
 
 (defun make-transformer/sup ()
+  (terpri)  ; to clean up Lisp warnings
   (load-transformer/sup)
+  (terpri)
   (make-lalrparser))
 
 (defun make-supervision (pname &key (maker t))
