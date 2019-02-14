@@ -247,7 +247,7 @@
 ;;; globals
 ;;; =======
 
-(defparameter *ccglab-reserved* '(phon morph syn sem param insyn insem outsyn outsem bcat dir feats modal
+(defparameter *ccglab-reserved* '(tag phon morph syn sem param insyn insem outsyn outsem bcat dir feats modal
 				  left right solution result arg index lex bconst key id)) ; reserved words
 (defparameter *lispsys* nil)   ; the lisp system you are using; detected automatically by ccglab script
 (defparameter *singletons* 0)  ; singleton (string constant) category is potentially dangerous, esp. empty ones!
