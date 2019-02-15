@@ -332,11 +332,13 @@
 
 ;; NF control
 (defmacro backward-nf ()
+  "this macro is dirty because it knows ht2 is the local var in all backward rules; avoids repeat"
   `(if *nf-parse* 
     (member (machash 'TAG ht2) *backward-tag-set*)
     t))
 
 (defmacro forward-nf ()
+  "this macro is dirty because it knows ht1 is the local var in all forward rules; avoids repeat"
   `(if *nf-parse* 
     (member (machash 'TAG ht1) *forward-tag-set*)
     t))
