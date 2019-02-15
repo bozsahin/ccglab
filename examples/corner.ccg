@@ -1,9 +1,0 @@
-% to try lex rules on a phrase 
-% semantics is simplified to check training
-the d := np/*n: \x. x;
-man n := n: !man;
-in p  := (n\n)/*np: \x\y.!in x y;
-corner n := n: !corner;
-(str) np : lf --> s/(s\np) : \lf\p. p lf;
-(otr) np : lf --> (s\np)\((s\np)/np) : \lf\p. p lf;
-hits v := (s\np)/np: \x\y.!hits x y;

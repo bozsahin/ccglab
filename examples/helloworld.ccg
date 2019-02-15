@@ -9,7 +9,7 @@ mat n   := n : \y.!mat y;
 
 % mini-workflow for mini-grammar: at command line do ($ is the prompt)
 $ ccglab
-% (load-grammar "ecsotm" :maker 'sbcl) % assuming SBCL is your lisp
+% (load-grammar "helloworld" :make t)
 % (ccg-deduce '(every cat sat on the mat))
 % (cky-show-deduction)
 % (ccg-deduce '(every mat sat on the cat))
