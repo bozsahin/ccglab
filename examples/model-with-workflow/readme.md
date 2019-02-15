@@ -9,9 +9,9 @@ II. Doing it manually, which is better for understanding the modeling workflow.
 
 1. Created the text file g1.ccg. It is the grammar we wish to train.
 2. Created the text file g1.supervision. It is the data we wish to train on.
-3. In ccglab, did (load-grammar "g1" :maker 'sbcl). 
+3. In ccglab, did (load-grammar "g1" :make t). 
     It created the g1.ded file from g1.ccg. 
-4. In ccglab, did (make-supervision "g1" :maker 'sbcl).
+4. In ccglab, did (make-supervision "g1").
     It created the g1.sup file from g1.supervision.
 5. Copied g1.ded to g1.ind to prepare for training.
 6. Initialized the parameters in g1.ind. I kept them as 1.0.
@@ -25,7 +25,7 @@ II. Doing it manually, which is better for understanding the modeling workflow.
 10. One way is (rank '(john knows mary loves John))
     It will show the most likely LF for the example, among other things.
 11. The '.out' file shows the details above in Lispese. It was started
-    in ccglab as (dribble "g1.trained...out") before i ran the experiment.
+    in ccglab before i ran the experiment.
     I stopped dribbling after step 9. I zscored the new grammar for comparison.
 
 (dribble "fn") is Lisp's way of saving all the top commands and their output in a file called fn.

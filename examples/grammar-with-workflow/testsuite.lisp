@@ -1,7 +1,7 @@
 ;; numbers are indexes to the paper example numbers
 ;; load this file in CCGlab after you do (load-grammar "fg2018") 
-;; then do (db-ders) to see derivations of all examples,
-;;   and (db-lfs) just to see LFs only (also reports mishaps)
+;; then do (test-ders) to see derivations of all examples,
+;;   and (test-lfs) just to see LFs only (also reports mishaps)
 ;; -cem bozsahin may 2018
 (defparameter *db* '(                             ; database of examples to be tested
 (2 (John persuaded Mary to hit the target) s)
@@ -27,7 +27,7 @@
 ))
 
 
-(defun  db-ders()
+(defun  test-ders()
   (pprint (which-ccglab))
   (pprint "showing results onto intended categories only")
   (dolist (p *db*)
@@ -35,7 +35,7 @@
 	   (format t "~%=======~%~s~%========~%" (first p))
 	   (cky-show-deduction (third p)))))  ; only show results onto intended category in the *db*
 
-(defun  db-lfs()
+(defun  test-lfs()
   (pprint (which-ccglab))
   (dolist (p *db*)
     (progn (ccg-deduce (second p))

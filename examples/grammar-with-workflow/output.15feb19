@@ -1,0 +1,1562 @@
+
+> (status)
+
+To see rule switches, do (switches)
+  To beam or not to beam    : NIL
+  Normal Form (NF) parse    : T
+  Out of vocabulary flag    : NIL
+ *PRINT-READABLY*           : NIL
+ *PRINT-PRETTY*             : T
+  Currently loaded grammar  : 
+ *CCG-GRAMMAR*              : 0 items
+ *LEX-RULES-TABLE*          : 0 items
+ *CKY-HASHTABLE*            : 0 items
+ *CKY-INPUT* for the table  : NIL 
+  Most likely LF w/weight   : NIL 
+  Its most likely derivation: NIL
+  Sum of weighted counts    : 0.0 
+  Most likely LF's cells    : NIL 
+  Number of differing LFs   : 0 
+  Most weighted derivation  : NIL 
+NIL
+> (lg "fg2018")
+
+======================= l o a d i n g =======================================
+; loading #P"/Users/bozsahin/myrepos/ccglab/examples/grammar-with-workflow/fg2018.ded"
+
+Project [fg2018] is assumed to consist of
+-----------------------------------------------------------------------------
+  CCG grammar source : fg2018.ccg $
+    Its token form   : fg2018.lisptokens $
+  Deduction grammar  : fg2018.ded $ (derived from fg2018.lisptokens)
+  Induction grammar  : fg2018.ind #
+  Supervision source : fg2018.sup ^
+  Model-specific code: fg2018.lisp ^
+   and other model-specific files you may create.
+       *CCG-GRAMMAR* : set from fg2018.ded
+  *LEX-RULES-TABLE*  : set from fg2018.ded
+Expected files       : $ for deduction, # for induction, ^ for model development
+=============================================================================
+T
+> (load "testsuite.lisp")
+
+T
+> (test-ders)
+
+"CCGlab, version 5.2"
+"showing results onto intended categories only"
+=======
+2
+========
+
+
+Derivation 1
+--------------
+LEX   (JOHN) := NP
+        : J
+LEX   (PERSUADED) := ((S\^NP)/VP)/^NP
+        : (LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y))))
+LEX   (MARY) := NP
+        : M
+>     (PERSUADED)(MARY) := (S\^NP)/VP
+        : ((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) M)
+LEX   (TO) := VP/^VP
+        : (LAM P P)
+LEX   (HIT) := VP/^NP
+        : (LAM X (LAM Y ((HIT X) Y)))
+LEX   (THE) := NP/*N
+        : (LAM X (DEF X))
+LEX   (TARGET) := N
+        : TARGET
+>     (THE)(TARGET) := NP
+        : ((LAM X (DEF X)) TARGET)
+>     (HIT)(THE TARGET) := VP
+        : ((LAM X (LAM Y ((HIT X) Y))) ((LAM X (DEF X)) TARGET))
+>     (TO)(HIT THE TARGET) := VP
+        : ((LAM P P) ((LAM X (LAM Y ((HIT X) Y))) ((LAM X (DEF X)) TARGET)))
+>     (PERSUADED MARY)(TO HIT THE TARGET) := S\^NP
+        : (((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) M)
+           ((LAM P P) ((LAM X (LAM Y ((HIT X) Y))) ((LAM X (DEF X)) TARGET))))
+<     (JOHN)(PERSUADED MARY TO HIT THE TARGET) := S
+        : ((((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) M)
+            ((LAM P P) ((LAM X (LAM Y ((HIT X) Y))) ((LAM X (DEF X)) TARGET))))
+           J)
+
+Final LF, normal-order evaluated: 
+
+    (((PERSUADE ((HIT (DEF TARGET)) M)) M) J) =
+    (PERSUADE (HIT (DEF TARGET) M) M J)
+
+Derivation 2
+--------------
+LEX   (JOHN) := S/(S\NP)
+        : (LAM P (P J))
+LEX   (PERSUADED) := ((S\^NP)/VP)/^NP
+        : (LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y))))
+LEX   (MARY) := NP
+        : M
+>     (PERSUADED)(MARY) := (S\^NP)/VP
+        : ((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) M)
+LEX   (TO) := VP/^VP
+        : (LAM P P)
+LEX   (HIT) := VP/^NP
+        : (LAM X (LAM Y ((HIT X) Y)))
+LEX   (THE) := NP/*N
+        : (LAM X (DEF X))
+LEX   (TARGET) := N
+        : TARGET
+>     (THE)(TARGET) := NP
+        : ((LAM X (DEF X)) TARGET)
+>     (HIT)(THE TARGET) := VP
+        : ((LAM X (LAM Y ((HIT X) Y))) ((LAM X (DEF X)) TARGET))
+>     (TO)(HIT THE TARGET) := VP
+        : ((LAM P P) ((LAM X (LAM Y ((HIT X) Y))) ((LAM X (DEF X)) TARGET)))
+>     (PERSUADED MARY)(TO HIT THE TARGET) := S\^NP
+        : (((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) M)
+           ((LAM P P) ((LAM X (LAM Y ((HIT X) Y))) ((LAM X (DEF X)) TARGET))))
+>     (JOHN)(PERSUADED MARY TO HIT THE TARGET) := S
+        : ((LAM P (P J))
+           (((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) M)
+            ((LAM P P) ((LAM X (LAM Y ((HIT X) Y))) ((LAM X (DEF X)) TARGET)))))
+
+Final LF, normal-order evaluated: 
+
+    (((PERSUADE ((HIT (DEF TARGET)) M)) M) J) =
+    (PERSUADE (HIT (DEF TARGET) M) M J)
+
+Derivation 3
+--------------
+LEX   (JOHN) := NP
+        : J
+LEX   (PERSUADED) := ((S\^NP)/VP)/^NP
+        : (LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y))))
+LEX   (MARY) := NP
+        : M
+>     (PERSUADED)(MARY) := (S\^NP)/VP
+        : ((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) M)
+LEX   (TO) := VP/^VP
+        : (LAM P P)
+LEX   (HIT) := VP/^NP
+        : (LAM X (LAM Y ((HIT X) Y)))
+LEX   (THE) := NP/*N
+        : (LAM X (DEF X))
+LEX   (TARGET) := N
+        : TARGET
+>     (THE)(TARGET) := NP
+        : ((LAM X (DEF X)) TARGET)
+>     (HIT)(THE TARGET) := VP
+        : ((LAM X (LAM Y ((HIT X) Y))) ((LAM X (DEF X)) TARGET))
+>     (TO)(HIT THE TARGET) := VP
+        : ((LAM P P) ((LAM X (LAM Y ((HIT X) Y))) ((LAM X (DEF X)) TARGET)))
+>     (PERSUADED MARY)(TO HIT THE TARGET) := S\^NP
+        : (((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) M)
+           ((LAM P P) ((LAM X (LAM Y ((HIT X) Y))) ((LAM X (DEF X)) TARGET))))
+<     (JOHN)(PERSUADED MARY TO HIT THE TARGET) := S
+        : ((((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) M)
+            ((LAM P P) ((LAM X (LAM Y ((HIT X) Y))) ((LAM X (DEF X)) TARGET))))
+           J)
+
+Final LF, normal-order evaluated: 
+
+    (((PERSUADE ((HIT (DEF TARGET)) M)) M) J) =
+    (PERSUADE (HIT (DEF TARGET) M) M J)
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+=======
+|2A|
+========
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+=======
+|2B|
+========
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+=======
+3
+========
+
+
+Derivation 1
+--------------
+LEX   (JOHN) := NP
+        : J
+LEX   (PERSUADED) := ((S\^NP)/VP)/^NP
+        : (LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y))))
+LEX   (MARY) := NP
+        : M
+>     (PERSUADED)(MARY) := (S\^NP)/VP
+        : ((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) M)
+LEX   (TO) := VP/^VP
+        : (LAM P P)
+LEX   (HIT) := VP/^NP
+        : (LAM X (LAM Y ((HIT X) Y)))
+LEX   (HARRY) := NP
+        : H
+>     (HIT)(HARRY) := VP
+        : ((LAM X (LAM Y ((HIT X) Y))) H)
+>     (TO)(HIT HARRY) := VP
+        : ((LAM P P) ((LAM X (LAM Y ((HIT X) Y))) H))
+>     (PERSUADED MARY)(TO HIT HARRY) := S\^NP
+        : (((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) M)
+           ((LAM P P) ((LAM X (LAM Y ((HIT X) Y))) H)))
+<     (JOHN)(PERSUADED MARY TO HIT HARRY) := S
+        : ((((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) M)
+            ((LAM P P) ((LAM X (LAM Y ((HIT X) Y))) H)))
+           J)
+
+Final LF, normal-order evaluated: 
+
+    (((PERSUADE ((HIT H) M)) M) J) =
+    (PERSUADE (HIT H M) M J)
+
+Derivation 2
+--------------
+LEX   (JOHN) := S/(S\NP)
+        : (LAM P (P J))
+LEX   (PERSUADED) := ((S\^NP)/VP)/^NP
+        : (LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y))))
+LEX   (MARY) := NP
+        : M
+>     (PERSUADED)(MARY) := (S\^NP)/VP
+        : ((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) M)
+LEX   (TO) := VP/^VP
+        : (LAM P P)
+LEX   (HIT) := VP/^NP
+        : (LAM X (LAM Y ((HIT X) Y)))
+LEX   (HARRY) := NP
+        : H
+>     (HIT)(HARRY) := VP
+        : ((LAM X (LAM Y ((HIT X) Y))) H)
+>     (TO)(HIT HARRY) := VP
+        : ((LAM P P) ((LAM X (LAM Y ((HIT X) Y))) H))
+>     (PERSUADED MARY)(TO HIT HARRY) := S\^NP
+        : (((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) M)
+           ((LAM P P) ((LAM X (LAM Y ((HIT X) Y))) H)))
+>     (JOHN)(PERSUADED MARY TO HIT HARRY) := S
+        : ((LAM P (P J))
+           (((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) M)
+            ((LAM P P) ((LAM X (LAM Y ((HIT X) Y))) H))))
+
+Final LF, normal-order evaluated: 
+
+    (((PERSUADE ((HIT H) M)) M) J) =
+    (PERSUADE (HIT H M) M J)
+
+Derivation 3
+--------------
+LEX   (JOHN) := NP
+        : J
+LEX   (PERSUADED) := ((S\^NP)/VP)/^NP
+        : (LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y))))
+LEX   (MARY) := NP
+        : M
+>     (PERSUADED)(MARY) := (S\^NP)/VP
+        : ((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) M)
+LEX   (TO) := VP/^VP
+        : (LAM P P)
+LEX   (HIT) := VP/^NP
+        : (LAM X (LAM Y ((HIT X) Y)))
+LEX   (HARRY) := NP
+        : H
+>     (HIT)(HARRY) := VP
+        : ((LAM X (LAM Y ((HIT X) Y))) H)
+>     (TO)(HIT HARRY) := VP
+        : ((LAM P P) ((LAM X (LAM Y ((HIT X) Y))) H))
+>     (PERSUADED MARY)(TO HIT HARRY) := S\^NP
+        : (((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) M)
+           ((LAM P P) ((LAM X (LAM Y ((HIT X) Y))) H)))
+<     (JOHN)(PERSUADED MARY TO HIT HARRY) := S
+        : ((((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) M)
+            ((LAM P P) ((LAM X (LAM Y ((HIT X) Y))) H)))
+           J)
+
+Final LF, normal-order evaluated: 
+
+    (((PERSUADE ((HIT H) M)) M) J) =
+    (PERSUADE (HIT H M) M J)
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+=======
+|12A|
+========
+
+
+Derivation 1
+--------------
+LEX   (MY) := NP/*N
+        : (LAM X (MY X))
+LEX   (TEAM) := N
+        : TEAM
+>     (MY)(TEAM) := NP
+        : ((LAM X (MY X)) TEAM)
+LEX   (SCORED) := (S\^NP)/(EVERY WHICH WAY)
+        : (LAM X (LAM Y (((SCORE _) X) Y)))
+LEX   (EVERY) := A/*B
+        : (LAM P P)
+LEX   (WHICH) := B/*C
+        : (LAM P P)
+LEX   (WAY) := C
+        : C
+>     (WHICH)(WAY) := B
+        : ((LAM P P) C)
+>     (EVERY)(WHICH WAY) := A
+        : ((LAM P P) ((LAM P P) C))
+>     (SCORED)(EVERY WHICH WAY) := S\^NP
+        : ((LAM X (LAM Y (((SCORE _) X) Y))) ((LAM P P) ((LAM P P) C)))
+<     (MY TEAM)(SCORED EVERY WHICH WAY) := S
+        : (((LAM X (LAM Y (((SCORE _) X) Y))) ((LAM P P) ((LAM P P) C)))
+           ((LAM X (MY X)) TEAM))
+
+Final LF, normal-order evaluated: 
+
+    (((SCORE _) C) (MY TEAM)) =
+    (SCORE _ C (MY TEAM))
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+=======
+14
+========
+
+
+Derivation 1
+--------------
+LEX   (JOHN) := S/(S\NP)
+        : (LAM P (P J))
+LEX   (KICKED) := (S\^NP)/^NP
+        : (LAM X (LAM Y ((KICK X) Y)))
+>B    (JOHN)(KICKED) := S/^NP
+        : (LAM X ((LAM P (P J)) ((LAM X (LAM Y ((KICK X) Y))) X)))
+LEX   (AND) := (@X\*@X)/*@X
+        : (LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+LEX   (MARY) := S/(S\NP)
+        : (LAM P (P M))
+LEX   (DID) := (S\^NP)/^VP
+        : (LAM P (LAM X (DID (P X))))
+LEX   (NOT) := VP/^VP
+        : (LAM P (LAM X (NOT (P X))))
+LEX   (KICK) := VP/^NP
+        : (LAM X (LAM Y ((KICK X) Y)))
+>B    (NOT)(KICK) := VP/^NP
+        : (LAM X ((LAM P (LAM X (NOT (P X)))) ((LAM X (LAM Y ((KICK X) Y))) X)))
+>B    (DID)(NOT KICK) := (S\^NP)/^NP
+        : (LAM X
+           ((LAM P (LAM X (DID (P X))))
+            ((LAM X
+              ((LAM P (LAM X (NOT (P X)))) ((LAM X (LAM Y ((KICK X) Y))) X)))
+             X)))
+>B    (MARY)(DID NOT KICK) := S/^NP
+        : (LAM X
+           ((LAM P (P M))
+            ((LAM X
+              ((LAM P (LAM X (DID (P X))))
+               ((LAM X
+                 ((LAM P (LAM X (NOT (P X))))
+                  ((LAM X (LAM Y ((KICK X) Y))) X)))
+                X)))
+             X)))
+>     (AND)(MARY DID NOT KICK) := (S/^NP)\*(S/^NP)
+        : ((LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+           (LAM X
+            ((LAM P (P M))
+             ((LAM X
+               ((LAM P (LAM X (DID (P X))))
+                ((LAM X
+                  ((LAM P (LAM X (NOT (P X))))
+                   ((LAM X (LAM Y ((KICK X) Y))) X)))
+                 X)))
+              X))))
+<     (JOHN KICKED)(AND MARY DID NOT KICK) := S/^NP
+        : (((LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+            (LAM X
+             ((LAM P (P M))
+              ((LAM X
+                ((LAM P (LAM X (DID (P X))))
+                 ((LAM X
+                   ((LAM P (LAM X (NOT (P X))))
+                    ((LAM X (LAM Y ((KICK X) Y))) X)))
+                  X)))
+               X))))
+           (LAM X ((LAM P (P J)) ((LAM X (LAM Y ((KICK X) Y))) X))))
+LEX   (THE) := NP/*N
+        : (LAM X (DEF X))
+LEX   (BUCKET) := N
+        : BUCKET
+>     (THE)(BUCKET) := NP
+        : ((LAM X (DEF X)) BUCKET)
+>     (JOHN KICKED AND MARY DID NOT KICK)(THE BUCKET) := S
+        : ((((LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+             (LAM X
+              ((LAM P (P M))
+               ((LAM X
+                 ((LAM P (LAM X (DID (P X))))
+                  ((LAM X
+                    ((LAM P (LAM X (NOT (P X))))
+                     ((LAM X (LAM Y ((KICK X) Y))) X)))
+                   X)))
+                X))))
+            (LAM X ((LAM P (P J)) ((LAM X (LAM Y ((KICK X) Y))) X))))
+           ((LAM X (DEF X)) BUCKET))
+
+Final LF, normal-order evaluated: 
+
+    ((AND (DID (NOT ((KICK (DEF BUCKET)) M)))) ((KICK (DEF BUCKET)) J)) =
+    (AND (DID (NOT (KICK (DEF BUCKET) M))) (KICK (DEF BUCKET) J))
+
+Derivation 2
+--------------
+LEX   (JOHN) := S/(S\NP)
+        : (LAM P (P J))
+LEX   (KICKED) := (S\^NP)/(THE BUCKET)
+        : (LAM X (LAM Y (((DIE _) X) Y)))
+>B    (JOHN)(KICKED) := S/(THE BUCKET)
+        : (LAM X ((LAM P (P J)) ((LAM X (LAM Y (((DIE _) X) Y))) X)))
+LEX   (AND) := (@X\*@X)/*@X
+        : (LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+LEX   (MARY) := S/(S\NP)
+        : (LAM P (P M))
+LEX   (DID) := (S\^NP)/^VP
+        : (LAM P (LAM X (DID (P X))))
+LEX   (NOT) := VP/^VP
+        : (LAM P (LAM X (NOT (P X))))
+LEX   (KICK) := VP/(THE BUCKET)
+        : (LAM X (LAM Y (((DIE _) X) Y)))
+>B    (NOT)(KICK) := VP/(THE BUCKET)
+        : (LAM X
+           ((LAM P (LAM X (NOT (P X)))) ((LAM X (LAM Y (((DIE _) X) Y))) X)))
+>B    (DID)(NOT KICK) := (S\^NP)/(THE BUCKET)
+        : (LAM X
+           ((LAM P (LAM X (DID (P X))))
+            ((LAM X
+              ((LAM P (LAM X (NOT (P X))))
+               ((LAM X (LAM Y (((DIE _) X) Y))) X)))
+             X)))
+>B    (MARY)(DID NOT KICK) := S/(THE BUCKET)
+        : (LAM X
+           ((LAM P (P M))
+            ((LAM X
+              ((LAM P (LAM X (DID (P X))))
+               ((LAM X
+                 ((LAM P (LAM X (NOT (P X))))
+                  ((LAM X (LAM Y (((DIE _) X) Y))) X)))
+                X)))
+             X)))
+>     (AND)(MARY DID NOT KICK) := (S/(THE BUCKET))\*(S/(THE BUCKET))
+        : ((LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+           (LAM X
+            ((LAM P (P M))
+             ((LAM X
+               ((LAM P (LAM X (DID (P X))))
+                ((LAM X
+                  ((LAM P (LAM X (NOT (P X))))
+                   ((LAM X (LAM Y (((DIE _) X) Y))) X)))
+                 X)))
+              X))))
+<     (JOHN KICKED)(AND MARY DID NOT KICK) := S/(THE BUCKET)
+        : (((LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+            (LAM X
+             ((LAM P (P M))
+              ((LAM X
+                ((LAM P (LAM X (DID (P X))))
+                 ((LAM X
+                   ((LAM P (LAM X (NOT (P X))))
+                    ((LAM X (LAM Y (((DIE _) X) Y))) X)))
+                  X)))
+               X))))
+           (LAM X ((LAM P (P J)) ((LAM X (LAM Y (((DIE _) X) Y))) X))))
+LEX   (THE) := NP/*N
+        : (LAM X (DEF X))
+LEX   (BUCKET) := N
+        : BUCKET
+>     (THE)(BUCKET) := NP
+        : ((LAM X (DEF X)) BUCKET)
+>     (JOHN KICKED AND MARY DID NOT KICK)(THE BUCKET) := S
+        : ((((LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+             (LAM X
+              ((LAM P (P M))
+               ((LAM X
+                 ((LAM P (LAM X (DID (P X))))
+                  ((LAM X
+                    ((LAM P (LAM X (NOT (P X))))
+                     ((LAM X (LAM Y (((DIE _) X) Y))) X)))
+                   X)))
+                X))))
+            (LAM X ((LAM P (P J)) ((LAM X (LAM Y (((DIE _) X) Y))) X))))
+           ((LAM X (DEF X)) BUCKET))
+
+Final LF, normal-order evaluated: 
+
+    ((AND (DID (NOT (((DIE _) (DEF BUCKET)) M)))) (((DIE _) (DEF BUCKET)) J)) =
+    (AND (DID (NOT (DIE _ (DEF BUCKET) M))) (DIE _ (DEF BUCKET) J))
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+=======
+16
+========
+
+
+Derivation 1
+--------------
+LEX   (I) := NP
+        : I
+LEX   (PICKED) := ((S\^NP)/(UP))/^NP
+        : (LAM Y (LAM X (LAM Z ((CAUSE (INIT ((((HOLD _) X) Y) Z))) Z))))
+LEX   (THE) := NP/*N
+        : (LAM X (DEF X))
+LEX   (BOOK) := N
+        : BOOK
+>     (THE)(BOOK) := NP
+        : ((LAM X (DEF X)) BOOK)
+>     (PICKED)(THE BOOK) := (S\^NP)/(UP)
+        : ((LAM Y (LAM X (LAM Z ((CAUSE (INIT ((((HOLD _) X) Y) Z))) Z))))
+           ((LAM X (DEF X)) BOOK))
+LEX   (UP) := ((S\NP)\(S\NP))/^NP
+        : (LAM X (LAM P (LAM Y ((UP (P Y)) X))))
+>     (PICKED THE BOOK)(UP) := S\^NP
+        : (((LAM Y (LAM X (LAM Z ((CAUSE (INIT ((((HOLD _) X) Y) Z))) Z))))
+            ((LAM X (DEF X)) BOOK))
+           (LAM X (LAM P (LAM Y ((UP (P Y)) X)))))
+<     (I)(PICKED THE BOOK UP) := S
+        : ((((LAM Y (LAM X (LAM Z ((CAUSE (INIT ((((HOLD _) X) Y) Z))) Z))))
+             ((LAM X (DEF X)) BOOK))
+            (LAM X (LAM P (LAM Y ((UP (P Y)) X)))))
+           I)
+
+Final LF, normal-order evaluated: 
+
+    ((CAUSE
+      (INIT
+       ((((HOLD _) (LAM X (LAM P (LAM Y ((UP (P Y)) X))))) (DEF BOOK)) I)))
+     I) =
+    (CAUSE (INIT (HOLD _ (\ X . \ P . \ Y . UP (P Y) X) (DEF BOOK) I)) I)
+
+Derivation 2
+--------------
+LEX   (I) := NP
+        : I
+LEX   (PICKED) := ((S\^NP)/(UP))/^NP
+        : (LAM Y (LAM X (LAM Z ((CAUSE (INIT ((((HOLD _) X) Y) Z))) Z))))
+LEX   (THE) := NP/*N
+        : (LAM X (DEF X))
+LEX   (BOOK) := N
+        : BOOK
+>     (THE)(BOOK) := NP
+        : ((LAM X (DEF X)) BOOK)
+>     (PICKED)(THE BOOK) := (S\^NP)/(UP)
+        : ((LAM Y (LAM X (LAM Z ((CAUSE (INIT ((((HOLD _) X) Y) Z))) Z))))
+           ((LAM X (DEF X)) BOOK))
+LEX   (UP) := ((S\NP)\(S\NP))/^NP
+        : (LAM X (LAM P (LAM Y ((UP (P Y)) X))))
+>     (PICKED THE BOOK)(UP) := S\^NP
+        : (((LAM Y (LAM X (LAM Z ((CAUSE (INIT ((((HOLD _) X) Y) Z))) Z))))
+            ((LAM X (DEF X)) BOOK))
+           (LAM X (LAM P (LAM Y ((UP (P Y)) X)))))
+<     (I)(PICKED THE BOOK UP) := S
+        : ((((LAM Y (LAM X (LAM Z ((CAUSE (INIT ((((HOLD _) X) Y) Z))) Z))))
+             ((LAM X (DEF X)) BOOK))
+            (LAM X (LAM P (LAM Y ((UP (P Y)) X)))))
+           I)
+
+Final LF, normal-order evaluated: 
+
+    ((CAUSE
+      (INIT
+       ((((HOLD _) (LAM X (LAM P (LAM Y ((UP (P Y)) X))))) (DEF BOOK)) I)))
+     I) =
+    (CAUSE (INIT (HOLD _ (\ X . \ P . \ Y . UP (P Y) X) (DEF BOOK) I)) I)
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+=======
+|16P|
+========
+
+
+Derivation 1
+--------------
+LEX   (I) := NP
+        : I
+LEX   (PICKED) := ((S\^NP)/^NP)/(UP)
+        : (LAM X (LAM Y (LAM Z ((((PICK _) X) Y) Z))))
+LEX   (UP) := ((S\NP)\(S\NP))/^NP
+        : (LAM X (LAM P (LAM Y ((UP (P Y)) X))))
+>     (PICKED)(UP) := (S\^NP)/^NP
+        : ((LAM X (LAM Y (LAM Z ((((PICK _) X) Y) Z))))
+           (LAM X (LAM P (LAM Y ((UP (P Y)) X)))))
+LEX   (THE) := NP/*N
+        : (LAM X (DEF X))
+LEX   (BOOK) := N
+        : BOOK
+>     (THE)(BOOK) := NP
+        : ((LAM X (DEF X)) BOOK)
+>     (PICKED UP)(THE BOOK) := S\^NP
+        : (((LAM X (LAM Y (LAM Z ((((PICK _) X) Y) Z))))
+            (LAM X (LAM P (LAM Y ((UP (P Y)) X)))))
+           ((LAM X (DEF X)) BOOK))
+<     (I)(PICKED UP THE BOOK) := S
+        : ((((LAM X (LAM Y (LAM Z ((((PICK _) X) Y) Z))))
+             (LAM X (LAM P (LAM Y ((UP (P Y)) X)))))
+            ((LAM X (DEF X)) BOOK))
+           I)
+
+Final LF, normal-order evaluated: 
+
+    ((((PICK _) (LAM X (LAM P (LAM Y ((UP (P Y)) X))))) (DEF BOOK)) I) =
+    (PICK _ (\ X . \ P . \ Y . UP (P Y) X) (DEF BOOK) I)
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+=======
+18
+========
+
+
+Derivation 1
+--------------
+LEX   (THE) := NP/*N
+        : (LAM X (DEF X))
+LEX   (BUCKET) := N
+        : BUCKET
+LEX   (THAT) := (N\N)/*(S/NP)
+        : (LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+LEX   (YOU) := S/(S\NP)
+        : (LAM P (P YOU))
+LEX   (KICKED) := (S\^NP)/^NP
+        : (LAM X (LAM Y ((KICK X) Y)))
+>B    (YOU)(KICKED) := S/^NP
+        : (LAM X ((LAM P (P YOU)) ((LAM X (LAM Y ((KICK X) Y))) X)))
+>     (THAT)(YOU KICKED) := N\N
+        : ((LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+           (LAM X ((LAM P (P YOU)) ((LAM X (LAM Y ((KICK X) Y))) X))))
+<     (BUCKET)(THAT YOU KICKED) := N
+        : (((LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+            (LAM X ((LAM P (P YOU)) ((LAM X (LAM Y ((KICK X) Y))) X))))
+           BUCKET)
+>     (THE)(BUCKET THAT YOU KICKED) := NP
+        : ((LAM X (DEF X))
+           (((LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+             (LAM X ((LAM P (P YOU)) ((LAM X (LAM Y ((KICK X) Y))) X))))
+            BUCKET))
+
+Final LF, normal-order evaluated: 
+
+    (DEF (LAM X ((AND ((KICK X) YOU)) (BUCKET X)))) =
+    (DEF (\ X . AND (KICK X YOU) (BUCKET X)))
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+=======
+19
+========
+
+
+Derivation 1
+--------------
+LEX   (MARY) := S/(S\NP)
+        : (LAM P (P M))
+LEX   (DRAGGED) := (S\^NP)/^NP
+        : (LAM X (LAM Y ((DRAG X) Y)))
+>B    (MARY)(DRAGGED) := S/^NP
+        : (LAM X ((LAM P (P M)) ((LAM X (LAM Y ((DRAG X) Y))) X)))
+LEX   (AND) := (@X\*@X)/*@X
+        : (LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+LEX   (JOHN) := S/(S\NP)
+        : (LAM P (P J))
+LEX   (KICKED) := (S\^NP)/^NP
+        : (LAM X (LAM Y ((KICK X) Y)))
+>B    (JOHN)(KICKED) := S/^NP
+        : (LAM X ((LAM P (P J)) ((LAM X (LAM Y ((KICK X) Y))) X)))
+>     (AND)(JOHN KICKED) := (S/^NP)\*(S/^NP)
+        : ((LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+           (LAM X ((LAM P (P J)) ((LAM X (LAM Y ((KICK X) Y))) X))))
+<     (MARY DRAGGED)(AND JOHN KICKED) := S/^NP
+        : (((LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+            (LAM X ((LAM P (P J)) ((LAM X (LAM Y ((KICK X) Y))) X))))
+           (LAM X ((LAM P (P M)) ((LAM X (LAM Y ((DRAG X) Y))) X))))
+LEX   (THE) := NP/*N
+        : (LAM X (DEF X))
+LEX   (BUCKET) := N
+        : BUCKET
+>     (THE)(BUCKET) := NP
+        : ((LAM X (DEF X)) BUCKET)
+>     (MARY DRAGGED AND JOHN KICKED)(THE BUCKET) := S
+        : ((((LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+             (LAM X ((LAM P (P J)) ((LAM X (LAM Y ((KICK X) Y))) X))))
+            (LAM X ((LAM P (P M)) ((LAM X (LAM Y ((DRAG X) Y))) X))))
+           ((LAM X (DEF X)) BUCKET))
+
+Final LF, normal-order evaluated: 
+
+    ((AND ((KICK (DEF BUCKET)) J)) ((DRAG (DEF BUCKET)) M)) =
+    (AND (KICK (DEF BUCKET) J) (DRAG (DEF BUCKET) M))
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+=======
+|21A|
+========
+
+
+Derivation 1
+--------------
+LEX   (AT) := (S/^S)/(ANY RATE)
+        : (LAM X (LAM S ((((MORE EXACTLY) S) _) X)))
+LEX   (ANY) := DUMMY/DUMMY
+        : (LAM X (ANY X))
+LEX   (RATE) := DUMMY
+        : RATE
+>     (ANY)(RATE) := DUMMY
+        : ((LAM X (ANY X)) RATE)
+>     (AT)(ANY RATE) := S/^S
+        : ((LAM X (LAM S ((((MORE EXACTLY) S) _) X))) ((LAM X (ANY X)) RATE))
+LEX   (YOU) := S/(S\NP)
+        : (LAM P (P YOU))
+LEX   (SPILLED) := (S\^NP)/^NP
+        : (LAM X (LAM Y ((SPILL X) Y)))
+LEX   (THE) := NP/*N
+        : (LAM X (DEF X))
+LEX   (BEANS) := N
+        : BEANS
+>     (THE)(BEANS) := NP
+        : ((LAM X (DEF X)) BEANS)
+>     (SPILLED)(THE BEANS) := S\^NP
+        : ((LAM X (LAM Y ((SPILL X) Y))) ((LAM X (DEF X)) BEANS))
+>     (YOU)(SPILLED THE BEANS) := S
+        : ((LAM P (P YOU))
+           ((LAM X (LAM Y ((SPILL X) Y))) ((LAM X (DEF X)) BEANS)))
+>     (AT ANY RATE)(YOU SPILLED THE BEANS) := S
+        : (((LAM X (LAM S ((((MORE EXACTLY) S) _) X))) ((LAM X (ANY X)) RATE))
+           ((LAM P (P YOU))
+            ((LAM X (LAM Y ((SPILL X) Y))) ((LAM X (DEF X)) BEANS))))
+
+Final LF, normal-order evaluated: 
+
+    ((((MORE EXACTLY) ((SPILL (DEF BEANS)) YOU)) _) (ANY RATE)) =
+    (MORE EXACTLY (SPILL (DEF BEANS) YOU) _ (ANY RATE))
+
+Derivation 2
+--------------
+LEX   (AT) := (S/^S)/(ANY RATE)
+        : (LAM X (LAM S ((((MORE EXACTLY) S) _) X)))
+LEX   (ANY) := DUMMY/DUMMY
+        : (LAM X (ANY X))
+LEX   (RATE) := DUMMY
+        : RATE
+>     (ANY)(RATE) := DUMMY
+        : ((LAM X (ANY X)) RATE)
+>     (AT)(ANY RATE) := S/^S
+        : ((LAM X (LAM S ((((MORE EXACTLY) S) _) X))) ((LAM X (ANY X)) RATE))
+LEX   (YOU) := S/(S\NP)
+        : (LAM P (P YOU))
+LEX   (SPILLED) := (S\^NP)/^NP
+        : (LAM X (LAM Y ((((REVEAL _) X) SECRET) Y)))
+LEX   (THE) := NP/*N
+        : (LAM X (DEF X))
+LEX   (BEANS) := N
+        : BEANS
+>     (THE)(BEANS) := NP
+        : ((LAM X (DEF X)) BEANS)
+>     (SPILLED)(THE BEANS) := S\^NP
+        : ((LAM X (LAM Y ((((REVEAL _) X) SECRET) Y))) ((LAM X (DEF X)) BEANS))
+>     (YOU)(SPILLED THE BEANS) := S
+        : ((LAM P (P YOU))
+           ((LAM X (LAM Y ((((REVEAL _) X) SECRET) Y)))
+            ((LAM X (DEF X)) BEANS)))
+>     (AT ANY RATE)(YOU SPILLED THE BEANS) := S
+        : (((LAM X (LAM S ((((MORE EXACTLY) S) _) X))) ((LAM X (ANY X)) RATE))
+           ((LAM P (P YOU))
+            ((LAM X (LAM Y ((((REVEAL _) X) SECRET) Y)))
+             ((LAM X (DEF X)) BEANS))))
+
+Final LF, normal-order evaluated: 
+
+    ((((MORE EXACTLY) ((((REVEAL _) (DEF BEANS)) SECRET) YOU)) _) (ANY RATE)) =
+    (MORE EXACTLY (REVEAL _ (DEF BEANS) SECRET YOU) _ (ANY RATE))
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+=======
+|21B|
+========
+
+
+Derivation 1
+--------------
+LEX   (YOU) := S/(S\NP)
+        : (LAM P (P YOU))
+LEX   (SPILLED) := (S\^NP)/^NP
+        : (LAM X (LAM Y ((SPILL X) Y)))
+LEX   (THE) := NP/*N
+        : (LAM X (DEF X))
+LEX   (BEANS) := N
+        : BEANS
+>     (THE)(BEANS) := NP
+        : ((LAM X (DEF X)) BEANS)
+>     (SPILLED)(THE BEANS) := S\^NP
+        : ((LAM X (LAM Y ((SPILL X) Y))) ((LAM X (DEF X)) BEANS))
+LEX   (AT) := (S\^S)/(ANY RATE)
+        : (LAM X (LAM S (((CONTRASTWITH _) X) S)))
+LEX   (ANY) := DUMMY/DUMMY
+        : (LAM X (ANY X))
+LEX   (RATE) := DUMMY
+        : RATE
+>     (ANY)(RATE) := DUMMY
+        : ((LAM X (ANY X)) RATE)
+>     (AT)(ANY RATE) := S\^S
+        : ((LAM X (LAM S (((CONTRASTWITH _) X) S))) ((LAM X (ANY X)) RATE))
+<B    (SPILLED THE BEANS)(AT ANY RATE) := S\^NP
+        : (LAM X
+           (((LAM X (LAM S (((CONTRASTWITH _) X) S))) ((LAM X (ANY X)) RATE))
+            (((LAM X (LAM Y ((SPILL X) Y))) ((LAM X (DEF X)) BEANS)) X)))
+>     (YOU)(SPILLED THE BEANS AT ANY RATE) := S
+        : ((LAM P (P YOU))
+           (LAM X
+            (((LAM X (LAM S (((CONTRASTWITH _) X) S))) ((LAM X (ANY X)) RATE))
+             (((LAM X (LAM Y ((SPILL X) Y))) ((LAM X (DEF X)) BEANS)) X))))
+
+Final LF, normal-order evaluated: 
+
+    (((CONTRASTWITH _) (ANY RATE)) ((SPILL (DEF BEANS)) YOU)) =
+    (CONTRASTWITH _ (ANY RATE) (SPILL (DEF BEANS) YOU))
+
+Derivation 2
+--------------
+LEX   (YOU) := S/(S\NP)
+        : (LAM P (P YOU))
+LEX   (SPILLED) := (S\^NP)/^NP
+        : (LAM X (LAM Y ((((REVEAL _) X) SECRET) Y)))
+LEX   (THE) := NP/*N
+        : (LAM X (DEF X))
+LEX   (BEANS) := N
+        : BEANS
+>     (THE)(BEANS) := NP
+        : ((LAM X (DEF X)) BEANS)
+>     (SPILLED)(THE BEANS) := S\^NP
+        : ((LAM X (LAM Y ((((REVEAL _) X) SECRET) Y))) ((LAM X (DEF X)) BEANS))
+LEX   (AT) := (S\^S)/(ANY RATE)
+        : (LAM X (LAM S (((CONTRASTWITH _) X) S)))
+LEX   (ANY) := DUMMY/DUMMY
+        : (LAM X (ANY X))
+LEX   (RATE) := DUMMY
+        : RATE
+>     (ANY)(RATE) := DUMMY
+        : ((LAM X (ANY X)) RATE)
+>     (AT)(ANY RATE) := S\^S
+        : ((LAM X (LAM S (((CONTRASTWITH _) X) S))) ((LAM X (ANY X)) RATE))
+<B    (SPILLED THE BEANS)(AT ANY RATE) := S\^NP
+        : (LAM X
+           (((LAM X (LAM S (((CONTRASTWITH _) X) S))) ((LAM X (ANY X)) RATE))
+            (((LAM X (LAM Y ((((REVEAL _) X) SECRET) Y)))
+              ((LAM X (DEF X)) BEANS))
+             X)))
+>     (YOU)(SPILLED THE BEANS AT ANY RATE) := S
+        : ((LAM P (P YOU))
+           (LAM X
+            (((LAM X (LAM S (((CONTRASTWITH _) X) S))) ((LAM X (ANY X)) RATE))
+             (((LAM X (LAM Y ((((REVEAL _) X) SECRET) Y)))
+               ((LAM X (DEF X)) BEANS))
+              X))))
+
+Final LF, normal-order evaluated: 
+
+    (((CONTRASTWITH _) (ANY RATE)) ((((REVEAL _) (DEF BEANS)) SECRET) YOU)) =
+    (CONTRASTWITH _ (ANY RATE) (REVEAL _ (DEF BEANS) SECRET YOU))
+
+Derivation 3
+--------------
+LEX   (YOU) := S/(S\NP)
+        : (LAM P (P YOU))
+LEX   (SPILLED) := (S\^NP)/^NP
+        : (LAM X (LAM Y ((SPILL X) Y)))
+LEX   (THE) := NP/*N
+        : (LAM X (DEF X))
+LEX   (BEANS) := N
+        : BEANS
+>     (THE)(BEANS) := NP
+        : ((LAM X (DEF X)) BEANS)
+>     (SPILLED)(THE BEANS) := S\^NP
+        : ((LAM X (LAM Y ((SPILL X) Y))) ((LAM X (DEF X)) BEANS))
+>     (YOU)(SPILLED THE BEANS) := S
+        : ((LAM P (P YOU))
+           ((LAM X (LAM Y ((SPILL X) Y))) ((LAM X (DEF X)) BEANS)))
+LEX   (AT) := (S\^S)/(ANY RATE)
+        : (LAM X (LAM S (((CONTRASTWITH _) X) S)))
+LEX   (ANY) := DUMMY/DUMMY
+        : (LAM X (ANY X))
+LEX   (RATE) := DUMMY
+        : RATE
+>     (ANY)(RATE) := DUMMY
+        : ((LAM X (ANY X)) RATE)
+>     (AT)(ANY RATE) := S\^S
+        : ((LAM X (LAM S (((CONTRASTWITH _) X) S))) ((LAM X (ANY X)) RATE))
+<     (YOU SPILLED THE BEANS)(AT ANY RATE) := S
+        : (((LAM X (LAM S (((CONTRASTWITH _) X) S))) ((LAM X (ANY X)) RATE))
+           ((LAM P (P YOU))
+            ((LAM X (LAM Y ((SPILL X) Y))) ((LAM X (DEF X)) BEANS))))
+
+Final LF, normal-order evaluated: 
+
+    (((CONTRASTWITH _) (ANY RATE)) ((SPILL (DEF BEANS)) YOU)) =
+    (CONTRASTWITH _ (ANY RATE) (SPILL (DEF BEANS) YOU))
+
+Derivation 4
+--------------
+LEX   (YOU) := S/(S\NP)
+        : (LAM P (P YOU))
+LEX   (SPILLED) := (S\^NP)/^NP
+        : (LAM X (LAM Y ((((REVEAL _) X) SECRET) Y)))
+LEX   (THE) := NP/*N
+        : (LAM X (DEF X))
+LEX   (BEANS) := N
+        : BEANS
+>     (THE)(BEANS) := NP
+        : ((LAM X (DEF X)) BEANS)
+>     (SPILLED)(THE BEANS) := S\^NP
+        : ((LAM X (LAM Y ((((REVEAL _) X) SECRET) Y))) ((LAM X (DEF X)) BEANS))
+>     (YOU)(SPILLED THE BEANS) := S
+        : ((LAM P (P YOU))
+           ((LAM X (LAM Y ((((REVEAL _) X) SECRET) Y)))
+            ((LAM X (DEF X)) BEANS)))
+LEX   (AT) := (S\^S)/(ANY RATE)
+        : (LAM X (LAM S (((CONTRASTWITH _) X) S)))
+LEX   (ANY) := DUMMY/DUMMY
+        : (LAM X (ANY X))
+LEX   (RATE) := DUMMY
+        : RATE
+>     (ANY)(RATE) := DUMMY
+        : ((LAM X (ANY X)) RATE)
+>     (AT)(ANY RATE) := S\^S
+        : ((LAM X (LAM S (((CONTRASTWITH _) X) S))) ((LAM X (ANY X)) RATE))
+<     (YOU SPILLED THE BEANS)(AT ANY RATE) := S
+        : (((LAM X (LAM S (((CONTRASTWITH _) X) S))) ((LAM X (ANY X)) RATE))
+           ((LAM P (P YOU))
+            ((LAM X (LAM Y ((((REVEAL _) X) SECRET) Y)))
+             ((LAM X (DEF X)) BEANS))))
+
+Final LF, normal-order evaluated: 
+
+    (((CONTRASTWITH _) (ANY RATE)) ((((REVEAL _) (DEF BEANS)) SECRET) YOU)) =
+    (CONTRASTWITH _ (ANY RATE) (REVEAL _ (DEF BEANS) SECRET YOU))
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+=======
+23
+========
+
+
+Derivation 1
+--------------
+LEX   (YOU) := S/(S\NP)
+        : (LAM P (P YOU))
+LEX   (SPILLED) := (S\^NP)/^NP
+        : (LAM X (LAM Y ((SPILL X) Y)))
+>B    (YOU)(SPILLED) := S/^NP
+        : (LAM X ((LAM P (P YOU)) ((LAM X (LAM Y ((SPILL X) Y))) X)))
+LEX   (AND) := (@X\*@X)/*@X
+        : (LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+LEX   (MARY) := S/(S\NP)
+        : (LAM P (P M))
+LEX   (COOKED) := (S\^NP)/^NP
+        : (LAM X (LAM Y ((COOK X) Y)))
+>B    (MARY)(COOKED) := S/^NP
+        : (LAM X ((LAM P (P M)) ((LAM X (LAM Y ((COOK X) Y))) X)))
+>     (AND)(MARY COOKED) := (S/^NP)\*(S/^NP)
+        : ((LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+           (LAM X ((LAM P (P M)) ((LAM X (LAM Y ((COOK X) Y))) X))))
+<     (YOU SPILLED)(AND MARY COOKED) := S/^NP
+        : (((LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+            (LAM X ((LAM P (P M)) ((LAM X (LAM Y ((COOK X) Y))) X))))
+           (LAM X ((LAM P (P YOU)) ((LAM X (LAM Y ((SPILL X) Y))) X))))
+LEX   (THE) := NP/*N
+        : (LAM X (DEF X))
+LEX   (BEANS) := N
+        : BEANS
+>     (THE)(BEANS) := NP
+        : ((LAM X (DEF X)) BEANS)
+>     (YOU SPILLED AND MARY COOKED)(THE BEANS) := S
+        : ((((LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+             (LAM X ((LAM P (P M)) ((LAM X (LAM Y ((COOK X) Y))) X))))
+            (LAM X ((LAM P (P YOU)) ((LAM X (LAM Y ((SPILL X) Y))) X))))
+           ((LAM X (DEF X)) BEANS))
+
+Final LF, normal-order evaluated: 
+
+    ((AND ((COOK (DEF BEANS)) M)) ((SPILL (DEF BEANS)) YOU)) =
+    (AND (COOK (DEF BEANS) M) (SPILL (DEF BEANS) YOU))
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+=======
+25
+========
+
+
+Derivation 1
+--------------
+LEX   (YOU) := S/(S\NP)
+        : (LAM P (P YOU))
+LEX   (SPILLED) := (S\^NP)/^NP
+        : (LAM X (LAM Y ((SPILL X) Y)))
+>B    (YOU)(SPILLED) := S/^NP
+        : (LAM X ((LAM P (P YOU)) ((LAM X (LAM Y ((SPILL X) Y))) X)))
+LEX   (AND) := (@X\*@X)/*@X
+        : (LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+LEX   (MARY) := S/(S\NP)
+        : (LAM P (P M))
+LEX   (COOKED) := (S\^NP)/^NP
+        : (LAM X (LAM Y ((COOK X) Y)))
+>B    (MARY)(COOKED) := S/^NP
+        : (LAM X ((LAM P (P M)) ((LAM X (LAM Y ((COOK X) Y))) X)))
+>     (AND)(MARY COOKED) := (S/^NP)\*(S/^NP)
+        : ((LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+           (LAM X ((LAM P (P M)) ((LAM X (LAM Y ((COOK X) Y))) X))))
+<     (YOU SPILLED)(AND MARY COOKED) := S/^NP
+        : (((LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+            (LAM X ((LAM P (P M)) ((LAM X (LAM Y ((COOK X) Y))) X))))
+           (LAM X ((LAM P (P YOU)) ((LAM X (LAM Y ((SPILL X) Y))) X))))
+LEX   (THE) := NP/*N
+        : (LAM X (DEF X))
+LEX   (BEANS) := N
+        : BEANS
+>     (THE)(BEANS) := NP
+        : ((LAM X (DEF X)) BEANS)
+>     (YOU SPILLED AND MARY COOKED)(THE BEANS) := S
+        : ((((LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+             (LAM X ((LAM P (P M)) ((LAM X (LAM Y ((COOK X) Y))) X))))
+            (LAM X ((LAM P (P YOU)) ((LAM X (LAM Y ((SPILL X) Y))) X))))
+           ((LAM X (DEF X)) BEANS))
+
+Final LF, normal-order evaluated: 
+
+    ((AND ((COOK (DEF BEANS)) M)) ((SPILL (DEF BEANS)) YOU)) =
+    (AND (COOK (DEF BEANS) M) (SPILL (DEF BEANS) YOU))
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+=======
+|25V|
+========
+
+
+Derivation 1
+--------------
+LEX   (YOU) := S/(S\NP)
+        : (LAM P (P YOU))
+LEX   (SPILLED) := (S\^NP)/^NP
+        : (LAM X (LAM Y ((SPILL X) Y)))
+>B    (YOU)(SPILLED) := S/^NP
+        : (LAM X ((LAM P (P YOU)) ((LAM X (LAM Y ((SPILL X) Y))) X)))
+LEX   (AND) := (@X\*@X)/*@X
+        : (LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+LEX   (MARY) := S/(S\NP)
+        : (LAM P (P M))
+LEX   (SPILLED) := (S\^NP)/^NP
+        : (LAM X (LAM Y ((SPILL X) Y)))
+>B    (MARY)(SPILLED) := S/^NP
+        : (LAM X ((LAM P (P M)) ((LAM X (LAM Y ((SPILL X) Y))) X)))
+>     (AND)(MARY SPILLED) := (S/^NP)\*(S/^NP)
+        : ((LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+           (LAM X ((LAM P (P M)) ((LAM X (LAM Y ((SPILL X) Y))) X))))
+<     (YOU SPILLED)(AND MARY SPILLED) := S/^NP
+        : (((LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+            (LAM X ((LAM P (P M)) ((LAM X (LAM Y ((SPILL X) Y))) X))))
+           (LAM X ((LAM P (P YOU)) ((LAM X (LAM Y ((SPILL X) Y))) X))))
+LEX   (THE) := NP/*N
+        : (LAM X (DEF X))
+LEX   (BEANS) := N
+        : BEANS
+>     (THE)(BEANS) := NP
+        : ((LAM X (DEF X)) BEANS)
+>     (YOU SPILLED AND MARY SPILLED)(THE BEANS) := S
+        : ((((LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+             (LAM X ((LAM P (P M)) ((LAM X (LAM Y ((SPILL X) Y))) X))))
+            (LAM X ((LAM P (P YOU)) ((LAM X (LAM Y ((SPILL X) Y))) X))))
+           ((LAM X (DEF X)) BEANS))
+
+Final LF, normal-order evaluated: 
+
+    ((AND ((SPILL (DEF BEANS)) M)) ((SPILL (DEF BEANS)) YOU)) =
+    (AND (SPILL (DEF BEANS) M) (SPILL (DEF BEANS) YOU))
+
+Derivation 2
+--------------
+LEX   (YOU) := S/(S\NP)
+        : (LAM P (P YOU))
+LEX   (SPILLED) := (S\^NP)/^NP
+        : (LAM X (LAM Y ((((REVEAL _) X) SECRET) Y)))
+>B    (YOU)(SPILLED) := S/^NP
+        : (LAM X
+           ((LAM P (P YOU)) ((LAM X (LAM Y ((((REVEAL _) X) SECRET) Y))) X)))
+LEX   (AND) := (@X\*@X)/*@X
+        : (LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+LEX   (MARY) := S/(S\NP)
+        : (LAM P (P M))
+LEX   (SPILLED) := (S\^NP)/^NP
+        : (LAM X (LAM Y ((((REVEAL _) X) SECRET) Y)))
+>B    (MARY)(SPILLED) := S/^NP
+        : (LAM X
+           ((LAM P (P M)) ((LAM X (LAM Y ((((REVEAL _) X) SECRET) Y))) X)))
+>     (AND)(MARY SPILLED) := (S/^NP)\*(S/^NP)
+        : ((LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+           (LAM X
+            ((LAM P (P M)) ((LAM X (LAM Y ((((REVEAL _) X) SECRET) Y))) X))))
+<     (YOU SPILLED)(AND MARY SPILLED) := S/^NP
+        : (((LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+            (LAM X
+             ((LAM P (P M)) ((LAM X (LAM Y ((((REVEAL _) X) SECRET) Y))) X))))
+           (LAM X
+            ((LAM P (P YOU)) ((LAM X (LAM Y ((((REVEAL _) X) SECRET) Y))) X))))
+LEX   (THE) := NP/*N
+        : (LAM X (DEF X))
+LEX   (BEANS) := N
+        : BEANS
+>     (THE)(BEANS) := NP
+        : ((LAM X (DEF X)) BEANS)
+>     (YOU SPILLED AND MARY SPILLED)(THE BEANS) := S
+        : ((((LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+             (LAM X
+              ((LAM P (P M)) ((LAM X (LAM Y ((((REVEAL _) X) SECRET) Y))) X))))
+            (LAM X
+             ((LAM P (P YOU))
+              ((LAM X (LAM Y ((((REVEAL _) X) SECRET) Y))) X))))
+           ((LAM X (DEF X)) BEANS))
+
+Final LF, normal-order evaluated: 
+
+    ((AND ((((REVEAL _) (DEF BEANS)) SECRET) M))
+     ((((REVEAL _) (DEF BEANS)) SECRET) YOU)) =
+    (AND (REVEAL _ (DEF BEANS) SECRET M) (REVEAL _ (DEF BEANS) SECRET YOU))
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+=======
+25ALT
+========
+
+
+Derivation 1
+--------------
+LEX   (YOU) := S/(S\NP)
+        : (LAM P (P YOU))
+LEX   (SPILLED) := (S\^NP)/^NP
+        : (LAM X (LAM Y ((SPILL X) Y)))
+LEX   (THE) := NP/*N
+        : (LAM X (DEF X))
+LEX   (BEANS) := N
+        : BEANS
+>     (THE)(BEANS) := NP
+        : ((LAM X (DEF X)) BEANS)
+>     (SPILLED)(THE BEANS) := S\^NP
+        : ((LAM X (LAM Y ((SPILL X) Y))) ((LAM X (DEF X)) BEANS))
+>     (YOU)(SPILLED THE BEANS) := S
+        : ((LAM P (P YOU))
+           ((LAM X (LAM Y ((SPILL X) Y))) ((LAM X (DEF X)) BEANS)))
+
+Final LF, normal-order evaluated: 
+
+    ((SPILL (DEF BEANS)) YOU) =
+    (SPILL (DEF BEANS) YOU)
+
+Derivation 2
+--------------
+LEX   (YOU) := S/(S\NP)
+        : (LAM P (P YOU))
+LEX   (SPILLED) := (S\^NP)/^NP
+        : (LAM X (LAM Y ((((REVEAL _) X) SECRET) Y)))
+LEX   (THE) := NP/*N
+        : (LAM X (DEF X))
+LEX   (BEANS) := N
+        : BEANS
+>     (THE)(BEANS) := NP
+        : ((LAM X (DEF X)) BEANS)
+>     (SPILLED)(THE BEANS) := S\^NP
+        : ((LAM X (LAM Y ((((REVEAL _) X) SECRET) Y))) ((LAM X (DEF X)) BEANS))
+>     (YOU)(SPILLED THE BEANS) := S
+        : ((LAM P (P YOU))
+           ((LAM X (LAM Y ((((REVEAL _) X) SECRET) Y)))
+            ((LAM X (DEF X)) BEANS)))
+
+Final LF, normal-order evaluated: 
+
+    ((((REVEAL _) (DEF BEANS)) SECRET) YOU) =
+    (REVEAL _ (DEF BEANS) SECRET YOU)
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+=======
+26
+========
+
+
+Derivation 1
+--------------
+LEX   (THE) := NP/*N
+        : (LAM X (DEF X))
+LEX   (BEANS) := N
+        : BEANS
+LEX   (THAT) := (N\N)/*(S/NP)
+        : (LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+LEX   (YOU) := S/(S\NP)
+        : (LAM P (P YOU))
+LEX   (SPILLED) := (S\^NP)/^NP
+        : (LAM X (LAM Y ((SPILL X) Y)))
+>B    (YOU)(SPILLED) := S/^NP
+        : (LAM X ((LAM P (P YOU)) ((LAM X (LAM Y ((SPILL X) Y))) X)))
+>     (THAT)(YOU SPILLED) := N\N
+        : ((LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+           (LAM X ((LAM P (P YOU)) ((LAM X (LAM Y ((SPILL X) Y))) X))))
+<     (BEANS)(THAT YOU SPILLED) := N
+        : (((LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+            (LAM X ((LAM P (P YOU)) ((LAM X (LAM Y ((SPILL X) Y))) X))))
+           BEANS)
+>     (THE)(BEANS THAT YOU SPILLED) := NP
+        : ((LAM X (DEF X))
+           (((LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+             (LAM X ((LAM P (P YOU)) ((LAM X (LAM Y ((SPILL X) Y))) X))))
+            BEANS))
+
+Final LF, normal-order evaluated: 
+
+    (DEF (LAM X ((AND ((SPILL X) YOU)) (BEANS X)))) =
+    (DEF (\ X . AND (SPILL X YOU) (BEANS X)))
+
+Derivation 2
+--------------
+LEX   (THE) := NP/*N
+        : (LAM X (DEF X))
+LEX   (BEANS) := N
+        : BEANS
+LEX   (THAT) := (N\N)/*(S/NP)
+        : (LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+LEX   (YOU) := S/(S\NP)
+        : (LAM P (P YOU))
+LEX   (SPILLED) := (S\^NP)/^NP
+        : (LAM X (LAM Y ((((REVEAL _) X) SECRET) Y)))
+>B    (YOU)(SPILLED) := S/^NP
+        : (LAM X
+           ((LAM P (P YOU)) ((LAM X (LAM Y ((((REVEAL _) X) SECRET) Y))) X)))
+>     (THAT)(YOU SPILLED) := N\N
+        : ((LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+           (LAM X
+            ((LAM P (P YOU)) ((LAM X (LAM Y ((((REVEAL _) X) SECRET) Y))) X))))
+<     (BEANS)(THAT YOU SPILLED) := N
+        : (((LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+            (LAM X
+             ((LAM P (P YOU))
+              ((LAM X (LAM Y ((((REVEAL _) X) SECRET) Y))) X))))
+           BEANS)
+>     (THE)(BEANS THAT YOU SPILLED) := NP
+        : ((LAM X (DEF X))
+           (((LAM P (LAM Q (LAM X ((AND (P X)) (Q X)))))
+             (LAM X
+              ((LAM P (P YOU))
+               ((LAM X (LAM Y ((((REVEAL _) X) SECRET) Y))) X))))
+            BEANS))
+
+Final LF, normal-order evaluated: 
+
+    (DEF (LAM X ((AND ((((REVEAL _) X) SECRET) YOU)) (BEANS X)))) =
+    (DEF (\ X . AND (REVEAL _ X SECRET YOU) (BEANS X)))
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+=======
+29
+========
+
+
+Derivation 1
+--------------
+LEX   (I) := NP
+        : I
+LEX   (TWIDDLED) := ((S\NP)/(THUMBS))/NP
+        : (LAM X
+           (LAM Y
+            (LAM Z
+             ((AND (((((PASS _Y) TIME) _) (SELF Z)) Z)) (((INALIEN X) Y) Z)))))
+LEX   (MY) := NP
+        : POSS
+>     (TWIDDLED)(MY) := (S\NP)/(THUMBS)
+        : ((LAM X
+            (LAM Y
+             (LAM Z
+              ((AND (((((PASS _Y) TIME) _) (SELF Z)) Z))
+               (((INALIEN X) Y) Z)))))
+           POSS)
+LEX   (THUMBS) := DUMMY
+        : THUMBS
+>     (TWIDDLED MY)(THUMBS) := S\NP
+        : (((LAM X
+             (LAM Y
+              (LAM Z
+               ((AND (((((PASS _Y) TIME) _) (SELF Z)) Z))
+                (((INALIEN X) Y) Z)))))
+            POSS)
+           THUMBS)
+<     (I)(TWIDDLED MY THUMBS) := S
+        : ((((LAM X
+              (LAM Y
+               (LAM Z
+                ((AND (((((PASS _Y) TIME) _) (SELF Z)) Z))
+                 (((INALIEN X) Y) Z)))))
+             POSS)
+            THUMBS)
+           I)
+
+Final LF, normal-order evaluated: 
+
+    ((AND (((((PASS _Y) TIME) _) (SELF I)) I)) (((INALIEN POSS) THUMBS) I)) =
+    (AND (PASS _Y TIME _ (SELF I) I) (INALIEN POSS THUMBS I))
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+=======
+|29P|
+========
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+=======
+|32C|
+========
+
+
+Derivation 1
+--------------
+LEX   (PERSUADE) := (VP/*VP)/*NP
+        : (LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y))))
+LEX   (JOHN) := NP
+        : J
+>     (PERSUADE)(JOHN) := VP/*VP
+        : ((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) J)
+LEX   (TO) := VP/^VP
+        : (LAM P P)
+LEX   (DO) := VP/^NP
+        : (LAM X (LAM Y ((DO X) Y)))
+LEX   (THE) := NP/*N
+        : (LAM X (DEF X))
+LEX   (DISHES) := N
+        : DISHES
+>     (THE)(DISHES) := NP
+        : ((LAM X (DEF X)) DISHES)
+>     (DO)(THE DISHES) := VP
+        : ((LAM X (LAM Y ((DO X) Y))) ((LAM X (DEF X)) DISHES))
+LEX   (EASILY) := VP\^VP
+        : (LAM P (LAM X (EASY (P X))))
+<     (DO THE DISHES)(EASILY) := VP
+        : ((LAM P (LAM X (EASY (P X))))
+           ((LAM X (LAM Y ((DO X) Y))) ((LAM X (DEF X)) DISHES)))
+>     (TO)(DO THE DISHES EASILY) := VP
+        : ((LAM P P)
+           ((LAM P (LAM X (EASY (P X))))
+            ((LAM X (LAM Y ((DO X) Y))) ((LAM X (DEF X)) DISHES))))
+>     (PERSUADE JOHN)(TO DO THE DISHES EASILY) := VP
+        : (((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) J)
+           ((LAM P P)
+            ((LAM P (LAM X (EASY (P X))))
+             ((LAM X (LAM Y ((DO X) Y))) ((LAM X (DEF X)) DISHES)))))
+
+Final LF, normal-order evaluated: 
+
+    (LAM Y (((PERSUADE (EASY ((DO (DEF DISHES)) J))) J) Y)) =
+    (\ Y . PERSUADE (EASY (DO (DEF DISHES) J)) J Y)
+
+Derivation 2
+--------------
+LEX   (PERSUADE) := (VP/*VP)/*NP
+        : (LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y))))
+LEX   (JOHN) := NP
+        : J
+>     (PERSUADE)(JOHN) := VP/*VP
+        : ((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) J)
+LEX   (TO) := VP/^VP
+        : (LAM P P)
+LEX   (DO) := VP/^NP
+        : (LAM X (LAM Y ((DO X) Y)))
+LEX   (THE) := NP/*N
+        : (LAM X (DEF X))
+LEX   (DISHES) := N
+        : DISHES
+>     (THE)(DISHES) := NP
+        : ((LAM X (DEF X)) DISHES)
+>     (DO)(THE DISHES) := VP
+        : ((LAM X (LAM Y ((DO X) Y))) ((LAM X (DEF X)) DISHES))
+>     (TO)(DO THE DISHES) := VP
+        : ((LAM P P) ((LAM X (LAM Y ((DO X) Y))) ((LAM X (DEF X)) DISHES)))
+LEX   (EASILY) := VP\^VP
+        : (LAM P (LAM X (EASY (P X))))
+<     (TO DO THE DISHES)(EASILY) := VP
+        : ((LAM P (LAM X (EASY (P X))))
+           ((LAM P P) ((LAM X (LAM Y ((DO X) Y))) ((LAM X (DEF X)) DISHES))))
+>     (PERSUADE JOHN)(TO DO THE DISHES EASILY) := VP
+        : (((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) J)
+           ((LAM P (LAM X (EASY (P X))))
+            ((LAM P P) ((LAM X (LAM Y ((DO X) Y))) ((LAM X (DEF X)) DISHES)))))
+
+Final LF, normal-order evaluated: 
+
+    (LAM Y (((PERSUADE (EASY ((DO (DEF DISHES)) J))) J) Y)) =
+    (\ Y . PERSUADE (EASY (DO (DEF DISHES) J)) J Y)
+
+Derivation 3
+--------------
+LEX   (PERSUADE) := (VP/*VP)/*NP
+        : (LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y))))
+LEX   (JOHN) := NP
+        : J
+>     (PERSUADE)(JOHN) := VP/*VP
+        : ((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) J)
+LEX   (TO) := VP/^VP
+        : (LAM P P)
+LEX   (DO) := VP/^NP
+        : (LAM X (LAM Y ((DO X) Y)))
+LEX   (THE) := NP/*N
+        : (LAM X (DEF X))
+LEX   (DISHES) := N
+        : DISHES
+>     (THE)(DISHES) := NP
+        : ((LAM X (DEF X)) DISHES)
+>     (DO)(THE DISHES) := VP
+        : ((LAM X (LAM Y ((DO X) Y))) ((LAM X (DEF X)) DISHES))
+LEX   (EASILY) := VP\^VP
+        : (LAM P (LAM X (EASY (P X))))
+<     (DO THE DISHES)(EASILY) := VP
+        : ((LAM P (LAM X (EASY (P X))))
+           ((LAM X (LAM Y ((DO X) Y))) ((LAM X (DEF X)) DISHES)))
+>     (TO)(DO THE DISHES EASILY) := VP
+        : ((LAM P P)
+           ((LAM P (LAM X (EASY (P X))))
+            ((LAM X (LAM Y ((DO X) Y))) ((LAM X (DEF X)) DISHES))))
+>     (PERSUADE JOHN)(TO DO THE DISHES EASILY) := VP
+        : (((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) J)
+           ((LAM P P)
+            ((LAM P (LAM X (EASY (P X))))
+             ((LAM X (LAM Y ((DO X) Y))) ((LAM X (DEF X)) DISHES)))))
+
+Final LF, normal-order evaluated: 
+
+    (LAM Y (((PERSUADE (EASY ((DO (DEF DISHES)) J))) J) Y)) =
+    (\ Y . PERSUADE (EASY (DO (DEF DISHES) J)) J Y)
+
+Derivation 4
+--------------
+LEX   (PERSUADE) := (VP/*VP)/*NP
+        : (LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y))))
+LEX   (JOHN) := NP
+        : J
+>     (PERSUADE)(JOHN) := VP/*VP
+        : ((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) J)
+LEX   (TO) := VP/^VP
+        : (LAM P P)
+LEX   (DO) := VP/^NP
+        : (LAM X (LAM Y ((DO X) Y)))
+LEX   (THE) := NP/*N
+        : (LAM X (DEF X))
+LEX   (DISHES) := N
+        : DISHES
+>     (THE)(DISHES) := NP
+        : ((LAM X (DEF X)) DISHES)
+>     (DO)(THE DISHES) := VP
+        : ((LAM X (LAM Y ((DO X) Y))) ((LAM X (DEF X)) DISHES))
+>     (TO)(DO THE DISHES) := VP
+        : ((LAM P P) ((LAM X (LAM Y ((DO X) Y))) ((LAM X (DEF X)) DISHES)))
+LEX   (EASILY) := VP\^VP
+        : (LAM P (LAM X (EASY (P X))))
+<     (TO DO THE DISHES)(EASILY) := VP
+        : ((LAM P (LAM X (EASY (P X))))
+           ((LAM P P) ((LAM X (LAM Y ((DO X) Y))) ((LAM X (DEF X)) DISHES))))
+>     (PERSUADE JOHN)(TO DO THE DISHES EASILY) := VP
+        : (((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) J)
+           ((LAM P (LAM X (EASY (P X))))
+            ((LAM P P) ((LAM X (LAM Y ((DO X) Y))) ((LAM X (DEF X)) DISHES)))))
+
+Final LF, normal-order evaluated: 
+
+    (LAM Y (((PERSUADE (EASY ((DO (DEF DISHES)) J))) J) Y)) =
+    (\ Y . PERSUADE (EASY (DO (DEF DISHES) J)) J Y)
+
+Derivation 5
+--------------
+LEX   (PERSUADE) := (VP/*VP)/*NP
+        : (LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y))))
+LEX   (JOHN) := NP
+        : J
+>     (PERSUADE)(JOHN) := VP/*VP
+        : ((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) J)
+LEX   (TO) := VP/^VP
+        : (LAM P P)
+LEX   (DO) := VP/^NP
+        : (LAM X (LAM Y ((DO X) Y)))
+LEX   (THE) := NP/*N
+        : (LAM X (DEF X))
+LEX   (DISHES) := N
+        : DISHES
+>     (THE)(DISHES) := NP
+        : ((LAM X (DEF X)) DISHES)
+>     (DO)(THE DISHES) := VP
+        : ((LAM X (LAM Y ((DO X) Y))) ((LAM X (DEF X)) DISHES))
+>     (TO)(DO THE DISHES) := VP
+        : ((LAM P P) ((LAM X (LAM Y ((DO X) Y))) ((LAM X (DEF X)) DISHES)))
+>     (PERSUADE JOHN)(TO DO THE DISHES) := VP
+        : (((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) J)
+           ((LAM P P) ((LAM X (LAM Y ((DO X) Y))) ((LAM X (DEF X)) DISHES))))
+LEX   (EASILY) := VP\^VP
+        : (LAM P (LAM X (EASY (P X))))
+<     (PERSUADE JOHN TO DO THE DISHES)(EASILY) := VP
+        : ((LAM P (LAM X (EASY (P X))))
+           (((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) J)
+            ((LAM P P) ((LAM X (LAM Y ((DO X) Y))) ((LAM X (DEF X)) DISHES)))))
+
+Final LF, normal-order evaluated: 
+
+    (LAM X (EASY (((PERSUADE ((DO (DEF DISHES)) J)) J) X))) =
+    (\ X . EASY (PERSUADE (DO (DEF DISHES) J) J X))
+
+Derivation 6
+--------------
+LEX   (PERSUADE) := (VP/*VP)/*NP
+        : (LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y))))
+LEX   (JOHN) := NP
+        : J
+>     (PERSUADE)(JOHN) := VP/*VP
+        : ((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) J)
+LEX   (TO) := VP/^VP
+        : (LAM P P)
+LEX   (DO) := VP/^NP
+        : (LAM X (LAM Y ((DO X) Y)))
+LEX   (THE) := NP/*N
+        : (LAM X (DEF X))
+LEX   (DISHES) := N
+        : DISHES
+>     (THE)(DISHES) := NP
+        : ((LAM X (DEF X)) DISHES)
+>     (DO)(THE DISHES) := VP
+        : ((LAM X (LAM Y ((DO X) Y))) ((LAM X (DEF X)) DISHES))
+>     (TO)(DO THE DISHES) := VP
+        : ((LAM P P) ((LAM X (LAM Y ((DO X) Y))) ((LAM X (DEF X)) DISHES)))
+>     (PERSUADE JOHN)(TO DO THE DISHES) := VP
+        : (((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) J)
+           ((LAM P P) ((LAM X (LAM Y ((DO X) Y))) ((LAM X (DEF X)) DISHES))))
+LEX   (EASILY) := VP\^VP
+        : (LAM P (LAM X (EASY (P X))))
+<     (PERSUADE JOHN TO DO THE DISHES)(EASILY) := VP
+        : ((LAM P (LAM X (EASY (P X))))
+           (((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) J)
+            ((LAM P P) ((LAM X (LAM Y ((DO X) Y))) ((LAM X (DEF X)) DISHES)))))
+
+Final LF, normal-order evaluated: 
+
+    (LAM X (EASY (((PERSUADE ((DO (DEF DISHES)) J)) J) X))) =
+    (\ X . EASY (PERSUADE (DO (DEF DISHES) J) J X))
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+NIL
+> (dribble)

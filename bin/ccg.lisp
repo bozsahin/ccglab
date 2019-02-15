@@ -1,5 +1,5 @@
 ;;;; =========================================================================== 
-;;;; == CCGlab  -Cem Bozsahin, 2015-2018, Lisboa, Ankara                      ==
+;;;; == CCGlab  -Cem Bozsahin, 2015-2019, Lisboa, Ankara                      ==
 ;;;; ===========================================================================
 ;;;; 
 ;;;; GNU GPL license applies.
@@ -189,12 +189,12 @@
   `(if (member ,feat *ccglab-reserved*) (format t "~%*** CCGlab warning ** Your feature name clashes with built-in features; please rename : ~A" ,feat)))
 
 (defun make-lex-hashtable ()
-  "keys are: index param sem syn morph phon."
-  (make-hash-table :test #'equal :size 7 :rehash-size 2 :rehash-threshold 1.0))
+  "keys are: index key param sem syn morph phon tag. Tag is NF tag"
+  (make-hash-table :test #'equal :size 8 :rehash-size 2 :rehash-threshold 1.0))
 
 (defun make-lrule-hashtable ()
   "keys are: index param insem outsem insyn outsyn."
-  (make-hash-table :test #'equal :size 100 :rehash-size 2 :rehash-threshold 1.0))
+  (make-hash-table :test #'equal :size 101 :rehash-size 20 :rehash-threshold 1.0))
 
 (defun make-basic-cat-hashtable (nfeatures)
   "keys are: bcat, bconst, and features of the basic cat"
@@ -202,11 +202,11 @@
 
 (defun make-complex-cat-hashtable ()
   "keys are: dir modal lex result arg."
-  (make-hash-table :test #'equal :size 6 :rehash-size 2 :rehash-threshold 1.0))
+  (make-hash-table :test #'equal :size 5 :rehash-size 2 :rehash-threshold 1.0))
 
 (defun make-cky-entry-hashtable ()
-  "keys are: syn sem index param."
-  (make-hash-table :test #'equal :size 5 :rehash-size 2 :rehash-threshold 1.0))
+  "keys are: syn sem index param lex tag. Tag is NF tag."
+  (make-hash-table :test #'equal :size 6 :rehash-size 2 :rehash-threshold 1.0))
 
 (defun copy-hashtable (ht)
   "To create a fresh copy of ht"
@@ -247,7 +247,7 @@
 ;;; globals
 ;;; =======
 
-(defparameter *ccglab-reserved* '(phon morph syn sem param insyn insem outsyn outsem bcat dir feats modal
+(defparameter *ccglab-reserved* '(tag phon morph syn sem param insyn insem outsyn outsem bcat dir feats modal
 				  left right solution result arg index lex bconst key id)) ; reserved words
 (defparameter *lispsys* nil)   ; the lisp system you are using; detected automatically by ccglab script
 (defparameter *singletons* 0)  ; singleton (string constant) category is potentially dangerous, esp. empty ones!
@@ -274,6 +274,14 @@
 (defparameter *training-sorted-solutions-list* nil) ; to get out of loops by beam
 (defparameter *beam* 0)             ; beam width, determined by number of solutions
 (defparameter *beam-exp* 0.9)       ; must be 0 <= x <= 1 . Larger means wider beam
+
+;; for NF parse, Eisner 1996-style---eliminate them at the source (no cky-entry)
+(defparameter *nf-parse* t)
+(defparameter *bc* 'BC)
+(defparameter *fc* 'FC)
+(defparameter *ot* 'OT)
+(defparameter *forward-tag-set* (list *bc* *ot*))
+(defparameter *backward-tag-set* (list *fc* *ot*))
 
 ;; more globals
 (defparameter *cky-lf-hashtable-sum* 0.0) ; sum of all result LFs inner product
@@ -321,6 +329,22 @@
 (defparameter *b3-comp* t)
 (defparameter *fx3-comp* t)
 (defparameter *bx3-comp* t)
+
+;; NF control
+(defmacro backward-nf ()
+  "this macro is dirty because it knows ht2 is the local var in all backward rules; avoids repeat"
+  `(if *nf-parse* 
+    (member (machash 'TAG ht2) *backward-tag-set*)
+    t))
+
+(defmacro forward-nf ()
+  "this macro is dirty because it knows ht1 is the local var in all forward rules; avoids repeat"
+  `(if *nf-parse* 
+    (member (machash 'TAG ht1) *forward-tag-set*)
+    t))
+
+(defmacro set-nf-tag (ht tag)
+  `(and *nf-parse* (setf (machash 'TAG ,ht) ,tag)))
 
 ;; rule switch wholesale control
 (defun basic-ccg (&optional (ok t))
@@ -442,6 +466,7 @@
   "returns all equivalent LFS if all-lfs is not nil"
   (format t "~%To see rule switches, do (switches)~%")
   (format t "  To beam or not to beam    : ~A~%" *beamp*)
+  (format t "  Normal Form (NF) parse    : ~A~%" *nf-parse*)
   (format t "  Out of vocabulary flag    : ~A~%" *oovp*)
   (format t " *PRINT-READABLY*           : ~A~%" *print-readably*)
   (format t " *PRINT-PRETTY*             : ~A~%" *print-pretty*)
@@ -460,7 +485,7 @@
   )
 
 (defun which-ccglab ()
-  "CCGlab, version 5.1")
+  "CCGlab, version 5.2")
 
 (defun set-lisp-system (lispsys)
   (case lispsys
@@ -476,7 +501,7 @@
 
 (defun flash-news (&optional (report nil))
   (and report 
-       (format t "~%':maker' keyword in load-grammar and make-supervision ~%  functions is deprecating.~%Use ':make t' for load-grammar to remake.~%Call make-supervision without a maker.~%This is because the Lisp system is now automatically ~%  detected (see above).")))
+       (format t "~%The Lisp system is now automatically ~%  detected (see above).~%Normal form parse is now available.")))
 
 (defun welcome (&optional (lispsys *lispsys*))
   (status)
@@ -493,9 +518,12 @@
 (defun beam-value ()
   (format t "*Beamp* = ~A  *Beam-exp* = ~A~%" *beamp* *beam-exp*))
 
+(defun nf-parse-value ()
+  (format t "*nf-parse* = ~A~%" *nf-parse*))
+
 (defun set-beam-exp (val)
-  (and (> val 1.0) (format t "Beware! unrealistic beam= ~A~%" val))
-  (and (< val 0.6) (format t "Warning! Narrow beam = ~A~%" val))
+  (and (> val 1.0) (format t "Beware! impossible beam = ~A~%" val))
+  (and (< val 0.6) (format t "Warning! very narrow beam = ~A~%" val))
   (setf *beam-exp* val)
   (beam-value))
 
@@ -504,6 +532,12 @@
 
 (defun beam-on ()
   (setf *beamp* t)(beam-value))
+
+(defun nf-parse-off ()
+  (setf *nf-parse* nil)(nf-parse-value))
+
+(defun nf-parse-on ()
+  (setf *nf-parse* t)(nf-parse-value))
 
 (defun beamer ()
   "use this to set beam only after a parse so that *cky-nparses* is known."
@@ -870,6 +904,7 @@
   for faster and easier parsing. Called during parsing only."
   (let ((ht (make-lex-hashtable)))
     (setf (machash 'INDEX ht) 'LEX)     ; created by not combining
+    (setf (machash 'TAG ht) *ot*)        ; NF tag initialization
     (setf (machash 'KEY ht) (nv-list-val 'KEY lexspec))
     (setf (machash 'PARAM ht) (nv-list-val 'PARAM lexspec))
     (setf (machash 'SEM ht) (nv-list-val 'SEM lexspec))
@@ -902,6 +937,7 @@
 											     (- (second coorda) 1))))
 	   (lex-check (machash 'LEX 'SYN fht) alex))
     (let ((newht (make-cky-entry-hashtable)))
+      (set-nf-tag newht *ot*)
       (setf (machash 'SEM newht) (&a (machash 'SEM fht) (machash 'SEM aht))) ; this means lexical LFs must be compositional
       (setf (machash 'INDEX newht) ruleindex)
       (and (machash 'LEX 'SYN fht) (setf (machash 'LEX newht) t))
@@ -1365,6 +1401,7 @@
 (defun f-apply (ht1 ht2 lex2 coord2) 
   "forward application"
   (and (complexp-hash (machash 'SYN ht1))
+       (forward-nf)
        (eql (machash 'DIR 'SYN ht1) 'FS) ; no need to check modality, all entries qualify for application.
        (if (machash 'BCONST 'ARG 'SYN ht1) 
 	 (return-from f-apply (singleton-match ht1 ht2 lex2 '|>| coord2)) t) ; short-circuit f-apply if arg is singleton
@@ -1373,6 +1410,7 @@
 	 (and match 
 	      (lex-check (machash 'LEX 'SYN ht1) lex2)  ; if we have X//Y Y , Y must be lex
 	      (let ((newht (make-cky-entry-hashtable)))
+		(set-nf-tag newht *ot*)
 		(setf (machash 'SEM newht) (&a (machash 'SEM ht1) (machash 'SEM ht2)))
 		(setf (machash 'INDEX newht) '|>|)
 		(and (machash 'LEX 'SYN ht1) (setf (machash 'LEX newht) t)) ; result is lexical too if X//Y Y succeeds--pass on
@@ -1382,6 +1420,7 @@
 (defun b-apply (ht1 ht2 lex1 coord1) 
   "backward application"
   (and (complexp-hash (machash 'SYN ht2))
+       (backward-nf)
        (eql (machash 'DIR 'SYN ht2) 'BS) ; no need to check modality, all entries qualify for application.
        (if (machash 'BCONST 'ARG 'SYN ht2) 
 	 (return-from b-apply (singleton-match ht2 ht1 lex1 '|<| coord1)) t) ; short-circuit b-apply if arg is singleton
@@ -1391,6 +1430,7 @@
 	 (and match 
 	      (lex-check (machash 'LEX 'SYN ht2) lex1)  ; if we have Y X\\Y, Y must be lex
 	      (let ((newht (make-cky-entry-hashtable)))
+		(set-nf-tag newht *ot*)
 		(setf (machash 'SEM newht) (&a (machash 'SEM ht2) (machash 'SEM ht1)))
 		(setf (machash 'INDEX newht) '|<|)
 		(and (machash 'LEX 'SYN ht2) (setf (machash 'LEX newht) t)) ; result is lexical too if Y X\\Y succeeds--pass on
@@ -1401,6 +1441,7 @@
   "forward composition"
   (and (complexp-hash (machash 'SYN ht1))
        (complexp-hash (machash 'SYN ht2))
+       (forward-nf)
        (eql (machash 'DIR 'SYN ht1) 'FS)
        (eql (machash 'DIR 'SYN ht2) 'FS)
        (member (machash 'MODAL 'SYN ht1) '(ALL HARMONIC))
@@ -1409,6 +1450,7 @@
 	 (cat-match (machash 'ARG 'SYN ht1) (machash 'RESULT 'SYN ht2))
 	 (and match (let ((newht (make-cky-entry-hashtable))
 			  (newsyn (make-complex-cat-hashtable)))
+		      (set-nf-tag newht *fc*)
 		      (setf (machash 'SEM newht) (&b (machash 'SEM ht1) (machash 'SEM ht2)))
 		      (setf (machash 'INDEX newht) '|>B|) ; ht2 dir and modality projects
 		      (setf (machash 'SYN newht) newsyn)
@@ -1422,6 +1464,7 @@
   "backward composition"
   (and (complexp-hash (machash 'SYN ht1))
        (complexp-hash (machash 'SYN ht2))
+       (backward-nf)
        (eql (machash 'DIR 'SYN ht1) 'BS)
        (eql (machash 'DIR 'SYN ht2) 'BS)
        (member (machash 'MODAL 'SYN ht1) '(ALL HARMONIC))
@@ -1430,6 +1473,7 @@
 	 (cat-match (machash 'RESULT 'SYN ht1) (machash 'ARG 'SYN ht2))
 	 (and match (let ((newht (make-cky-entry-hashtable))
 			  (newsyn (make-complex-cat-hashtable)))
+		      (set-nf-tag newht *bc*)
 		      (setf (machash 'SEM newht) (&b (machash 'SEM ht2) (machash 'SEM ht1)))
 		      (setf (machash 'INDEX newht) '|<B|) ; ht1 dir and modality projects
 		      (setf (machash 'SYN newht) newsyn)
@@ -1443,6 +1487,7 @@
   "forward crossing composition"
   (and (complexp-hash (machash 'SYN ht1))
        (complexp-hash (machash 'SYN ht2))
+       (forward-nf)
        (eql (machash 'DIR 'SYN ht1) 'FS)
        (eql (machash 'DIR 'SYN ht2) 'BS)
        (member (machash 'MODAL 'SYN ht1) '(ALL CROSS))
@@ -1451,6 +1496,7 @@
 	 (cat-match (machash 'ARG 'SYN ht1) (machash 'RESULT 'SYN ht2))
 	 (and match (let ((newht (make-cky-entry-hashtable))
 			  (newsyn (make-complex-cat-hashtable)))
+		      (set-nf-tag newht *fc*)
 		      (setf (machash 'SEM newht) (&b (machash 'SEM ht1) (machash 'SEM ht2)))
 		      (setf (machash 'INDEX newht) '|>Bx|) ; ht2 dir and modality projects
 		      (setf (machash 'SYN newht) newsyn)
@@ -1464,6 +1510,7 @@
   "backward crossing composition"
   (and (complexp-hash (machash 'SYN ht1))
        (complexp-hash (machash 'SYN ht2))
+       (backward-nf)
        (eql (machash 'DIR 'SYN ht1) 'FS)
        (eql (machash 'DIR 'SYN ht2) 'BS)
        (member (machash 'MODAL 'SYN ht1) '(ALL CROSS))
@@ -1472,6 +1519,7 @@
 	 (cat-match (machash 'RESULT 'SYN ht1) (machash 'ARG 'SYN ht2))
 	 (and match (let ((newht (make-cky-entry-hashtable))
 			  (newsyn (make-complex-cat-hashtable)))
+		      (set-nf-tag newht *bc*)
 		      (setf (machash 'SEM newht) (&b (machash 'SEM ht2) (machash 'SEM ht1)))
 		      (setf (machash 'INDEX newht) '|<Bx|) ; ht1 dir and modality projects
 		      (setf (machash 'SYN newht) newsyn)
@@ -1485,6 +1533,7 @@
   "forward substitution"
   (and (complexp-hash (machash 'SYN ht1))
        (complexp-hash (machash 'SYN ht2))
+       (forward-nf)
        (machash 'RESULT 'SYN ht1) 
        (machash 'DIR 'RESULT 'SYN ht1) ; result must be functor too
        (eql (machash 'DIR 'SYN ht1) 'FS)
@@ -1501,6 +1550,7 @@
 		      (and match2 
 			   (let ((newht (make-cky-entry-hashtable))
 				 (newsyn (make-complex-cat-hashtable)))
+			     (set-nf-tag newht *fc*)
 			     (setf (machash 'SEM newht) (&s (machash 'SEM ht1) (machash 'SEM ht2)))
 			     (setf (machash 'INDEX newht) '|>S|) ; ht2 dir and modality projects below
 			     (setf (machash 'SYN newht) newsyn)
@@ -1516,6 +1566,7 @@
   "backward substitution"
   (and (complexp-hash (machash 'SYN ht2))
        (complexp-hash (machash 'SYN ht1))
+       (backward-nf)
        (machash 'RESULT 'SYN ht2) 
        (machash 'DIR 'RESULT 'SYN ht2) ; result must be functor too
        (eql (machash 'DIR 'SYN ht2) 'BS)
@@ -1532,6 +1583,7 @@
 		      (and match2 
 			   (let ((newht (make-cky-entry-hashtable))
 				 (newsyn (make-complex-cat-hashtable)))
+			     (set-nf-tag newht *bc*)
 			     (setf (machash 'SEM newht) (&s (machash 'SEM ht2) (machash 'SEM ht1)))
 			     (setf (machash 'INDEX newht) '|<S|) ; ht1 dir and modality projects below
 			     (setf (machash 'SYN newht) newsyn)
@@ -1547,6 +1599,7 @@
   "forward crossed substitution"
   (and (complexp-hash (machash 'SYN ht1))
        (complexp-hash (machash 'SYN ht2))
+       (forward-nf)
        (machash 'RESULT 'SYN ht1) 
        (machash 'DIR 'RESULT 'SYN ht1) ; result must be functor too
        (eql (machash 'DIR 'SYN ht1) 'BS)
@@ -1563,6 +1616,7 @@
 		      (and match2 
 			   (let ((newht (make-cky-entry-hashtable))
 				 (newsyn (make-complex-cat-hashtable)))
+			     (set-nf-tag newht *fc*)
 			     (setf (machash 'SEM newht) (&s (machash 'SEM ht1) (machash 'SEM ht2)))
 			     (setf (machash 'INDEX newht) '|>Sx|) ; ht2 dir and modality projects below
 			     (setf (machash 'SYN newht) newsyn)
@@ -1578,6 +1632,7 @@
   "backward crossed substitution"
   (and (complexp-hash (machash 'SYN ht2))
        (complexp-hash (machash 'SYN ht1))
+       (backward-nf)
        (machash 'RESULT 'SYN ht2) 
        (machash 'DIR 'RESULT 'SYN ht2) ; result must be functor too
        (eql (machash 'DIR 'SYN ht2) 'FS)
@@ -1594,6 +1649,7 @@
 		      (and match2 
 			   (let ((newht (make-cky-entry-hashtable))
 				 (newsyn (make-complex-cat-hashtable)))
+			     (set-nf-tag newht *bc*)
 			     (setf (machash 'SEM newht) (&s (machash 'SEM ht2) (machash 'SEM ht1)))
 			     (setf (machash 'INDEX newht) '|<Sx|) ; ht1 dir and modality projects below
 			     (setf (machash 'SYN newht) newsyn)
@@ -1612,6 +1668,7 @@
   "forward substitution bar, aka the lost combinator"
   (and (complexp-hash (machash 'SYN ht1))
        (complexp-hash (machash 'SYN ht2))
+       (forward-nf)
        (machash 'RESULT 'SYN ht1) 
        (machash 'DIR 'RESULT 'SYN ht1) ; result must be functor too
        (eql (machash 'DIR 'SYN ht2) 'FS)
@@ -1625,6 +1682,7 @@
 			   (let ((newht (make-cky-entry-hashtable))
 				 (newsyn (make-complex-cat-hashtable))
 				 (newsynz (make-complex-cat-hashtable)))
+			     (set-nf-tag newht *fc*)
 			     (setf (machash 'SEM newht) (&sbar (machash 'SEM ht1) (machash 'SEM ht2)))
 			     (setf (machash 'INDEX newht) '|>L|) 
 			     (setf (machash 'SYN newht) newsyn)
@@ -1647,6 +1705,7 @@
   "forward crossing substitution bar"
   (and (complexp-hash (machash 'SYN ht1))
        (complexp-hash (machash 'SYN ht2))
+       (forward-nf)
        (machash 'RESULT 'SYN ht1) 
        (machash 'DIR 'RESULT 'SYN ht1) ; result must be functor too
        (eql (machash 'DIR 'SYN ht2) 'BS)
@@ -1660,6 +1719,7 @@
 			   (let ((newht (make-cky-entry-hashtable))
 				 (newsyn (make-complex-cat-hashtable))
 				 (newsynz (make-complex-cat-hashtable)))
+			     (set-nf-tag newht *fc*)
 			     (setf (machash 'SEM newht) (&sbar (machash 'SEM ht1) (machash 'SEM ht2)))
 			     (setf (machash 'INDEX newht) '|>Lx|) 
 			     (setf (machash 'SYN newht) newsyn)
@@ -1682,6 +1742,7 @@
   "backward substitution bar"
   (and (complexp-hash (machash 'SYN ht1))
        (complexp-hash (machash 'SYN ht2))
+       (backward-nf)
        (machash 'RESULT 'SYN ht1) 
        (machash 'DIR 'RESULT 'SYN ht1) ; result must be functor too
        (eql (machash 'DIR 'SYN ht2) 'BS)
@@ -1695,6 +1756,7 @@
 			   (let ((newht (make-cky-entry-hashtable))
 				 (newsyn (make-complex-cat-hashtable))
 				 (newsynz (make-complex-cat-hashtable)))
+			     (set-nf-tag newht *bc*)
 			     (setf (machash 'SEM newht) (&sbar (machash 'SEM ht1) (machash 'SEM ht2)))
 			     (setf (machash 'INDEX newht) '|<L|) 
 			     (setf (machash 'SYN newht) newsyn)
@@ -1717,6 +1779,7 @@
   "backward crossed substitution bar"
   (and (complexp-hash (machash 'SYN ht1))
        (complexp-hash (machash 'SYN ht2))
+       (backward-nf)
        (machash 'RESULT 'SYN ht1) 
        (machash 'DIR 'RESULT 'SYN ht1) ; result must be functor too
        (eql (machash 'DIR 'SYN ht2) 'FS)
@@ -1730,6 +1793,7 @@
 			   (let ((newht (make-cky-entry-hashtable))
 				 (newsyn (make-complex-cat-hashtable))
 				 (newsynz (make-complex-cat-hashtable)))
+			     (set-nf-tag newht *bc*)
 			     (setf (machash 'SEM newht) (&sbar (machash 'SEM ht1) (machash 'SEM ht2)))
 			     (setf (machash 'INDEX newht) '|<Lx|) 
 			     (setf (machash 'SYN newht) newsyn)
@@ -1754,6 +1818,7 @@
    Not to be confused with combinator D of Rosenbloom 1950, which is just BB."
   (and (complexp-hash (machash 'SYN ht1))
        (complexp-hash (machash 'SYN ht2))
+       (forward-nf)
        (machash 'RESULT 'SYN ht1) 
        (machash 'DIR 'ARG 'SYN ht1) ; arg must be functor too
        (eql (machash 'DIR 'SYN ht2) 'FS)
@@ -1766,6 +1831,7 @@
               (let ((newht (make-cky-entry-hashtable))     ;
 		    (newsynx (make-complex-cat-hashtable))   ; new result
 		    (newsynw (make-complex-cat-hashtable)))  ; new result of new argument
+		(set-nf-tag newht *fc*)
 		(setf (machash 'SEM newht) (&d (machash 'SEM ht1) (machash 'SEM ht2)))
 		(setf (machash 'INDEX newht) '|>D|) ; things project from ht1 and ht2
 		(setf (machash 'SYN newht) newsynx)
@@ -1788,6 +1854,7 @@
   "backward subcomposition."
   (and (complexp-hash (machash 'SYN ht1))
        (complexp-hash (machash 'SYN ht2))
+       (backward-nf)
        (machash 'RESULT 'SYN ht2) 
        (machash 'DIR 'ARG 'SYN ht2) ; arg must be functor too
        (eql (machash 'DIR 'SYN ht1) 'BS)
@@ -1801,6 +1868,7 @@
               (let ((newht (make-cky-entry-hashtable))     ;
 		    (newsynx (make-complex-cat-hashtable))   ; new result
 		    (newsynw (make-complex-cat-hashtable)))  ; new result of new argument
+		(set-nf-tag newht *bc*)
 		(setf (machash 'SEM newht) (&d (machash 'SEM ht2) (machash 'SEM ht1)))
 		(setf (machash 'INDEX newht) '|<D|) ; things project from ht1 and ht2
 		(setf (machash 'SYN newht) newsynx)
@@ -1823,6 +1891,7 @@
   "forward crossed subcomposition."
   (and (complexp-hash (machash 'SYN ht1))
        (complexp-hash (machash 'SYN ht2))
+       (forward-nf)
        (machash 'RESULT 'SYN ht1) 
        (machash 'DIR 'ARG 'SYN ht1) ; arg must be functor too
        (eql (machash 'DIR 'SYN ht2) 'BS)
@@ -1835,6 +1904,7 @@
               (let ((newht (make-cky-entry-hashtable))     ;
 		    (newsynx (make-complex-cat-hashtable))   ; new result
 		    (newsynw (make-complex-cat-hashtable)))  ; new result of new argument
+		(set-nf-tag newht *fc*)
 		(setf (machash 'SEM newht) (&d (machash 'SEM ht1) (machash 'SEM ht2)))
 		(setf (machash 'INDEX newht) '|>Dx|) ; things project from ht1 and ht2
 		(setf (machash 'SYN newht) newsynx)
@@ -1857,6 +1927,7 @@
   "backward crossed subcomposition."
   (and (complexp-hash (machash 'SYN ht1))
        (complexp-hash (machash 'SYN ht2))
+       (backward-nf)
        (machash 'RESULT 'SYN ht2) 
        (machash 'DIR 'ARG 'SYN ht2) ; arg must be functor too
        (eql (machash 'DIR 'SYN ht1) 'FS)
@@ -1870,6 +1941,7 @@
               (let ((newht (make-cky-entry-hashtable))     ;
 		    (newsynx (make-complex-cat-hashtable))   ; new result
 		    (newsynw (make-complex-cat-hashtable)))  ; new result of new argument
+		(set-nf-tag newht *bc*)
 		(setf (machash 'SEM newht) (&d (machash 'SEM ht2) (machash 'SEM ht1)))
 		(setf (machash 'INDEX newht) '|<Dx|) ; things project from ht1 and ht2
 		(setf (machash 'SYN newht) newsynx)
@@ -1892,6 +1964,7 @@
   ">B^2"
   (and (complexp-hash (machash 'SYN ht1))
        (complexp-hash (machash 'SYN ht2))
+       (forward-nf)
        (eql (machash 'DIR 'SYN ht1) 'FS)
        (machash 'DIR 'RESULT 'SYN ht2) ; ht2 must have complex result
        (eql (machash 'DIR 'RESULT 'SYN ht2) 'FS)
@@ -1903,6 +1976,7 @@
 	 (and match (let ((newht (make-cky-entry-hashtable))
 			  (newsynx (make-complex-cat-hashtable))
 			  (newsyn (make-complex-cat-hashtable)))
+		      (set-nf-tag newht *fc*)
 		      (setf (machash 'SEM newht) (&b2 (machash 'SEM ht1) (machash 'SEM ht2)))
 		      (setf (machash 'INDEX newht) '|>B2|) ; ht2 dir and modality projects
 		      (setf (machash 'SYN newht) newsyn)
@@ -1925,6 +1999,7 @@
   "<B^2"
   (and (complexp-hash (machash 'SYN ht1))
        (complexp-hash (machash 'SYN ht2))
+       (backward-nf)
        (eql (machash 'DIR 'SYN ht2) 'BS)
        (machash 'DIR 'RESULT 'SYN ht1) ; ht1 must have complex result
        (eql (machash 'DIR 'RESULT 'SYN ht1) 'BS)
@@ -1937,6 +2012,7 @@
 	 (and match (let ((newht (make-cky-entry-hashtable))
 			  (newsynx (make-complex-cat-hashtable))
 			  (newsyn (make-complex-cat-hashtable)))
+		      (set-nf-tag newht *bc*)
 		      (setf (machash 'SEM newht) (&b2 (machash 'SEM ht2) (machash 'SEM ht1)))
 		      (setf (machash 'INDEX newht) '|<B2|) ; ht1 dir and modality projects
 		      (setf (machash 'SYN newht) newsyn)
@@ -1959,6 +2035,7 @@
   ">Bx^2"
   (and (complexp-hash (machash 'SYN ht1))
        (complexp-hash (machash 'SYN ht2))
+       (forward-nf)
        (eql (machash 'DIR 'SYN ht1) 'FS)
        (machash 'DIR 'RESULT 'SYN ht2) ; ht2 must have complex result
        (eql (machash 'DIR 'RESULT 'SYN ht2) 'BS)
@@ -1970,6 +2047,7 @@
 	 (and match (let ((newht (make-cky-entry-hashtable))
 			  (newsynx (make-complex-cat-hashtable))
 			  (newsyn (make-complex-cat-hashtable)))
+		      (set-nf-tag newht *fc*)
 		      (setf (machash 'SEM newht) (&b2 (machash 'SEM ht1) (machash 'SEM ht2)))
 		      (setf (machash 'INDEX newht) '|>Bx2|) ; ht2 dir and modality projects
 		      (setf (machash 'SYN newht) newsyn)
@@ -1992,6 +2070,7 @@
   "<Bx^2"
   (and (complexp-hash (machash 'SYN ht1))
        (complexp-hash (machash 'SYN ht2))
+       (backward-nf)
        (eql (machash 'DIR 'SYN ht2) 'BS)
        (machash 'DIR 'RESULT 'SYN ht1) ; ht1 must have complex result
        (eql (machash 'DIR 'RESULT 'SYN ht1) 'FS)
@@ -2004,6 +2083,7 @@
 	 (and match (let ((newht (make-cky-entry-hashtable))
 			  (newsynx (make-complex-cat-hashtable))
 			  (newsyn (make-complex-cat-hashtable)))
+		      (set-nf-tag newht *bc*)
 		      (setf (machash 'SEM newht) (&b2 (machash 'SEM ht2) (machash 'SEM ht1)))
 		      (setf (machash 'INDEX newht) '|<Bx2|) ; ht1 dir and modality projects
 		      (setf (machash 'SYN newht) newsyn)
@@ -2026,6 +2106,7 @@
   ">S2 of Steedman 2011, not Curry's. see  Bozsahin CL book ch.5"
   (and (complexp-hash (machash 'SYN ht1))
        (complexp-hash (machash 'SYN ht2))
+       (forward-nf)
        (machash 'RESULT 'SYN ht1) 
        (machash 'DIR 'RESULT 'SYN ht1) ; result must be functor too
        (machash 'DIR 'RESULT 'SYN ht2) ; result must be functor too
@@ -2043,6 +2124,7 @@
 			   (let ((newht (make-cky-entry-hashtable))
 				 (newsyn2 (make-complex-cat-hashtable))
 				 (newsyn (make-complex-cat-hashtable)))
+			     (set-nf-tag newht *fc*)
 			     (setf (machash 'SEM newht) (&s2 (machash 'SEM ht1) (machash 'SEM ht2)))
 			     (setf (machash 'INDEX newht) '|>S2|) ; ht2 dir and modality projects below
 			     (setf (machash 'SYN newht) newsyn)
@@ -2068,6 +2150,7 @@
   "<S2"
   (and (complexp-hash (machash 'SYN ht2))
        (complexp-hash (machash 'SYN ht1))
+       (backward-nf)
        (machash 'RESULT 'SYN ht2) 
        (machash 'DIR 'RESULT 'SYN ht2) ; result must be functor too
        (machash 'DIR 'RESULT 'SYN ht1) ; result must be functor too
@@ -2086,6 +2169,7 @@
 			   (let ((newht (make-cky-entry-hashtable))
 				 (newsyn2 (make-complex-cat-hashtable))
 				 (newsyn (make-complex-cat-hashtable)))
+			     (set-nf-tag newht *bc*)
 			     (setf (machash 'SEM newht) (&s2 (machash 'SEM ht2) (machash 'SEM ht1)))
 			     (setf (machash 'INDEX newht) '|<S2|) ; ht1 dir and modality projects below
 			     (setf (machash 'SYN newht) newsyn)
@@ -2111,6 +2195,7 @@
   ">S2"
   (and (complexp-hash (machash 'SYN ht1))
        (complexp-hash (machash 'SYN ht2))
+       (forward-nf)
        (machash 'RESULT 'SYN ht1) 
        (machash 'DIR 'RESULT 'SYN ht1) ; result must be functor too
        (machash 'DIR 'RESULT 'SYN ht2) ; result must be functor too
@@ -2128,6 +2213,7 @@
 			   (let ((newht (make-cky-entry-hashtable))
 				 (newsyn2 (make-complex-cat-hashtable))
 				 (newsyn (make-complex-cat-hashtable)))
+			     (set-nf-tag newht *fc*)
 			     (setf (machash 'SEM newht) (&s2 (machash 'SEM ht1) (machash 'SEM ht2)))
 			     (setf (machash 'INDEX newht) '|>Sx2|) ; ht2 dir and modality projects below
 			     (setf (machash 'SYN newht) newsyn)
@@ -2153,6 +2239,7 @@
   "<Sx2, of Steedman 2011"
   (and (complexp-hash (machash 'SYN ht2))
        (complexp-hash (machash 'SYN ht1))
+       (backward-nf)
        (machash 'RESULT 'SYN ht2) 
        (machash 'DIR 'RESULT 'SYN ht2) ; result must be functor too
        (machash 'DIR 'RESULT 'SYN ht1) ; result must be functor too
@@ -2171,6 +2258,7 @@
 			   (let ((newht (make-cky-entry-hashtable))
 				 (newsyn2 (make-complex-cat-hashtable))
 				 (newsyn (make-complex-cat-hashtable)))
+			     (set-nf-tag newht *bc*)
 			     (setf (machash 'SEM newht) (&s2 (machash 'SEM ht2) (machash 'SEM ht1)))
 			     (setf (machash 'INDEX newht) '|<Sx2|) ; ht1 dir and modality projects below
 			     (setf (machash 'SYN newht) newsyn)
@@ -2204,6 +2292,7 @@
        (complexp-hash (machash 'SYN ht2))
        (complexp-hash (machash 'ARG 'SYN ht1))
        (complexp-hash (machash 'RESULT 'SYN ht2))
+       (forward-nf)
        (eql (machash 'DIR 'SYN ht1) 'FS) 
        (eql (machash 'DIR 'RESULT 'SYN ht2) 'FS)
        (member (machash 'MODAL 'SYN ht1) '(ALL HARMONIC))
@@ -2215,6 +2304,7 @@
 		    (newsynq (make-complex-cat-hashtable))  ; other rules are still confusing (to me) 
 		    (newsynz (make-complex-cat-hashtable))  ; because of indirect refs by SYN newht
 		    (newsynw (make-complex-cat-hashtable))) ; maybe one day i'll rename them all. one day
+		(set-nf-tag newht *fc*)
 		(setf (machash 'SEM newht) (&d2 (machash 'SEM ht1) (machash 'SEM ht2)))
 		(setf (machash 'INDEX newht) '|>D2|) ; things project from ht1 and ht2
 		(setf (machash 'DIR newsynz) (machash 'DIR 'ARG 'SYN ht1))
@@ -2236,6 +2326,7 @@
   ">B^3"
   (and (complexp-hash (machash 'SYN ht1))
        (complexp-hash (machash 'SYN ht2))
+       (forward-nf)
        (eql (machash 'DIR 'SYN ht1) 'FS)
        (member (machash 'MODAL 'SYN ht1) '(ALL HARMONIC))
        (machash 'DIR 'RESULT 'SYN ht2) ; ht2 must have a really complex result
@@ -2250,6 +2341,7 @@
 			  (newsyn1 (make-complex-cat-hashtable))
 			  (newsyn2 (make-complex-cat-hashtable))
 			  (newsyn3 (make-complex-cat-hashtable)))
+		      (set-nf-tag newht *fc*)
 		      (setf (machash 'SEM newht) (&b3 (machash 'SEM ht1) (machash 'SEM ht2)))
 		      (setf (machash 'INDEX newht) '|>B3|) ; ht2 dir and modality projects
 		      (setf (machash 'SYN newht) newsyn1)
@@ -2279,6 +2371,7 @@
   ">Bx^3"
   (and (complexp-hash (machash 'SYN ht1))
        (complexp-hash (machash 'SYN ht2))
+       (forward-nf)
        (eql (machash 'DIR 'SYN ht1) 'FS)
        (member (machash 'MODAL 'SYN ht1) '(ALL CROSS))
        (machash 'DIR 'RESULT 'SYN ht2) ; ht2 must have a really complex result
@@ -2293,6 +2386,7 @@
 			  (newsyn1 (make-complex-cat-hashtable))
 			  (newsyn2 (make-complex-cat-hashtable))
 			  (newsyn3 (make-complex-cat-hashtable)))
+		      (set-nf-tag newht *fc*)
 		      (setf (machash 'SEM newht) (&b3 (machash 'SEM ht1) (machash 'SEM ht2)))
 		      (setf (machash 'INDEX newht) '|>Bx3|) ; ht2 dir and modality projects
 		      (setf (machash 'SYN newht) newsyn1)
@@ -2322,6 +2416,7 @@
   "<B^3"
   (and (complexp-hash (machash 'SYN ht1))
        (complexp-hash (machash 'SYN ht2))
+       (backward-nf)
        (eql (machash 'DIR 'SYN ht2) 'BS)
        (member (machash 'MODAL 'SYN ht2) '(ALL HARMONIC))
        (machash 'DIR 'RESULT 'SYN ht1) ; ht1 must have a really complex result
@@ -2336,6 +2431,7 @@
 			  (newsyn1 (make-complex-cat-hashtable))
 			  (newsyn2 (make-complex-cat-hashtable))
 			  (newsyn3 (make-complex-cat-hashtable)))
+		      (set-nf-tag newht *bc*)
 		      (setf (machash 'SEM newht) (&b3 (machash 'SEM ht2) (machash 'SEM ht1)))
 		      (setf (machash 'INDEX newht) '|<B3|) ; ht1 dir and modality projects
 		      (setf (machash 'SYN newht) newsyn1)
@@ -2365,6 +2461,7 @@
   "<Bx^3"
   (and (complexp-hash (machash 'SYN ht1))
        (complexp-hash (machash 'SYN ht2))
+       (backward-nf)
        (eql (machash 'DIR 'SYN ht2) 'BS)
        (member (machash 'MODAL 'SYN ht2) '(ALL CROSS))
        (machash 'DIR 'RESULT 'SYN ht1) ; ht1 must have a really complex result
@@ -2379,6 +2476,7 @@
 			  (newsyn1 (make-complex-cat-hashtable))
 			  (newsyn2 (make-complex-cat-hashtable))
 			  (newsyn3 (make-complex-cat-hashtable)))
+		      (set-nf-tag newht *bc*)
 		      (setf (machash 'SEM newht) (&b3 (machash 'SEM ht2) (machash 'SEM ht1)))
 		      (setf (machash 'INDEX newht) '|<Bx3|) ; ht1 dir and modality projects
 		      (setf (machash 'SYN newht) newsyn1)
@@ -2407,9 +2505,11 @@
 (defun f-special (ht1 ht2)
   "@.. cats can only apply. We assume there is one unknown in such cats, and that all such cats are functors."
   (and (specialp-hash (machash 'SYN ht1))
+       (forward-nf)
        (eql (machash 'DIR 'SYN ht1) 'FS)
        (not (specialp-hash (machash 'SYN ht2)))
        (let ((newht (make-cky-entry-hashtable)))
+	 (set-nf-tag newht *ot*)
 	 (setf (machash 'SEM newht) (&a (machash 'SEM ht1) (machash 'SEM ht2)))
 	 (setf (machash 'INDEX newht) '|>|)
 	 (setf (machash 'SYN newht)(substitute-special-cat   ; pass on a fresh copy for substtn
@@ -2420,9 +2520,11 @@
 (defun b-special (ht1 ht2)
   "@.. cats can only apply. We assume there is one unknown in such cats, and that all such cats are functors."
   (and (specialp-hash (machash 'SYN ht2))
+       (backward-nf)
        (eql (machash 'DIR 'SYN ht2) 'BS)
        (not (specialp-hash (machash 'SYN ht1)))
        (let ((newht (make-cky-entry-hashtable)))
+	 (set-nf-tag newht *ot*)
 	 (setf (machash 'SEM newht) (&a (machash 'SEM ht2) (machash 'SEM ht1)))
 	 (setf (machash 'INDEX newht) '|<|)
 	 (setf (machash 'SYN newht)(substitute-special-cat   ; pass on a fresh copy for substtn
@@ -2508,6 +2610,7 @@
 			    (setf r (+ r 1))
 			    (let ((newht (make-cky-entry-hashtable))
 				  (nlr (copy-hashtable (machash 'OUTSYN lr))))
+			      (set-nf-tag newht *ot*)
 			      (setf (machash 'SEM newht)      
 				    (&a (machash 'OUTSEM lr)
 					(machash 'SEM (nv-list-val 'SOLUTION 
@@ -2545,7 +2648,7 @@
 	 (setf *cky-argmax-lf-max* nil)(setf *cky-max* nil)
 	 (let ((n (length itemslist))
 	       (a 0))  ; number of readings per CKY cell
-	   (loop for i from 1 to n do  ; lexcal loop for picking all eligible lex items
+	   (loop for i from 1 to n do  ; lexical loop for picking all eligible lex items
 		 (let* ((matches (get-gram-items (nth (- i 1) itemslist)))
 			(n2 (length matches)))
 		   (cond  ((eql n2 0)

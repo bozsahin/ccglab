@@ -5,7 +5,7 @@ T
 > (test-noqnoc)
 
 ======================= l o a d i n g =======================================
-; loading #P"/home/bozsahin/myrepos/ccglab-models/noqnoc/g1.ded"
+; loading #P"/Users/bozsahin/myrepos/ccglab/examples/model-with-workflow/g1.ded"
 
 Project [g1] is assumed to consist of
 -----------------------------------------------------------------------------
@@ -23,7 +23,7 @@ Expected files       : $ for deduction, # for induction, ^ for model development
 *Beamp* = NIL  *Beam-exp* = 0.9
 
 ======================= l o a d i n g =======================================
-; loading #P"/home/bozsahin/myrepos/ccglab-models/noqnoc/g1.ind"
+; loading #P"/Users/bozsahin/myrepos/ccglab/examples/model-with-workflow/g1.ind"
 
 Project [g1] is assumed to consist of
 -----------------------------------------------------------------------------
@@ -57,10 +57,10 @@ To change a switch, use (setf <switchname> <value>)
 	  *b-subbar*    NIL
 	  *fx-subbar*   NIL
 	  *bx-subbar*   NIL
-	  *f-subcomp*   T
-	  *b-subcomp*   T
-	  *fx-subcomp*  T
-	  *bx-subcomp*  T
+	  *f-subcomp*   NIL
+	  *b-subcomp*   NIL
+	  *fx-subcomp*  NIL
+	  *bx-subcomp*  NIL
           *f2-comp*     T
 	  *b2-comp*     T
 	  *fx2-comp*    T
@@ -69,6 +69,7 @@ To change a switch, use (setf <switchname> <value>)
 	  *b2-sub*      T
 	  *fx2-sub*     T
 	  *bx2-sub*     T
+	  *f2-subcomp*  NIL
 	  *f3-comp*     T
 	  *b3-comp*     T
 	  *fx3-comp*    T
@@ -80,24 +81,24 @@ Model parameters before and after training
 ================================================
 key   lex             initial  final    diff 
 ------------------------------------------------
-1     KNOWS             1.0 7.441595  (6.441595)
-2     KNOWS             1.0 3.825647  (2.825647)
-3     KNOWS             1.0  -1.1472  ( -2.1472)
-4     KNOWS             1.0 -3.37033  (-4.37033)
-5     LOVES             1.0 7.043674  (6.043674)
-6     LOVES             1.0 -5.15808  (-6.15808)
-7     JOHN              1.0 5.554564  (4.554564)
-8     JOHN              1.0 2.970176  (1.970176)
-9     JOHN              1.0 3.712413  (2.712413)
-10    JOHN              1.0 -1.07364  (-2.07364)
-11    MARY              1.0 5.097501  (4.097501)
-12    MARY              1.0 3.261242  (2.261242)
-13    MARY              1.0 4.124776  (3.124776)
-14    MARY              1.0 -1.41044  (-2.41044)
-15    JOHN              1.0 -3.55847  (-4.55847)
-16    JOHN              1.0 -1.07364  (-2.07364)
-17    MARY              1.0 -3.38225  (-4.38225)
-18    MARY              1.0 -1.41044  (-2.41044)
+1     KNOWS             1.0 6.725861  (5.725861)
+2     KNOWS             1.0  3.43604  ( 2.43604)
+3     KNOWS             1.0 -1.86293  (-2.86293)
+4     KNOWS             1.0 -2.58007  (-3.58007)
+5     LOVES             1.0 7.482493  (6.482493)
+6     LOVES             1.0 -5.48249  (-6.48249)
+7     JOHN              1.0 5.533658  (4.533658)
+8     JOHN              1.0 2.982362  (1.982362)
+9     JOHN              1.0  3.86692  ( 2.86692)
+10    JOHN              1.0 -1.35396  (-2.35396)
+11    MARY              1.0 5.095231  (4.095231)
+12    MARY              1.0  3.27333  ( 2.27333)
+13    MARY              1.0 4.292733  (3.292733)
+14    MARY              1.0 -1.72071  (-2.72071)
+15    JOHN              1.0 -3.34851  (-4.34851)
+16    JOHN              1.0 -1.35396  (-2.35396)
+17    MARY              1.0 -3.17686  (-4.17686)
+18    MARY              1.0 -1.72071  (-2.72071)
 ================================================
 NIL
 > (dribble)
