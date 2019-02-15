@@ -468,8 +468,8 @@
   (format t "  To beam or not to beam    : ~A~%" *beamp*)
   (format t "  Normal Form (NF) parse    : ~A~%" *nf-parse*)
   (format t "  Out of vocabulary flag    : ~A~%" *oovp*)
-  (format t " *PRINT-READABLY*           : ~A~%" *print-readably*)
-  (format t " *PRINT-PRETTY*             : ~A~%" *print-pretty*)
+  (format t "  Any non-standard rule     ? ~A~%" (or *f-subbar* *b-subbar* *fx-subbar* 
+						   *bx-subbar* *f-subcomp* *b-subcomp* *fx-subcomp* *bx-subcomp*))
   (format t "  Currently loaded grammar  : ~A~%" *loaded-grammar*)
   (format t " *CCG-GRAMMAR*              : ~A item~:p~%" (length *ccg-grammar*))
   (format t " *LEX-RULES-TABLE*          : ~A item~:p~%" (length *lex-rules-table*))
