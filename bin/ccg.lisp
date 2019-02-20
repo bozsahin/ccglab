@@ -506,7 +506,6 @@
 (defun welcome (&optional (lispsys *lispsys*))
   (status)
   (format t "~%If you've got WARNINGS during loading,~%   you can ignore them.")
-  (format t "~%They are caused by the LALR parser,  ~%   which forward-references some functions.")
   (format t "~%====================================================")
   (format t "~%Welcome to ~A" (which-ccglab))
   (format t "~%----------------------------------------------------")
