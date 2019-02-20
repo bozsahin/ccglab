@@ -468,8 +468,9 @@
   (format t "  To beam or not to beam    : ~A~%" *beamp*)
   (format t "  Normal Form (NF) parse    : ~A~%" *nf-parse*)
   (format t "  Out of vocabulary flag    : ~A~%" *oovp*)
-  (format t "  Any non-standard rule     ? ~A~%" (or *f-subbar* *b-subbar* *fx-subbar* 
-						   *bx-subbar* *f-subcomp* *b-subcomp* *fx-subcomp* *bx-subcomp*))
+  (format t "  Any non-standard rule     ? ~A~%" (if (or *f-subbar* *b-subbar* *fx-subbar* *bx-subbar* *f-subcomp* *b-subcomp* 
+							 *fx-subcomp* *bx-subcomp*)
+						   'yes 'no))
   (format t "  Currently loaded grammar  : ~A~%" *loaded-grammar*)
   (format t " *CCG-GRAMMAR*              : ~A item~:p~%" (length *ccg-grammar*))
   (format t " *LEX-RULES-TABLE*          : ~A item~:p~%" (length *lex-rules-table*))
@@ -3166,7 +3167,7 @@
   t)
 
 (defun reset-globals()
-  (format t "~%------------------ Things to note -------------------~%")
+  (format t "~%--------------- CCGlab Things to note ----------------~%")
   (setf *print-readably* nil)
   (setf *print-pretty* t) 
   (setf *lex-rules-table* nil)

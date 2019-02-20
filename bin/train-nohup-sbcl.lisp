@@ -5,8 +5,9 @@
     (setf (sb-ext:bytes-consed-between-gcs) (* gcmb 1024 1024))  ; specify GC cycle in MB
     ; default is 51 MB in sbcl
     (sb-ext:gc) ; make effective immediately
+    (pprint (which-ccglab))             ; for the record
+    (status)                            ; ditto  (summarises rule use etc)
     (time (update-model gram N alpha0 c :load t)) ; cross your fingers
     (show-training)                     ; prayers answered
-    (pprint (which-ccglab))             ; for the record
-    (and savep (save-training out))     ; session output always to nohup.out when called by ccglab.nohup
+    (and savep (save-training out))     ; this is to save the grammar---session output always to names with nohup.out when called by ccglab.nohup
     ))
