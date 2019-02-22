@@ -93,9 +93,10 @@
       (push-t w wl))))
 
 (defun mk-basic-cat (bcat)
-  "if bcat is a string constant, BCAT feature's value is the list of lisp reader tokens in it, otherwise bcat.
+  "if bcat is a string constant, BCAT feature's value is the list of lisp reader tokens in it, otherwise a symbol.
   In the first case, we mark the BCAT special, as (BCONST t). Returns list of name-value pairs.
-  This avoids needless repetition of string to list conversion at parse time."
+  This avoids needless repetition of string to list conversion at parse time.
+  No empty string check is performed because Lisp reader has funny ways to deal with strings."
   (if (stringp bcat)
     (list (list 'BCAT (word-list-from-string bcat)) '(BCONST t))
     (list (list 'BCAT bcat))))
@@ -465,6 +466,7 @@
 (defun status(&optional (all-lfs nil))
   "returns all equivalent LFS if all-lfs is not nil"
   (format t "~%To see rule switches, do (switches)~%")
+  (format t "  ---------------------------~%")
   (format t "  To beam or not to beam    : ~A~%" *beamp*)
   (format t "  Normal Form (NF) parse    : ~A~%" *nf-parse*)
   (format t "  Out of vocabulary flag    : ~A~%" *oovp*)
@@ -482,6 +484,7 @@
   (format t "  Most likely LF's cells    : ~A ~%" *cky-argmax-lf*)
   (format t "  Number of differing LFs   : ~A ~%" (hash-table-count *cky-lf-hashtable*))
   (format t "  Most weighted derivation  : ~A ~%" *cky-max*)
+  (format t "  ---------------------------~%")
   (and all-lfs (pack-cky-lf-hashtable))
   )
 
@@ -1032,7 +1035,8 @@
 	 (setf *singletons* 0)
 	 (setf *ccg-grammar-keys* 0)
 	 (format s "~A" (parse/2 (read strm))))) ; this is the interface to LALR transformer's parse
-     (and (> *singletons* 0) (format t "~%** CCGlab warning ** There are ~A string-constant categories in your grammar, make sure none are void" *singletons*))
+     (and (> *singletons* 0) 
+	  (format t "~%=============================================================================~%** CCGlab warning ** There are ~A string-constant categories in your grammar, make sure NONE are void" *singletons*))
      (format t "~2%=========================== p r e p a r i n g ===============================~%")
      (format t "~%Project name: ~A~%  Input : ~A ~%  Output: ~A ~%Check to see if output contains any spec errors.~%Fix and re-run if it does." pname infilename ofilename)
      (format t "~%You can also re/create ~A by running 'tokens ~A' sed script offline." infilename pname)))
@@ -3167,7 +3171,7 @@
   t)
 
 (defun reset-globals()
-  (format t "~%--------------- CCGlab Things to note ----------------~%")
+  (format t "~%============= CCGlab things to note =================~%")
   (setf *print-readably* nil)
   (setf *print-pretty* t) 
   (setf *lex-rules-table* nil)
