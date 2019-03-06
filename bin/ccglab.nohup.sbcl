@@ -17,7 +17,7 @@
 # $8 : log file for the run (so that multi-thread runs dont override their results)
 #      This is also the reason why output .ind file has a long name to characterize
 #      the experiment.
-TRAIN=train-nohup-sbcl
+TRAIN=train-nohup-sbcl   # this function is in bin dir of ccglab
 CCGLAB_LISP="`which sbcl` --dynamic-space-size $1"
 echo '==================='  >> $8
 echo "I am called as: $0 $@" >> $8

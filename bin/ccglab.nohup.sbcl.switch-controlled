@@ -24,13 +24,13 @@
 #      This is also the reason why output .ind file has a long name to characterize
 #      the experiment.
 # $9 : the switch function to call before training
-TRAIN=train-nohup-sbcl
+TRAIN=train-nohup-sbcl    # this function is in bin dir of ccglab
 CCGLAB_LISP="`which sbcl` --dynamic-space-size $1"
 echo '==================='  >> $8
 echo "I am called as: $0 $@" >> $8
 echo "            at: `date`" >> $8
 echo "Log goes to   : $8" >> $8
 echo "I will call sbcl as: $CCGLAB_LISP" >> $8
-echo "It will call $TRAIN in $CCGLAB_HOME/bin/$TRAIN.lisp as: ($TRAIN \"$3\" $2 $4 \"$3.ind.nohupped.$5N.$6a.$7c\" $5 $6 $7)" >> $8
+echo "It will call $TRAIN in $CCGLAB_HOME/bin/$TRAIN.lisp as: ($TRAIN \"$3\" $2 $4 \"$3.$8.nohupped.$5N.$6a.$7c.ind\" $5 $6 $7)" >> $8
 echo '===================' >> $8
 $RLWRAP $CCGLAB_LISP --load $CCGLAB_HOME/bin/suppress-style-warnings.lisp --load $LALR_HOME/lalrparser.lisp --load $CCGLAB_HOME/bin/ccg.lisp --load $CCGLAB_HOME/bin/$TRAIN.lisp --eval '(reset-globals)' --eval "($9)" --eval "($TRAIN \"$3\" $2 $4 \"$3.$8.nohupped.$5N.$6a.$7c.ind\" $5 $6 $7)" --eval '(sb-ext:exit)' >> $8
