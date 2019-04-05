@@ -145,5 +145,6 @@ SBCL and rlwrap.
 <b>Have a look at the companion repos, <a href="https://github.com/bozsahin/ccglab-grammars">ccglab-grammars</a>, 
 and <a href="https://github.com/bozsahin/ccglab-models">ccglab-models</a>, which contain grammars and models developed in CCGlab</b>.
 
+<b>TO DO:</b> relational unary rules, for non-segmental morphology.
 
 enjoy.--Cem Bozsahin
