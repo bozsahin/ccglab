@@ -56,28 +56,25 @@ Do the following to get the preliminaries out of the way properly:
 <em>UBUNTU/DEBIAN/MINT</em>
 
 <ol>
-<li> <code>add-apt-repository universe</code>
+<li> <code>sudo add-apt-repository universe</code>
 
-<li> <code>apt-get update</code>
+<li> <code>sudo apt-get update</code>
 
-<li> <code>apt-get install git</code>
+<li> <code>sudo apt-get install git</code>
 
-<li> <code>apt-get install wget</code>
+<li> <code>sudo apt-get install wget</code>
 </ol>
 
-If you're not the machine's administrator, you need <code>sudo</code> priviledges to do 3-4.
 
 <em>FEDORA/RedHat</em>
 
 
 <ol>
-<li> <code>yum install yum-utils</code>
-<li> <code>yum-config-manager --enable \*</code>
-<li> <code> yum install git</code>
-<li> <code> yum install wget</code>
+<li> <code>sudo yum install yum-utils</code>
+<li> <code>sudo yum-config-manager --enable \*</code>
+<li> <code>sudo yum install git</code>
+<li> <code>sudo yum install wget</code>
 </ol>
-
-If you're not the machine's administrator, you need <code>sudo</code> priviledges to do 3--4.
 
 <em>OTHER LINUXES</em>
 
