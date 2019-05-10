@@ -1,5 +1,5 @@
 # ccglab
-Combinatory Categorial Grammar (CCG): All combinators, common grammar format, parsing to logical form, parameter estimation for probabilistic CCG.
+Combinatory Categorial Grammar (CCG): All combinators,  parsing to logical form and parameter estimation for CCG and probabilistic CCG.
 
 <b>There is an installer for ccglab, which I describe toward the bottom of README.
            
@@ -12,7 +12,7 @@ for the Lisp reader needs methods, therefore not usable in GCL/Clisp out of the 
 
 SBCL and CCL are usable out of the box for CCGlab. 
 
-Design and development of CCGlab continues to be in SBCL; then checked with CCL.
+Design and development of CCGlab continues to be in SBCL, then checked with CCL.
 
 <b>PRELIMINARIES FOR WINDOWS</b>
 
@@ -20,7 +20,7 @@ You need a linux/unix system for CCGlab, either real or in a virtual box such as
 
 A virtual box can be installed in Windows, which effectively gives CCGlab in Windows.
 
-Then follow one of the advices below for linuxes, depending on your virtual machine.
+Then follow one of the advices below for linuxes, depending on your (virtual) machine.
 
 I recommend setting up an Ubuntu virtualbox, because it allows you to try without fully installing it.
 
@@ -80,7 +80,7 @@ Do the following to get the preliminaries out of the way properly:
 
 Arch, Suse, MacOS do not seem to have this peculiar Ubuntu and RedHat/Fedora caste of packages. 
 
-The packages for sbcl and rlwrap are available for them. CCL Lisp too; if you feel like using it instead of SBCL.
+The packages for sbcl and rlwrap are available for them. CCL Lisp too, if you feel like using it instead of SBCL.
 
 <B>FIRST TIME INSTALL of CCGLAB</B>
 
