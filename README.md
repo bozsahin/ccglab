@@ -89,7 +89,7 @@ The packages for sbcl and rlwrap are available for them. CCL Lisp too; if you fe
 <li> <code>git clone https://github.com/bozsahin/ccglab</code>
 <br>This will create the repository in <code>h/ccglab</code>
 <br>This is your ccglab home.
-<li> <code>cd h/ccglab</code>
+<li> <code>cd ccglab</code>
 <li> Execute <code>./run-to-complete-first-time-install</code> bash script in the repo to get the extras needed, and to set up the paths so that CCGlab is usable from anywhere in your user account. <br>
 <li> Open a new bash terminal and run <code>ccglab</code> script from anywhere.
 </ol>
