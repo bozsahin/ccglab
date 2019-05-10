@@ -143,7 +143,7 @@ and <a href="https://github.com/bozsahin/ccglab-models">ccglab-models</a>, which
 
 <b>TO DO:</b> 
 <ul>
-<li> relational unary rules, for non-segmental morphology.
+<li> bidirectional unary rules.
 <li> web server, for use without install.
 </ul>
 
