@@ -102,7 +102,7 @@ The packages for sbcl and rlwrap are available for them. CCL Lisp too, if you fe
 </ol>
 
 Latest release is shown by <code>(which-ccglab).</code> Announced git releases may be slightly behind the latest,
-which is always this copy. Just clone this rather than download the release if you want the latest.
+which is always this copy. Just clone this repo rather than download the release if you want the latest.
 
 <B>MANUAL INSTALL:</B>
 
