@@ -136,8 +136,7 @@ And here is my <code>~/.bash_profile</code> file (create one if you don't have i
                       source ~/.bashrc
            fi
 
-The installer does all that and more, from fetching lalrparser.lisp to setting variables, paths and bash files and installing
-SBCL and rlwrap.
+The installer fetches the relevant sources (lalrparser, sbcl, rlwrap) and does the manual install automatically, and saves it in the files <code>.bash_profile, .bashrc</code> at your home.
 
 <b>Have a look at the companion repos, <a href="https://github.com/bozsahin/ccglab-grammars">ccglab-grammars</a>, 
 and <a href="https://github.com/bozsahin/ccglab-models">ccglab-models</a>, which contain grammars and models developed in CCGlab</b>.
