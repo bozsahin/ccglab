@@ -94,7 +94,7 @@ The packages for sbcl and rlwrap are available for them. CCL Lisp too, if you fe
 <li> Open a new bash terminal and run <code>ccglab</code> script from anywhere.
 </ol>
 
-<b>NO NEED TO REINSTALL:</b> If you already have a git-installed up-and-running CCGlab, just do the following for updates:
+<b>NO REINSTALL:</b> If you already have a git-installed up-and-running CCGlab, just do the following for updates:
 
 <ol>
 <li><code>cd $CCGLAB_HOME</code>
