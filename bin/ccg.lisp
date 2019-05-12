@@ -489,7 +489,7 @@
   )
 
 (defun which-ccglab ()
-  "CCGlab, version 5.2")
+  "CCGlab, version 5.2.0")
 
 (defun set-lisp-system (lispsys)
   (case lispsys
@@ -514,7 +514,7 @@
   (format t "~%Welcome to ~A" (which-ccglab))
   (format t "~%----------------------------------------------------")
   (set-lisp-system lispsys)
-  (flash-news t)
+  (flash-news)
   (format t "~%Ready.")
   (format t "~%====================================================~%"))
 
@@ -3199,9 +3199,22 @@
   (with-open-file (s fn :direction :input :if-does-not-exist :error) (read s)))
 
 (defun write1 (fn obj)
-  "writes one lisp object from file fn in one fell swoop"
+  "writes one lisp object to file fn in one fell swoop"
   (with-open-file (s fn :direction :output :if-exists :error) (format  s "~A~%" obj)))
 
+(defun gradient-profile (&rest models)
+  "lists pairwise gradient difference in a sequence of models in files. 
+  Assumes models are parallel; i.e. keys in same order."
+  (map 'list 
+       #'identity
+       (mapcar ; filters one feature from each entry
+	 #'(lambda (x)(second (assoc 'PARAM x))) 
+	 (mapcar 
+	   #'car
+	   (mapcar  ;returns list of grammars
+	     ; 1st: defparameter 2nd:grammar name 3rd: (quote grammar)
+	     #'(lambda (m) (second (third (read1 m)))) 
+	     models)))))
 
 ;; ======================================
 ;; some shortcuts for top-level functions
