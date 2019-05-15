@@ -244,6 +244,27 @@
   for *training-non0-hashtable*: value: whether key'd feature has nonzero count in cky parse (for inside-outside)"
   (make-hash-table :test #'equal :size (+ n 100) :rehash-size 1000 :rehash-threshold 1.0))
 
+;; 
+;; safer load with error catching (rather than falling off to debugger--useful for servers)
+;;
+;; Thanks to Juanjo of stackoverflow
+
+(defparameter *error-message* 'LOAD_ERROR)
+(defparameter *error-tag* 'loaderror)
+(defparameter *error* nil)
+
+(defun capture-error (condition)
+  (setf *error*
+	(format nil "***load error: ~A"
+		condition))
+  (throw *error-tag* (cons *error* *error-message*)))
+
+(defun safely-load (file)
+  (handler-bind ((serious-condition #'capture-error))
+      (catch *error-tag*
+        (load file :if-does-not-exist 'no-file)
+        nil)))
+
 ;;; =======
 ;;; globals
 ;;; =======
@@ -489,7 +510,7 @@
   )
 
 (defun which-ccglab ()
-  "CCGlab, version 5.2.0")
+  "CCGlab, version 5.2.1")
 
 (defun set-lisp-system (lispsys)
   (case lispsys
@@ -1065,7 +1086,9 @@
 	 (suname (concatenate 'string pname ".sup"))
 	 (lfile (if (eq pfile 'model) mname gname)))
     (format t "~%======================= l o a d i n g =======================================~%")
-    (cond ((load lfile :verbose t :if-does-not-exist nil) ; this will set the *ccg-grammar* list 
+    (setf *error* nil)
+    (safely-load lfile)             ; this will set the *ccg-grammar* list 
+    (cond ((not *error*)
 	   (setf *lex-rules-table* nil)
 	   (setf *loaded-grammar* lfile)
 	   (dolist (l *ccg-grammar*)(and (not (lexp l)) (push-t (hash-lexrule l) *lex-rules-table*))) ; we get reversed list of rules
@@ -1084,7 +1107,12 @@
 	   (format t "~%Expected files       : $ for deduction, # for induction, ^ for model development")
 	   (format t "~%=============================================================================~%")
 	   t)
-	  (t (format t "Project ~A cannot be loaded:" pname)
+	  (t (if (eq pfile 'model)
+	       (format t "~%ERROR loading the model file ~A" mname)
+	       (progn
+		 (format t "~%**ERROR loading ~A. Your ~A file has syntax error" gname sname)
+		 (format t "~%  Have a look at ~A to see where the error is in ~A" gname sname)))
+	     (format t "~%Project ~A cannot be loaded:" pname)
 	     (format t "~%  *ccg-grammar* is unchanged.")
 	     (format t "~%  *lex-rules-table* is unchanged.~%")
 	     nil))))
