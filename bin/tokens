@@ -4,6 +4,6 @@
 # First wraps in special symbols for Lisp, then rewraps :=, then unwraps up to 2 
 # comma/period within a string constant, then wraps all in ()
 # -Cem Bozsahin 2015, Ankara, Lisboa
-if [ -x $1.ccg ]; then
+if [ -f $1.ccg ]; then
 	sed -e 's/\%.*$//g' -e 's/:/ |:| /g' -e 's/=/ |=| /g' -e 's/\./ |\.| /g' -e ' s/\\/ |\\\\| /g' -e 's/\// |\/| /g' -e 's/\;/ |;| /g' -e 's/\,/ |\,| /g' -e 's/-->/ |-->| /g' -e 's/(/ |(| /g' -e 's/)/ |)| /g' -e 's/\^/ |\^| /g' -e 's/\*/ |*| /g' -e 's/\+/ |+| /g' -e 's/\[/ |\[| /g' -e 's/\]/ |\]| /g' -e 's/\&i/ (LAM x x) /g' $1.ccg|sed -e 's/ |:|[ ]*|=| / |:=| /g'|sed -e 's/"\(.*\) |\([,\.]\)| \(.*\)"/"\1\2\3"/g' -e 's/"\(.*\) |\([,\.]\)| \(.*\)"/"\1\2\3"/g'|sed -e '1,1s/^/(/' -e '$s/$/)/' > $1.lisptokens
 fi

@@ -262,7 +262,7 @@
 (defun safely-load (file)
   (handler-bind ((serious-condition #'capture-error))
       (catch *error-tag*
-        (load file :if-does-not-exist 'no-file)
+        (load file)
         nil)))
 
 ;;; =======
@@ -516,6 +516,7 @@
   (case lispsys
     (sbcl (setf *lispsys* 'sbcl))
     ((ccl ccl64 ccl32) (setf *lispsys* 'ccl))
+    ((alisp mlisp) (setf *lispsys* 'alisp))
     (otherwise (setf *lispsys* 'UNKNOWN)))
   (format t "~%Your Lisp is ~A." *lispsys*)
   (if (eql *lispsys* 'UNKNOWN)
@@ -1051,6 +1052,7 @@
      (case maker ;; one of these will generate .lisptokens
        (sbcl (run-program "tokens" (list pname) :search t :wait t))
        (ccl  (run-program "tokens" (list pname) :wait t))
+       (alisp  (run-shell-command (concatenate 'string "tokens " pname) :wait t))
        (otherwise (format t "~%Reading from off-line generated ~A" infilename)))
      (with-open-file (strm infilename :direction :input :if-does-not-exist nil)
        (if (streamp strm)
