@@ -510,7 +510,7 @@
   )
 
 (defun which-ccglab ()
-  "CCGlab, version 5.2.1")
+  "CCGlab, version 5.2.2")
 
 (defun set-lisp-system (lispsys)
   (case lispsys
@@ -1046,16 +1046,20 @@
    "reads paper-style tokenized specs for the project pname, and feeds that into 
   parse/1 to generate pname.ded"
    (let ((ofilename (concatenate 'string pname ".ded"))
+	 (sfilename (concatenate 'string pname ".ccg"))
 	 (infilename (concatenate 'string pname ".lisptokens")))
      (case maker ;; one of these will generate .lisptokens
        (sbcl (run-program "tokens" (list pname) :search t :wait t))
        (ccl  (run-program "tokens" (list pname) :wait t))
        (otherwise (format t "~%Reading from off-line generated ~A" infilename)))
-     (with-open-file (strm infilename :direction :input :if-does-not-exist :error)
-       (with-open-file (s ofilename  :direction :output :if-exists :supersede)
-	 (setf *singletons* 0)
-	 (setf *ccg-grammar-keys* 0)
-	 (format s "~A" (parse/2 (read strm))))) ; this is the interface to LALR transformer's parse
+     (with-open-file (strm infilename :direction :input :if-does-not-exist nil)
+       (if (streamp strm)
+	 (with-open-file (s ofilename  :direction :output :if-exists :supersede)
+	   (setf *singletons* 0)
+	   (setf *ccg-grammar-keys* 0)
+	   (format s "~A" (parse/2 (read strm)))) ; this is the interface to LALR transformer's parse
+	 (progn (format t "~%**ERROR in load: ~A or ~A or ~A." sfilename infilename ofilename)
+		(return-from lispify-project))))
      (and (> *singletons* 0) 
 	  (format t "~%=============================================================================~%** CCGlab warning ** There are ~A string-constant categories in your grammar, make sure NONE are void" *singletons*))
      (format t "~2%=========================== p r e p a r i n g ===============================~%")
@@ -1070,9 +1074,12 @@
        (sbcl (run-program "suptokens"  (list pname) :search t :wait t))
        (ccl  (run-program "suptokens" (list pname) :wait t))
        (otherwise (format t "~%Reading from off-line generated ~A" infilename)))
-     (with-open-file (strm infilename :direction :input :if-does-not-exist :error)
-       (with-open-file (s ofilename  :direction :output :if-exists :supersede)
-	 (format s "~A" (parse/2 (read strm))))) ; this is the interface to LALR transformer's parse
+     (with-open-file (strm infilename :direction :input :if-does-not-exist nil)
+       (if (streamp strm)
+	 (with-open-file (s ofilename  :direction :output :if-exists :supersede)
+	   (format s "~A" (parse/2 (read strm)))) ; this is the interface to LALR transformer's parse
+	 (progn (format t "~%**ERROR in loading ~A" infilename)
+		(return-from lispify-supervision))))
      (format t "~%=========================== p r e p a r i n g ===============================~%")
      (format t "~%Project name: ~A~%  Input : ~A ~%  Output: ~A ~%Check to see if output contains any spec errors.~%Fix and re-run if it does." pname infilename ofilename)
      (format t "~%You can also re/create ~A by running 'suptokens ~A' sed script offline." infilename pname)))
@@ -1110,8 +1117,8 @@
 	  (t (if (eq pfile 'model)
 	       (format t "~%ERROR loading the model file ~A" mname)
 	       (progn
-		 (format t "~%**ERROR loading ~A. Your ~A file has syntax error" gname sname)
-		 (format t "~%  Have a look at ~A to see where the error is in ~A" gname sname)))
+		 (format t "~%**ERROR loading the project ~A.~%  A required ~A file does not exist or ~A has syntax error." pname pname sname)
+		 (format t "~%  Have a look at ~A to see if there is error in ~A." gname sname)))
 	     (format t "~%Project ~A cannot be loaded:" pname)
 	     (format t "~%  *ccg-grammar* is unchanged.")
 	     (format t "~%  *lex-rules-table* is unchanged.~%")
