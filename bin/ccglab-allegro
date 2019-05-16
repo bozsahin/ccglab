@@ -1,0 +1,3 @@
+#!/bin/bash
+lispbinary=`basename $CCGLAB_LISP|head -n1`   # local variable. use of head is for cases where you defined some options to base binary
+$RLWRAP $CCGLAB_LISP -L $CCGLAB_HOME/bin/suppress-style-warnings.lisp -L $LALR_HOME/lalrparser.lisp -L $CCGLAB_HOME/bin/ccg.lisp -e '(reset-globals)'  -e "(welcome (quote $lispbinary))"

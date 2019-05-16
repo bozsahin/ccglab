@@ -516,7 +516,7 @@
   (case lispsys
     (sbcl (setf *lispsys* 'sbcl))
     ((ccl ccl64 ccl32) (setf *lispsys* 'ccl))
-    ((alisp mlisp) (setf *lispsys* 'alisp))
+    ((alisp mlisp mlisp8) (setf *lispsys* 'alisp))
     (otherwise (setf *lispsys* 'UNKNOWN)))
   (format t "~%Your Lisp is ~A." *lispsys*)
   (if (eql *lispsys* 'UNKNOWN)
@@ -1075,6 +1075,7 @@
      (case maker ;; one of these will generate .suptokens
        (sbcl (run-program "suptokens"  (list pname) :search t :wait t))
        (ccl  (run-program "suptokens" (list pname) :wait t))
+       (alisp  (run-shell-command (concatenate 'string "suptokens " pname) :wait t))
        (otherwise (format t "~%Reading from off-line generated ~A" infilename)))
      (with-open-file (strm infilename :direction :input :if-does-not-exist nil)
        (if (streamp strm)
