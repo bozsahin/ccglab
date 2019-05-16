@@ -1,3 +1,13 @@
 #!/bin/bash
 lispbinary=`basename $CCGLAB_LISP|head -n1`   # local variable. use of head is for cases where you defined some options to base binary
-$RLWRAP $CCGLAB_LISP --load $CCGLAB_HOME/bin/suppress-style-warnings.lisp --load $LALR_HOME/lalrparser.lisp --load $CCGLAB_HOME/bin/ccg.lisp --eval '(reset-globals)'  --eval "(welcome (quote $lispbinary))"
+if [ $lispbinary ] && [ $lispbinary = sbcl ] || [ $lispbinary = ccl ]; then
+	load='--load'
+	eval='--eval'
+elif [ $lispbinary ] && [ $lispbinary = alisp ] || [ $lispbinary = mlisp ]; then
+	load='-L'
+	eval='-e'
+else
+	load='-l'
+	eval='-e'
+fi
+$RLWRAP $CCGLAB_LISP $load $CCGLAB_HOME/bin/suppress-style-warnings.lisp $load $LALR_HOME/lalrparser.lisp $load $CCGLAB_HOME/bin/ccg.lisp $eval '(reset-globals)'  $eval "(welcome (quote $lispbinary))"
