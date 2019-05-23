@@ -12,8 +12,8 @@ for the Lisp reader needs methods, therefore not usable in GCL/Clisp out of the 
 
 SBCL and CCL are usable out of the box for CCGlab. 
 
-I added Allegro CL support for CCGlab (for calling bash scripts etc.), but somewhat reluctantly. Its free versions are so cryptic about heap control
-you will spend most of your time garbage-collecting rather tha doing useful work. Not worth it, folks.
+I added Allegro CL support for CCGlab (for calling bash scripts etc.), but somewhat reluctantly. Its free versions are so cryptic about heap control 
+you will avoid it and spend most of your time garbage-collecting rather than doing useful work. Not worth it, folks.
 
 Design and development of CCGlab continues to be in SBCL, then checked with CCL. Fingers crossed for Allegro CL.
 
