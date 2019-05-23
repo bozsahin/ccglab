@@ -12,7 +12,10 @@ for the Lisp reader needs methods, therefore not usable in GCL/Clisp out of the 
 
 SBCL and CCL are usable out of the box for CCGlab. 
 
-Design and development of CCGlab continues to be in SBCL, then checked with CCL.
+I added Allegro CL support for CCGlab, but somewhat reluctantly. Its free versions are so cryptic about heap control
+you will spend most of your time garbage-collecting rather tha doing useful work. Not worth it, folks.
+
+Design and development of CCGlab continues to be in SBCL, then checked with CCL. Fingers crossed for Allegro CL.
 
 <b>PRELIMINARIES FOR WINDOWS</b>
 
