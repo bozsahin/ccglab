@@ -510,7 +510,7 @@
   )
 
 (defun which-ccglab ()
-  "CCGlab, version 5.2.2")
+  "CCGlab, version 5.2.3")
 
 (defun set-lisp-system (lispsys)
   (case lispsys
@@ -3131,6 +3131,20 @@
                    ; we're trying to avoid recalculating counts since they dont change over iterations
   (stochastic-gradient-ascent verbose debug))
 
+(defun update-model-extrapolate (pname alpha0 c 
+	  &key (N 4) (verbose nil)(load nil) (debug nil))
+  "This version runs over supervision data N times (fixed and small), then extrapolates. 
+   First run is for inside-outside, which also gives gradient direction per parameter.
+   The subsequent N-1 iterations give estimates about gradient magnitude, which
+   we estimate in later-steps-more-weighted fashion."
+  (beam-value) ;; in case you want to abort a misguided looong training asap
+  (and load (load-model pname)) ; loads the .ind file into *ccg-grammar*
+  (and load (load-supervision pname)) ; (Si Li) pairs loaded into *supervision-pairs-list*
+  (set-training-parameters (- N 1)  (length *supervision-pairs-list*)(length *ccg-grammar*) alpha0 c)
+  (inside-outside) ; redundantly parse all sup pairs once to create hash table of nonzero counts for every pair
+                   ; we're trying to avoid recalculating counts since they dont change over iterations
+  (stochastic-gradient-ascent verbose debug))
+
 (defun show-training ()
   "show the values of parameters per key before and after training"
   (format t "The rule set used in the experiment:~%")
@@ -3298,6 +3312,7 @@
 	 probs cky-show-induction
 	 csle cky-show-lf-eqv 
 	 um update-model
+	 umx update-model-extrapolate
 	 st show-training
 	 csnf cky-show-normal-forms
 	 crs cky-reveal-cell
