@@ -3146,19 +3146,18 @@
                    ; we're trying to avoid recalculating counts since they dont change over iterations
   (stochastic-gradient-ascent verbose debug))
 
-(defun update-model-extrapolate (pname alpha0 c 
-	  &key (N 4) (verbose nil)(load nil) (debug nil))
+(defun update-model-extrapolate (pname alpha0 c &key (load nil))
   "This version runs over supervision data N times (fixed and small), then extrapolates. 
-   First run is for inside-outside, which also gives gradient direction per parameter.
-   The subsequent N-1 iterations give estimates about gradient magnitude, which
-   we estimate in later-steps-more-weighted fashion."
-  (beam-value) ;; in case you want to abort a misguided looong training asap
+   It finds 4 stages of the gradient, setting its direction and first magnitudes.
+   Then it runs Cabay & Jackson algorithm to find the gradient's limit for each parameter by
+   minimum polynomial extrapolation (MPE)."
+  (beam-value) ;; in case you want to abort 
   (and load (load-model pname)) ; loads the .ind file into *ccg-grammar*
   (and load (load-supervision pname)) ; (Si Li) pairs loaded into *supervision-pairs-list*
-  (set-training-parameters (- N 1)  (length *supervision-pairs-list*)(length *ccg-grammar*) alpha0 c)
+  (set-training-parameters 4  (length *supervision-pairs-list*)(length *ccg-grammar*) alpha0 c) ; fixed iteration 
   (inside-outside) ; redundantly parse all sup pairs once to create hash table of nonzero counts for every pair
                    ; we're trying to avoid recalculating counts since they dont change over iterations
-  (stochastic-gradient-ascent verbose debug))
+  (minimum-polynomial-extrapolate))
 
 (defun show-training ()
   "show the values of parameters per key before and after training"
