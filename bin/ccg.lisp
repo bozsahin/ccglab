@@ -3147,10 +3147,10 @@
   (stochastic-gradient-ascent verbose debug))
 
 (defun update-model-extrapolate (pname alpha0 c &key (load nil))
-  "This version runs over supervision data N times (fixed and small), then extrapolates. 
+  "This version runs over supervision data 4 times,  then extrapolates. 
    It finds 4 stages of the gradient, setting its direction and first magnitudes.
    Then it runs Cabay & Jackson algorithm to find the gradient's limit for each parameter by
-   minimum polynomial extrapolation (MPE)."
+   minimum polynomial extrapolation (MPE). It can be erroneous if stages fluctuate."
   (beam-value) ;; in case you want to abort 
   (and load (load-model pname)) ; loads the .ind file into *ccg-grammar*
   (and load (load-supervision pname)) ; (Si Li) pairs loaded into *supervision-pairs-list*
