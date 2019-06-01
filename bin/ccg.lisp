@@ -68,6 +68,21 @@
 
 ;; some common utilities
 
+(defun mpe4 (l4)
+  "computes the Cabay & Jackson limit for minimum polynomial extrapolation (mpe) from 4 stages of the gradient in l4"
+  (let* ((x1 (first l4))
+	 (x2 (second l4))
+	 (x3 (third l4))
+	 (x4 (fourth l4))
+	 (x2x1 (- x2 x1))
+	 (x3x2 (- x3 x2))
+	 (x4x3 (- x4 x3))
+	 (den (+ (expt x2x1 2.0) (expt x3x2 2.0))))
+    (if (or (eq x2 x1) (eq x3 x2) (eq x4 x3))
+      x4
+      (/ (+ (/ (+ (* x2 x2x1 x4x3) (* x3 x3x2 x4x3)) den) x4)
+	 (/ (+ (* x2x1 x4x3) (* x3x2 x4x3)) den)))))
+
 (defun make-dummy-lex-entries (phon)
   "two dummy entries-- @X/*@X and @X\*@X"
   (let ((k1 (gensym))
