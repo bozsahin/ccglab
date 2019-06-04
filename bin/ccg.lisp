@@ -68,16 +68,12 @@
 
 ;; some common utilities
 
-(defun mpe4 (l4)
-  "computes the Cabay & Jackson '76 limit for minimum polynomial extrapolation (mpe) from 4 stages of the gradient in l4"
-  (let* ((x1 (first l4))
-	 (x2 (second l4))
-	 (x3 (third l4))
-	 (x4 (fourth l4))
-	 (x2x1 (- x2 x1))
-	 (x3x2 (- x3 x2))
-	 (x4x3 (- x4 x3))
-	 (den (+ (expt x2x1 2.0) (expt x3x2 2.0))))
+(defun mpe4 (x1 x2 x3 x4)
+  "computes the Cabay & Jackson '76 limit for minimum polynomial extrapolation (mpe) from 4 stages of the gradient."
+  (let ((x2x1 (- x2 x1))
+	(x3x2 (- x3 x2))
+	(x4x3 (- x4 x3))
+	(den (+ (expt x2x1 2.0) (expt x3x2 2.0))))
     (if (or (almost-eq x2 x1) (almost-eq x3 x2) (almost-eq x4 x3))
       x4
       (/ (+ (/ (+ (* x2 x2x1 x4x3) (* x3 x3x2 x4x3)) den) x4)
