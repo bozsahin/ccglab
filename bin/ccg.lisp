@@ -68,11 +68,8 @@
 
 ;; some common utilities
 
-(defun almost-eq (x y)
-  (<= (abs (- x y)) 0.001))
-
 (defun mpe4 (l4)
-  "computes the Cabay & Jackson limit for minimum polynomial extrapolation (mpe) from 4 stages of the gradient in l4"
+  "computes the Cabay & Jackson '76 limit for minimum polynomial extrapolation (mpe) from 4 stages of the gradient in l4"
   (let* ((x1 (first l4))
 	 (x2 (second l4))
 	 (x3 (third l4))
@@ -85,6 +82,7 @@
       x4
       (/ (+ (/ (+ (* x2 x2x1 x4x3) (* x3 x3x2 x4x3)) den) x4)
 	 (/ (+ (* x2x1 x4x3) (* x3x2 x4x3)) den)))))
+
 
 (defun make-dummy-lex-entries (phon)
   "two dummy entries-- @X/*@X and @X\*@X"
@@ -140,6 +138,8 @@
 ;; macros for training table access
 (defmacro get-key-param (key)
   `(first (machash ,key *training-hashtable*)))
+(defmacro get-key-param-xp (key)
+  `(fifth (machash ,key *training-hashtable-x4*)))
 (defmacro get-key-derivative (key)
   `(rest (machash ,key *training-hashtable*)))
 (defmacro put-key-param (key param)
@@ -324,6 +324,7 @@
 (defparameter *backward-tag-set* (list *fc* *ot*))
 
 ;; more globals
+(defparameter *epsilon* 0.001)        ; largest difference to be considered equal
 (defparameter *cky-lf-hashtable-sum* 0.0) ; sum of all result LFs inner product
 (defparameter *cky-argmax-lf* nil)    ; list of solutions for most likely LF
 (defparameter *cky-argmax-lf-max* nil); current highest-ranking cell in cky table for the most likely LF.
@@ -389,7 +390,8 @@
 ;; rule switch wholesale control
 (defun basic-ccg (&optional (ok t))
   (case ok
-    ((on t) (setf 
+    ((on t) (format t "Using standard rule set~%") 
+	    (setf 
 	      *f-apply* t   ;application
 	      *b-apply* t
 	      *f-comp* t    ;composition
@@ -421,38 +423,39 @@
 	      *b3-comp* t
 	      *fx3-comp* t
 	      *bx3-comp* t))
-    ((off nil) (setf 
-	      *f-apply* t   ;application
-	      *b-apply* t
-	      *f-comp* t    ;composition
-	      *b-comp* t
-	      *fx-comp* t
-	      *bx-comp* t
-	      *f-sub* t     ;substitution
-	      *b-sub* t
-	      *fx-sub* t
-	      *bx-sub* t
-	      *f-subbar* t  ;substitution bar (aka lost combinator)
-	      *b-subbar* t
-	      *fx-subbar* t
-	      *bx-subbar* t
-	      *f-subcomp* t ;subcomposition (i.e. D)
-	      *f2-subcomp* t ; D^2
-	      *b-subcomp* t
-	      *fx-subcomp* t
-	      *bx-subcomp* t
-	      *f2-comp* t   ;B^2
-	      *b2-comp* t
-	      *fx2-comp* t
-	      *bx2-comp* t
-	      *f2-sub* t    ;S'' (not S^2 of Curry)
-	      *b2-sub* t
-	      *fx2-sub* t
-	      *bx2-sub* t
-	      *f3-comp* t   ;B^3
-	      *b3-comp* t
-	      *fx3-comp* t
-	      *bx3-comp* t))
+    ((off nil) (format t "Rule set controlled by user.~%")
+	       (setf 
+		 *f-apply* t   ;application
+		 *b-apply* t
+		 *f-comp* t    ;composition
+		 *b-comp* t
+		 *fx-comp* t
+		 *bx-comp* t
+		 *f-sub* t     ;substitution
+		 *b-sub* t
+		 *fx-sub* t
+		 *bx-sub* t
+		 *f-subbar* t  ;substitution bar (aka lost combinator)
+		 *b-subbar* t
+		 *fx-subbar* t
+		 *bx-subbar* t
+		 *f-subcomp* t ;subcomposition (i.e. D)
+		 *f2-subcomp* t ; D^2
+		 *b-subcomp* t
+		 *fx-subcomp* t
+		 *bx-subcomp* t
+		 *f2-comp* t   ;B^2
+		 *b2-comp* t
+		 *fx2-comp* t
+		 *bx2-comp* t
+		 *f2-sub* t    ;S'' (not S^2 of Curry)
+		 *b2-sub* t
+		 *fx2-sub* t
+		 *bx2-sub* t
+		 *f3-comp* t   ;B^3
+		 *b3-comp* t
+		 *fx3-comp* t
+		 *bx3-comp* t))
     (otherwise (format t "~%Error: expected a value on/off/t/nil~%Continuing with current values"))))
 
 
@@ -528,7 +531,7 @@
   )
 
 (defun which-ccglab ()
-  "CCGlab, version 5.2.3")
+  "CCGlab, version 5.2.4")
 
 (defun set-lisp-system (lispsys)
   (case lispsys
@@ -2929,7 +2932,20 @@
 (defparameter *alpha0* 1.0)       ; alpha_0 of Z&C05 - learning rate parameter
 (defparameter *c* 1.0)            ; c of Z&C05       - learning rate parameter
 (defparameter *training-hashtable* nil); parameter vector x partial derivative hash table, for training
+(defparameter *training-hashtable-x4* nil); for extrapolation from 4 runs over training data
 (defparameter *training-non0-hashtable* nil); parameter vector and current nonzero counts
+
+(defun extrapolate-parameters ()
+  "runs over every parameter trained 4 times---input val is a 4-item dotted lists of (param . derivative), 
+  and extrapolates a limit in the fifth column."
+  (maphash #'(lambda (key val)
+	       (declare (ignore key))
+	       (let ((p1 (first val))
+		     (p2 (second val))
+		     (p3 (third val))
+		     (p4 (fourth val)))
+		 (setf val (append val (list (mpe4 p1 p2 p3 p4))))))
+	   *training-hashtable-x4*))
 
 (defun load-supervision (pname)
   (let ((supname (concatenate 'string pname ".sup")))
@@ -2961,7 +2977,7 @@
   We cannot use string identity of lex items here because of ambiguity--we need the key of lex item, which is unique.
   The flag is to count multiple occurences of lex rules."
   (cond ((null (machash cell *cky-hashtable*)) 
-	 (format t "~%No such parse! (count-feature)")
+	 (format t "~%No such parse! count-feature")
 	 (return-from count-feature 0.0))
 	(t (let  ((l (nv-list-val 'LEFT (machash cell *cky-hashtable*)))
 		  (r (nv-list-val 'RIGHT (machash cell *cky-hashtable*))))
@@ -3005,8 +3021,8 @@
 	 (cky-find-argmax-lf)
 	 t)))
 
-(defun set-training-parameters (bign smalln nparams alpha0 c) 
-  "The parameters of the workflow of Z&C'05 for model parameter estimation. 
+(defun set-training-parameters (bign smalln nparams alpha0 c &optional (x4 nil)) 
+  "The parameters of the workflow of Z&C 05 for model parameter estimation. 
   Also initializes the paramaters from .ind, and the derivative."
   (setf *bign* bign)
   (setf *smalln* smalln)
@@ -3014,6 +3030,7 @@
   (setf *alpha0* alpha0)     
   (setf *c* c)
   (setf *training-hashtable* (make-training-hashtable nparams))
+  (if x4 (setf *training-hashtable-x4* (make-training-hashtable nparams))) ; this one needed if we extrapolate
   (setf *training-non0-hashtable* (make-training-hashtable smalln)) ; for inside-outside
   (dolist (l *ccg-grammar*)(mk-train-entry (nv-list-val 'KEY l) (nv-list-val 'PARAM l) 0.0))
   t)
@@ -3026,7 +3043,6 @@
 				 (/ (* *alpha0* (get-derivative val))
 				       (+ 1 (* *c* (+ i (* k *smalln*))))))))
 	   *training-hashtable*))
-
 
 (defun pprint-hashtable (ht)
   (format t "~%=========~%Hash Table: key val")
@@ -3131,36 +3147,48 @@
 		(update-derivative key in-sum all-sum li-sum all-li-sum verbose debug))))
 	  (t (format t "~%*** Unparsable training data! ~A~%Either fix or eliminate the pair from training set~%" s-lf)))))
 
-(defun stochastic-gradient-ascent (verbose debug) ; this is done per Li, Si, hence it is stochastic
+(defun record-pass ()
+  "current value of the parameters in training is attached as the end value of the same key in the list for extrapolation."
+  (maphash #'(lambda (key val)
+	       (setf (machash key *training-hashtable-x4*)
+		     (append (machash key *training-hashtable-x4*) (list (get-param val)))))
+	   *training-hashtable*))
+
+(defun stochastic-gradient-ascent (verbose debug &optional (x4 nil)) ; this is done per Li, Si, hence it is stochastic
+  "record the pass if extrapolation method is used. This argument is new and assumed false for old methods."
   (loop for k from 0 to (- *bign* 1) do 
-    (loop for i from 1 to *smalln* do
-      (and debug (format t "~%---------------------------------~%Iteration k i= ~A  ~A~%" k i))
-      (find-derivative-of-log-likelihood (elt *supervision-pairs-list* (- i 1)) i verbose debug)
-      (estimate-parameters k i)))
-  (format t "~%Done. use (show-training/save-training) to see/save the results")t)
+	(loop for i from 1 to *smalln* do
+	      (and debug (format t "~%---------------------------------~%Iteration k i= ~A  ~A~%" k i))
+	      (find-derivative-of-log-likelihood (elt *supervision-pairs-list* (- i 1)) i verbose debug)
+	      (estimate-parameters k i))
+	(if x4 (record-pass))))
 
 (defun update-model (pname iterations alpha0 c &key (verbose nil)(load nil) (debug nil))
-  "general workflow for updating model parameters of a project. Compare and save are separate."
+  "default workflow for updating model parameters of a project. Compare and save are separate."
   (beam-value) ;; in case you want to abort a misguided looong training asap
   (and load (load-model pname)) ; loads the .ind file into *ccg-grammar*
   (and load (load-supervision pname)) ; (Si Li) pairs loaded into *supervision-pairs-list*
   (set-training-parameters iterations (length *supervision-pairs-list*)(length *ccg-grammar*) alpha0 c)
   (inside-outside) ; redundantly parse all sup pairs once to create hash table of nonzero counts for every pair
                    ; we're trying to avoid recalculating counts since they dont change over iterations
-  (stochastic-gradient-ascent verbose debug))
+  (stochastic-gradient-ascent verbose debug)
+  (format t "~%Done. use (show-training/save-training) to see/save the results"))
 
-(defun update-model-extrapolate (pname alpha0 c &key (load nil))
+(defun update-model-extrapolate (pname alpha0 c &key (load nil)(verbose nil)(debug nil))
   "This version runs over supervision data 4 times,  then extrapolates. 
-   It finds 4 stages of the gradient, setting its direction and first magnitudes.
-   Then it runs Cabay & Jackson algorithm to find the gradient's limit for each parameter by
-   minimum polynomial extrapolation (MPE). It can be erroneous if stages fluctuate."
+  It finds 4 stages of the gradient, setting its direction and first 4 magnitudes.
+  Because of inside-outside count estimation, it is actually 5 passes over supervision data.
+  Then it runs Cabay & Jackson algorithm to find the gradient's limit for each parameter by
+  minimum polynomial extrapolation (MPE). It can be erroneous if stages fluctuate."
   (beam-value) ;; in case you want to abort 
   (and load (load-model pname)) ; loads the .ind file into *ccg-grammar*
   (and load (load-supervision pname)) ; (Si Li) pairs loaded into *supervision-pairs-list*
-  (set-training-parameters 4  (length *supervision-pairs-list*)(length *ccg-grammar*) alpha0 c) ; fixed iteration 
+  (set-training-parameters 4 (length *supervision-pairs-list*)(length *ccg-grammar*) alpha0 c 'x4) ; fixed iteration 
   (inside-outside) ; redundantly parse all sup pairs once to create hash table of nonzero counts for every pair
-                   ; we're trying to avoid recalculating counts since they dont change over iterations
-  (minimum-polynomial-extrapolate))
+  ; we're trying to avoid recalculating counts since they dont change over iterations
+  (stochastic-gradient-ascent verbose debug 'x4)
+  (extrapolate-parameters)
+  (format t "~%Done. use (show-training-xp/save-training-xp) to see/save the results"))
 
 (defun show-training ()
   "show the values of parameters per key before and after training"
@@ -3179,6 +3207,23 @@
 	      (- (get-key-param (nv-list-val 'KEY l)) (nv-list-val 'PARAM l)))))
   (format t "~%================================================"))
 
+(defun show-training-xp ()
+  "show the values of parameters per key before and after training"
+  (format t "The rule set used in the experiment:~%")
+  (switches)
+  (which-ccglab)
+  (format t "~%Training parameters: N = ~a alpha0 = ~a c = ~a n = ~a  " 
+	  *bign*  *alpha0* *c* *smalln*)
+  (beam-value)
+  (format t "~%Model parameters before and after training and extrapolation~%================================================")
+  (format t "~%key   lex             initial  final    diff ~%------------------------------------------------")
+  (dolist (l *ccg-grammar*)
+    (let ((feat (if (lex-rule-p (nv-list-val 'KEY l)) 'INDEX 'PHON)))
+      (format t "~%~5,,,A ~12,,,A ~8,,,F ~8,,,F  (~8,,,F)"
+	      (nv-list-val 'KEY l) (nv-list-val feat l) (nv-list-val 'PARAM l) (get-key-param-xp (nv-list-val 'KEY l))
+	      (- (get-key-param-xp (nv-list-val 'KEY l)) (nv-list-val 'PARAM l)))))
+  (format t "~%================================================"))
+
 (defun save-grammar (out)
   "this save is baroque to make it lisp reload-able"
   (with-open-file (s out :direction :output :if-exists :supersede) 
@@ -3192,6 +3237,13 @@
       (return-from save-training))
   (dolist (l *ccg-grammar*)
     (setf (nv-list-val 'PARAM l) (get-key-param (nv-list-val 'KEY l))))
+  (save-grammar out))
+
+(defun save-training-xp (out)
+  (or out (format t "please specify an output file to avoid unintentional overrides") 
+      (return-from save-training-xp))
+  (dolist (l *ccg-grammar*)
+    (setf (nv-list-val 'PARAM l) (get-key-param-xp (nv-list-val 'KEY l))))
   (save-grammar out))
 
 (defun z-score-grammar ()
@@ -3221,26 +3273,23 @@
 	  (format t "Done. Use save-grammar to save the changes in a file"))))))
 
 (defun show-lf ()
-  (setf *lfflag* t)(format t "All LFs will be shown~%"))
+  (setf *lfflag* t) (format t "All LFs will be shown~%"))
 
 (defun hide-lf ()
-  (setf *lfflag* nil)(format t "Only final LF will be shown~%"))
+  (setf *lfflag* nil) (format t "Only final LF will be shown~%"))
 
 (defun mklist (obj)
   (if (listp obj) obj (list obj)))
 
 (defun oov-off ()
-  (format t "OOV is reset (OOV errors reported)~%")
-  (setf *oovp* nil)
-  nil)
+  (setf *oovp* nil) (format t "OOV is reset (OOV errors reported)~%"))
 
 (defun oov-on ()
-  (setf *oovp* t)
-  (format t "OOV is set (OOV errors not reported)~%")
-  t)
+  (setf *oovp* t) (format t "OOV is set (OOV errors not reported)~%"))
 
 (defun reset-globals()
-  (format t "~%============= CCGlab things to note =================~%")
+  "resets the dynamic globals. If you change e.g. *epsilon* etc. just reload."
+  (format t "~%============= actived CCGlab options ================~%")
   (setf *print-readably* nil)
   (setf *print-pretty* t) 
   (setf *lex-rules-table* nil)
@@ -3249,19 +3298,20 @@
   (setf *cky-lf-hashtable-sum* 0.0)
   (setf *cky-input* nil) 
   (setf *cky-max* nil)
-  (show-lf)
-  (beam-off)
   (setf *cky-argmax-lf-max* nil) 
   (setf *cky-argmax-lf* nil)
   (setf *cky-lf* nil) 
   (setf *loaded-grammar* "")
   (setf *ccg-grammar*  nil)
   (setf *ccg-grammar-keys*  0)
+  (nf-parse-on)
+  (show-lf)
+  (beam-off)
   (oov-off)
-  (basic-ccg) ; turn experimental rules off by default
-  t)
+  (basic-ccg)) ; turn experimental rules off by default
 
-
+(defun almost-eq (x y)
+  (<= (abs (- x y)) *epsilon*))
 
 (defun read1 (fn)
   "reads one lisp object from file fn in one fell swoop"
