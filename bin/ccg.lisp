@@ -3285,7 +3285,7 @@
 
 (defun reset-globals()
   "resets the dynamic globals. If you change e.g. *epsilon* etc. just reload."
-  (format t "~%============= actived CCGlab options ================~%")
+  (format t "~%============= activated CCGlab options ==============~%")
   (setf *print-readably* nil)
   (setf *print-pretty* t) 
   (setf *lex-rules-table* nil)
