@@ -1,29 +1,37 @@
 #!/bin/bash
-# NOHUP THIS
-# to run big training sessions offline without hangups using train-nohup-sbcl.lisp
+# always NOHUP this script for your own safety.
 # DO NOT Ctrl-c/d/z the terminal for this. It's OK if it times out; your process
 #   continues to run, not OK
 #   if you interrupt, which goes into Lisp!!
-# -cem bozsahin, july 2018
+# -cem bozsahin, july 2019
+# to run big training sessions offline without hangups using train-nohup-sbcl.lisp
+# Now you can find gradients two ways, depending on $5: if it is a number then 
+#   that many iterations will be done; if it is 'xp' there will be 4 iterations then extrapolation.
 # $1 : sbcl dynamic space size in KBytes; 
 #      make sure /proc/sys/vm/max_map_count can handle this.
 #      That is a system wide limit; not just for sbcl.
 # $2 : sbcl garbage-collect cycle size in megabytes (> 51 to rise above default)
 # $3 : grammar name (without .ind extension; that's the one located and used) 
 # $4 : Must be nil if you DONT want to save the training, t otherwise
-# $5 : N              3 learning parameters (passes, learn rate, learn rate rate)
+# $5 : N (or xp)        3 learning parameters (passes, learn rate, learn rate rate)
 # $6 : alpha0
 # $7 : c
 # $8 : log file for the run (so that multi-thread runs dont override their results)
 #      This is also the reason why output .ind file has a long name to characterize
 #      the experiment.
 TRAIN=train-nohup-sbcl   # this function is in bin dir of ccglab
+N=$5  # whether this is iteration count or xp determines which trainer to call
+if [ $5 = xp ]; then
+	N=''  # not needed
+	TRAIN=$TRAIN-xp  # this is the function to call for extrapolation
+fi
 CCGLAB_LISP="`which sbcl` --dynamic-space-size $1"
 echo '==================='  >> $8
 echo "I am called as: $0 $@" >> $8
 echo "            at: `date`" >> $8
 echo "Log goes to   : $8" >> $8
 echo "I will call sbcl as: $CCGLAB_LISP" >> $8
-echo "It will call $TRAIN in $CCGLAB_HOME/bin/$TRAIN.lisp as: ($TRAIN \"$3\" $2 $4 \"$3.$8.nohupped.$5N.$6a.$7c.ind\" $5 $6 $7)" >> $8
+TRAINER="$TRAIN \"$3\" $2 $4 \"$3.$8.$5N.$6a.$7c.ind\" $N $6 $7"   # one less argument if $N is empty string
+echo "It will call $TRAIN in $CCGLAB_HOME/bin/train-nohup-sbcl.lisp as: ($TRAINER)" >> $8
 echo '===================' >> $8
-$RLWRAP $CCGLAB_LISP --load $CCGLAB_HOME/bin/suppress-style-warnings.lisp --load $LALR_HOME/lalrparser.lisp --load $CCGLAB_HOME/bin/ccg.lisp --load $CCGLAB_HOME/bin/$TRAIN.lisp --eval '(reset-globals)' --eval "($TRAIN \"$3\" $2 $4 \"$3.$8.nohupped.$5N.$6a.$7c.ind\" $5 $6 $7)" --eval '(sb-ext:exit)' >> $8
+$RLWRAP $CCGLAB_LISP --load $CCGLAB_HOME/bin/suppress-style-warnings.lisp --load $LALR_HOME/lalrparser.lisp --load $CCGLAB_HOME/bin/ccg.lisp --load $CCGLAB_HOME/bin/train-nohup-sbcl.lisp --eval '(reset-globals)' --eval "($TRAINER)" --eval '(sb-ext:exit)' >> $8

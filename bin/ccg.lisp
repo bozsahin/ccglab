@@ -527,7 +527,7 @@
   )
 
 (defun which-ccglab ()
-  "CCGlab, version 5.2.4")
+  "CCGlab, version 5.3")
 
 (defun set-lisp-system (lispsys)
   (case lispsys
@@ -3170,7 +3170,7 @@
   (stochastic-gradient-ascent verbose debug)
   (format t "~%Done. use (show-training/save-training) to see/save the results"))
 
-(defun update-model-extrapolate (pname alpha0 c &key (load nil)(verbose nil)(debug nil))
+(defun update-model-xp (pname alpha0 c &key (load nil)(verbose nil)(debug nil))
   "This version runs over supervision data 4 times,  then extrapolates. 
   It finds 4 stages of the gradient, setting its direction and first 4 magnitudes.
   Because of inside-outside count estimation, it is actually 5 passes over supervision data.
@@ -3375,7 +3375,7 @@
 	 probs cky-show-induction
 	 csle cky-show-lf-eqv 
 	 um update-model
-	 umx update-model-extrapolate
+	 umxp update-model-xp
 	 st show-training
 	 csnf cky-show-normal-forms
 	 crs cky-reveal-cell
