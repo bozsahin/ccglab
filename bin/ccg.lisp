@@ -77,8 +77,18 @@
     (if (or (almost-eq x2 x1) (almost-eq x3 x2) (almost-eq x4 x3))
       x4
       (/ (+ (/ (+ (* x2 x2x1 x4x3) (* x3 x3x2 x4x3)) den) x4)
-	 (+ 1.0 (/ (+ (* x2x1 x4x3) (* x3x2 x4x3)) den))))))
+	 (/ (+ (* x2x1 x4x3) (* x3x2 x4x3)) den)))))
 
+(defun mpe4+1 (x1 x2 x3 x4)
+  "this version includes c4=1.0 in the quotient"
+  (let* ((x2x1 (- x2 x1))
+	(x3x2 (- x3 x2))
+	(x4x3 (- x4 x3))
+	(den (+ (expt x2x1 2.0) (expt x3x2 2.0))))
+    (if (or (almost-eq x2 x1) (almost-eq x3 x2) (almost-eq x4 x3))
+      x4
+      (/ (+ (/ (+ (* x2 x2x1 x4x3) (* x3 x3x2 x4x3)) den) x4)
+	 (+ 1.0 (/ (+ (* x2x1 x4x3) (* x3x2 x4x3)) den))))))
 
 (defun make-dummy-lex-entries (phon)
   "two dummy entries-- @X/*@X and @X\*@X"
