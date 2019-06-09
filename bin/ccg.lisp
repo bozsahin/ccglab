@@ -552,9 +552,9 @@
       (format t "~%I am using run-program API as ~A does." *lispsys*)
       (format t "~%You may not be able to re-make .ded or .sup files if this is wrong."))))
 
-(defun flash-news (&optional (report nil))
+(defun flash-news (&optional (report t))
   (and report 
-       (format t "~%The Lisp system is now automatically ~%  detected (see above).~%Normal form parse is now available.")))
+       (format t "~%Gradient extrapolation now available.")))
 
 (defun welcome (&optional (lispsys *lispsys*))
   (status)
@@ -614,7 +614,7 @@
 (defun is-v (e) (cond ((consp e) nil)
 		      ((symbolp e) t) 
 		      ((constantp e) t)
-		      ((special-operator-p e) t)
+		      ;((special-operator-p e) t)
 		      (t nil)))
 (defun mk-l (v b) (list 'lam v b))
 (defun is-l (e) (and (consp e) (= (length e) 3) (equal 'lam (first e)) (is-v (second e))))
@@ -3387,11 +3387,13 @@
 	 um update-model
 	 umxp update-model-xp
 	 st show-training
+	 stxp show-training-xp
 	 csnf cky-show-normal-forms
 	 crs cky-reveal-cell
 	 cpp cky-pprint-probs
 	 sg  save-grammar
 	 savet save-training
+	 savetxp save-training-xp
 	 z z-score-grammar
 	 beta beta-normalize-outer
 	 ms make-supervision
