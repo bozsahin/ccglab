@@ -11,13 +11,13 @@
 (empty-message)
 
 (defun beam07-app ()
+  (setf *beam-exp* 0.7)
   (nf-parse-on)
   (beam-on)
-  (setf *beam-exp* 0.7)
   (setf *f-apply* t)   ;application
   (setf *b-apply* t)
-  (setf *f-comp* nil)  ;composition
-  (setf *b-comp* nil)
+  (setf *f-comp* t)  ;composition
+  (setf *b-comp* t)
   (setf *fx-comp* nil)
   (setf *bx-comp* nil)
   (setf *f-sub* nil  )   ;substitution
