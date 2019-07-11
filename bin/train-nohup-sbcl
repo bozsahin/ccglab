@@ -1,12 +1,7 @@
 #!/bin/bash
-# NOHUP THIS
-# this version takes 9 arguments! The last one is some switch you want to turn on or off (NF parse, beam, OOV flag)
-# NF parse is nf-parse-on (default) or nf-parse-off
-# beam is beam-on or beam-off (default)
-# OOV  is oov-on or oov-off (default)
-# Just pass the function WITHOUT parentheses.
+# This is nohupped by multi-thread. If you use it standalone, nohup it.
 # 
-# to run big training sessions offline without hangups using train-nohup-sbcl.lisp
+# to run big training sessions offline without hangups.
 # DO NOT Ctrl-c/d/z the terminal for this. It's OK if it times out; your process
 #   continues to run, not OK if you interrupt, which goes into Lisp!!
 # -cem bozsahin, july 2018
@@ -17,13 +12,14 @@
 # $2 : sbcl garbage-collect cycle size in megabytes (> 51 to rise above default)
 # $3 : grammar name (without .ind extension; that's the one located and used) 
 # $4 : Must be nil if you DONT want to save the training, t otherwise
-# $5 : N (or xp)              3 learning parameters (passes, learn rate, learn rate rate)
+# $5 : N (or xp)              first of 3 learning parameters (passes, learn rate, learn rate rate)
 # $6 : alpha0
 # $7 : c
 # $8 : log file for the run (so that multi-thread runs dont override their results)
 #      This is also the reason why output .ind file has a long name to characterize
 #      the experiment.
-# $9 : the switch function to call before training
+# $9 : the function to call before training (none called if not supplied)
+#      This is useful for initializing switches etc.
 TRAIN=train-nohup-sbcl    # this function is in bin dir of ccglab
 CCGLAB_LISP="`which sbcl` --dynamic-space-size $1"
 N=$5  # whether this is iteration count or xp determines which trainer to call
@@ -31,12 +27,12 @@ if [ $5 = xp ]; then
         N=''  # not needed
         TRAIN=$TRAIN-xp  # this is the function to call for extrapolation
 fi
-echo '==================='  >> $8
-echo "I am called as: $0 $@" >> $8
+echo '======= Log file ============'  >> $8.log
+echo "I am called as: $0 $@" >> $8.log
 echo "            at: `date`" >> $8
-echo "Log goes to   : $8" >> $8
-echo "I will call sbcl as: $CCGLAB_LISP" >> $8
+echo "Log goes to   : $8.log" >> $8.log
+echo "I will call sbcl as: $CCGLAB_LISP" >> $8.log
 TRAINER="$TRAIN \"$3\" $2 $4 \"$3.$8.$5N.$6a.$7c.ind\" $N $6 $7"   # one less argument if $N is empty string
-echo "It will call $TRAIN in $CCGLAB_HOME/bin/train-nohup-sbcl.lisp as: ($TRAINER)" >> $8
-echo '===================' >> $8
-$RLWRAP $CCGLAB_LISP --load $CCGLAB_HOME/bin/suppress-style-warnings.lisp --load $LALR_HOME/lalrparser.lisp --load $CCGLAB_HOME/bin/ccg.lisp --load $CCGLAB_HOME/bin/train-nohup-sbcl.lisp --eval '(reset-globals)' --eval "($9)" --eval "($TRAINER)" --eval '(sb-ext:exit)' >> $8
+echo "It will call $TRAIN in $CCGLAB_HOME/bin/init-sbcl.lisp as: ($TRAINER)" >> $8.log
+echo '=======          ============' >> $8.log
+$RLWRAP $CCGLAB_LISP --load $CCGLAB_HOME/bin/suppress-style-warnings.lisp --load $LALR_HOME/lalrparser.lisp --load $CCGLAB_HOME/bin/ccg.lisp --load $CCGLAB_HOME/bin/init-sbcl.lisp --load $CCGLAB_HOME/bin/.lisp --eval '(reset-globals)' --eval "($9)" --eval "($TRAINER)" --eval '(sb-ext:exit)' >> $8.log

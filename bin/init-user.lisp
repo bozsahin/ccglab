@@ -5,10 +5,7 @@
 ;; Feel free to change it anyway you like.
 ;; -cem bozsahin, 2019
 
-(defun empty-message ()
-  (format t "~%No user code loaded"))
 
-(empty-message)
 
 (defun beam07-app ()
   (setf *beam-exp* 0.7)
@@ -46,3 +43,5 @@
   (setf *fx3-comp* nil)
   (setf *bx3-comp* nil)
   )
+
+  (format t "~%init-user.lisp loaded")

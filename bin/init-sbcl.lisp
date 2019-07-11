@@ -28,3 +28,5 @@
     (show-training-xp)                  
     (and savep (save-training-xp out))  ; this is to save the grammar---session output always to names with nohup.out when called by ccglab.nohup
     ))
+
+(format t "~%init-sbcl.lisp loaded")

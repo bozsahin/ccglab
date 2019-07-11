@@ -10,4 +10,4 @@ else
 	load='-l'
 	eval='-e'
 fi
-$RLWRAP $CCGLAB_LISP $load $CCGLAB_HOME/bin/suppress-style-warnings.lisp $load $LALR_HOME/lalrparser.lisp $load $CCGLAB_HOME/bin/ccg.lisp $eval '(reset-globals)'  $eval "(welcome (quote $lispbinary))" $load $CCGLAB_HOME/bin/usercode-loads-last.lisp 
+$RLWRAP $CCGLAB_LISP $load $CCGLAB_HOME/bin/suppress-style-warnings.lisp $load $LALR_HOME/lalrparser.lisp $load $CCGLAB_HOME/bin/ccg.lisp $eval '(reset-globals)'  $eval "(welcome (quote $lispbinary))" $load $CCGLAB_HOME/bin/init-$lispbinary.lisp $load $CCGLAB_HOME/bin/init-user.lisp 

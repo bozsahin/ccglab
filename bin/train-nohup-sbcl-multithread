@@ -1,11 +1,10 @@
 #!/bin/bash
-# this one calls 9-argument trainer; see ccglab.nohup.sbcl.switch-controlled for explanation.
 # this is designed to  run different SBCLs on different cores with different data
-# $1: lists of experiments, one on each line. each must have 9 arguments to ccglab.nohup.sbcl.switch-controlled
+# $1: lists of experiments, one on each line. each must have 8 or 9 arguments to train-nohup-sbcl.
 #     we dont advise filenames with spaces and quotes; makes life difficult for bash
 #     no comments on dataset; just data. Number of threads needed is calculated from line count.
 #     It's good to have save option set to t in data otherwise you have to decipher garbled output.
 #     There is no telling in what order threads will be run.
 #  -- cem bozsahin, march 2019
 NP=`wc -l < $1`
-cat $1| nohup xargs -n 9 -P $NP ccglab.nohup.sbcl.switch-controlled
+cat $1| nohup xargs -n 9 -P $NP train-nohup-sbcl
