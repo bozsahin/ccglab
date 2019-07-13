@@ -1,9 +1,8 @@
 #!/bin/bash
 # This is nohupped by multi-thread. If you use it standalone, nohup it.
 # 
-# to run big training sessions offline without hangups.
-# DO NOT Ctrl-c/d/z the terminal for this. It's OK if it times out; your process
-#   continues to run, not OK if you interrupt, which goes into Lisp!!
+# DO NOT Ctrl-c/d/z the terminal for this. It's OK if terminal times out; your process
+#   continues to run; not OK if you interrupt, which goes into Lisp!!
 # -cem bozsahin, july 2018
 #
 # $1 : sbcl dynamic space size in KBytes; 
@@ -20,7 +19,7 @@
 #      the experiment.
 # $9 : the function to call before training (none called if not supplied)
 #      This is useful for initializing switches etc.
-TRAIN=train-nohup-sbcl    # this function is in bin dir of ccglab
+TRAIN=train-nohup-sbcl    # this function is in init-sbcl.lisp
 CCGLAB_LISP="`which sbcl` --dynamic-space-size $1"
 N=$5  # whether this is iteration count or xp determines which trainer to call
 if [ $5 = xp ]; then
