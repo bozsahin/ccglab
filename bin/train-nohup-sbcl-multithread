@@ -7,4 +7,4 @@
 #     There is no telling in what order threads will be run.
 #  -- cem bozsahin, march 2019
 NP=`wc -l < $1`
-cat $1| nohup xargs -n 9 -P $NP train-nohup-sbcl
+cat $1| nohup xargs -n 9 -P $NP trainer-sbcl
