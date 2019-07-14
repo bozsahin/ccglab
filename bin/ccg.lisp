@@ -2950,7 +2950,7 @@
 		     (p2 (second val))
 		     (p3 (third val))
 		     (p4 (fourth val)))
-		 (setf (machash key *training-hashtable-x4*) (append val (list (mpe4 p1 p2 p3 p4))))))
+		 (setf (machash key *training-hashtable-x4*) (append val (list (mpe4+1 p1 p2 p3 p4))))))
 	   *training-hashtable-x4*))
 
 (defun load-supervision (pname)
