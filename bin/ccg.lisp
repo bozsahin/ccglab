@@ -69,7 +69,7 @@
 ;; some common utilities
 
 (defun cabay-jackson (x1 x2 x3 x4)
-  "computes the Cabay & Jackson '76 limit for minimum polynomial extrapolation (mpe) from 4 stages of the gradient."
+  "computes the Cabay & Jackson '76 limit for minimum polynomial extrapolation (MPE) from 4 stages of the gradient."
   (let* ((x2x1 (- x2 x1))
 	 (x3x2 (- x3 x2))
 	 (a (+ x2x1 x3x2))
@@ -78,28 +78,6 @@
       x4
       (/ (+ (* x2 (/ x3x4 a)) (* x3 (/ x3x4 a)) x4)
 	 (+ 1.0 (/ (* 2.0 x3x4) a))))))
-
-(defun mpe4 (x1 x2 x3 x4)
-  "this one's wrong"
-  (let* ((x2x1 (- x2 x1))
-	(x3x2 (- x3 x2))
-	(x4x3 (- x4 x3))
-	(den (+ (expt x2x1 2.0) (expt x3x2 2.0))))
-    (if (or (almost-eq x2 x1) (almost-eq x3 x2) (almost-eq x4 x3))
-      x4
-      (/ (+ (/ (+ (* x2 x2x1 x4x3) (* x3 x3x2 x4x3)) den) x4)
-	 (/ (+ (* x2x1 x4x3) (* x3x2 x4x3)) den)))))
-
-(defun mpe4+1 (x1 x2 x3 x4)
-  "this version includes c4=1.0 in the quotient"
-  (let* ((x2x1 (- x2 x1))
-	(x3x2 (- x3 x2))
-	(x4x3 (- x4 x3))
-	(den (+ (expt x2x1 2.0) (expt x3x2 2.0))))
-    (if (or (almost-eq x2 x1) (almost-eq x3 x2) (almost-eq x4 x3))
-      x4
-      (/ (+ (/ (+ (* x2 x2x1 x4x3) (* x3 x3x2 x4x3)) den) x4)
-	 (+ 1.0 (/ (+ (* x2x1 x4x3) (* x3x2 x4x3)) den))))))
 
 (defun make-dummy-lex-entries (phon)
   "two dummy entries-- @X/*@X and @X\*@X"
@@ -548,7 +526,7 @@
   )
 
 (defun which-ccglab ()
-  "CCGlab, version 5.3")
+  "CCGlab, version 5.3.1")
 
 (defun set-lisp-system (lispsys)
   (case lispsys
