@@ -2961,7 +2961,11 @@
 		     (p2 (second val))
 		     (p3 (third val))
 		     (p4 (fourth val)))
+<<<<<<< HEAD
 		 (setf (machash key *training-hashtable-x4*) (append val (list (cabay-jackson p1 p2 p3 p4))))))
+=======
+		 (setf (machash key *training-hashtable-x4*) (append val (list (mpe4+1 p1 p2 p3 p4))))))
+>>>>>>> 25673d971fe5d890f84a1e7b28c3f957c65bb41a
 	   *training-hashtable-x4*))
 
 (defun load-supervision (pname)
