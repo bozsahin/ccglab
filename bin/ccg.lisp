@@ -68,8 +68,19 @@
 
 ;; some common utilities
 
-(defun mpe4 (x1 x2 x3 x4)
+(defun cabay-jackson (x1 x2 x3 x4)
   "computes the Cabay & Jackson '76 limit for minimum polynomial extrapolation (mpe) from 4 stages of the gradient."
+  (let* ((x2x1 (- x2 x1))
+	 (x3x2 (- x3 x2))
+	 (a (+ x2x1 x3x2))
+	 (x3x4 (- x3 x4)))
+    (if (or (almost-eq x2 x1) (almost-eq x3 x2) (almost-eq x4 x3))
+      x4
+      (/ (+ (* x2 (/ x3x4 a)) (* x3 (/ x3x4 a)) x4)
+	 (+ 1.0 (/ (* 2.0 x3x4) a))))))
+
+(defun mpe4 (x1 x2 x3 x4)
+  "this one's wrong"
   (let* ((x2x1 (- x2 x1))
 	(x3x2 (- x3 x2))
 	(x4x3 (- x4 x3))
@@ -2950,7 +2961,7 @@
 		     (p2 (second val))
 		     (p3 (third val))
 		     (p4 (fourth val)))
-		 (setf (machash key *training-hashtable-x4*) (append val (list (mpe4 p1 p2 p3 p4))))))
+		 (setf (machash key *training-hashtable-x4*) (append val (list (cabay-jackson p1 p2 p3 p4))))))
 	   *training-hashtable-x4*))
 
 (defun load-supervision (pname)
