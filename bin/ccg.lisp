@@ -54,7 +54,7 @@
 
 ;; Some reader macros and others are defined first to avoid complaints from Lisp compilers. 
 ;; SBCL can be particularly chatty.
- 
+
 (set-macro-character #\!     ; turns !c to "c". Used for LF constants.
   #'(lambda (s char)
       (declare (ignore char))
@@ -68,7 +68,7 @@
 
 ;; some common utilities
 
-(defun cabay-jackson (x1 x2 x3 x4)
+(defun mpe (x1 x2 x3 x4)
   "computes the Cabay & Jackson '76 limit for minimum polynomial extrapolation (MPE) from 4 stages of the gradient."
   (let* ((x2x1 (- x2 x1))
 	 (x3x2 (- x3 x2))
@@ -78,6 +78,12 @@
       x4
       (/ (+ (* x2 (/ x3x4 a)) (* x3 (/ x3x4 a)) x4)
 	 (+ 1.0 (/ (* 2.0 x3x4) a))))))
+
+(defmacro cabay-jackson (p1 p2 p3 p4)
+  "safeguard MPE calls because of possibility for antilimit (divergence); see Cabay-Jackson 1976"
+  `(handler-case (mpe ,p1 ,p2 ,p3 ,p4)
+             (division-by-zero (c) (progn (format t "Warning! Antilimit in MPE because of ~a~%" c)
+					  (/ most-positive-short-float 2.0)))))
 
 (defun make-dummy-lex-entries (phon)
   "two dummy entries-- @X/*@X and @X\*@X"
