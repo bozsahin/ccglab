@@ -46,7 +46,7 @@
       `(defparameter ,nam ,val))))  ; no defvars in this dynamic env!
 
 (defun ccglab-globals ()
-  (dolist (g (stable-sort *ccglab-globals* #'string<))
+  (dolist (g (sort (copy-seq *ccglab-globals*) #'string<))
     (format t "~%~a" g)))
 
 ;; a path language layer for multiple gethashes, to write linearly for visibility
