@@ -288,6 +288,8 @@
 ;;; globals
 ;;; =======
 
+(defparameter *type-raised-p* nil) ; is the grammar compiled out for type raising (nil/t)?
+(defparameter *type-raise-targets* nil) ; the list of basic cats to type raise (i.e. argument cats list)
 (defparameter *ccglab-reserved* '(tag phon morph syn sem param insyn insem outsyn outsem bcat dir feats modal
 				  left right solution result arg index lex bconst key id)) ; reserved words
 (defparameter *lispsys* nil)   ; the lisp system you are using; detected automatically by ccglab script
@@ -532,7 +534,7 @@
   )
 
 (defun which-ccglab ()
-  "CCGlab, version 5.3.1")
+  "CCGlab, version 5.4")
 
 (defun set-lisp-system (lispsys)
   (case lispsys
@@ -549,7 +551,7 @@
 
 (defun flash-news (&optional (report t))
   (and report 
-       (format t "~%Gradient extrapolation now available.")))
+       (format t "~%Gradient extrapolation now available.~%Type-raise compiling now available.")))
 
 (defun welcome (&optional (lispsys *lispsys*))
   (status)
@@ -574,6 +576,10 @@
   (setf *beam-exp* val)
   (beam-value))
 
+;;; ==========================
+;;; user controllable switches 
+;;; ==========================
+
 (defun beam-off ()
   (setf *beamp* nil)(beam-value))
 
@@ -585,6 +591,31 @@
 
 (defun nf-parse-on ()
   (setf *nf-parse* t)(nf-parse-value))
+
+(defun oov-off ()
+  (setf *oovp* nil) (format t "OOV is reset (OOV errors reported)~%"))
+
+(defun oov-on ()
+  (setf *oovp* t) (format t "OOV is set (OOV errors not reported)~%"))
+
+(defun type-raise-off ()
+  (setf *type-raised-p* nil))
+
+(defun type-raise-on ()
+  (setf *type-raised-p* t)
+  (or *type-raise-targets* (format t "~%Your list of arguments to type raise is nil.~%Call type-raise-targets to set it.")))
+
+(defun type-raise-targets (targets)
+  (setf *type-raise-targets* targets)
+  (type-raise-on))
+
+(defun show-lf ()
+  (setf *lfflag* t) (format t "All LFs will be shown~%"))
+
+(defun hide-lf ()
+  (setf *lfflag* nil) (format t "Only final LF will be shown~%"))
+
+;; ==========================
 
 (defun beamer ()
   "use this to set beam only after a parse so that *cky-nparses* is known."
@@ -2596,6 +2627,9 @@
 				     (copy-hashtable (machash 'SYN ht1))))
          newht)))
 
+(defmacro lowest-arg-type-p (synht)
+  `(member (machash 'BCAT 'SYN ,synht) *type-raise-targets*))
+
 (defun ccg-combine (ht1 ht2 lex1 lex2 coord1 coord2)
   "Short-circuit evaluates ccg rules one by one, to left term (ht1) and right term (ht2), which are hashtables.
   Returns the result as a hashtable.
@@ -2614,13 +2648,18 @@
   Reminder to code developers: every combination creates a new CKY hashtable entry, and as many
   complex result hashtables as there are slashes in the result."
   (cond ((and (basicp-hash (machash 'SYN ht1))
-	      (basicp-hash (machash 'SYN ht2)))  ; both are basic cats, the only non-combinable case
+	      (basicp-hash (machash 'SYN ht2)))  ; both are basic cats, a non-combinable case
 	 (return-from ccg-combine nil))
 	((and (complexp-hash ht1)
 	      (complexp-hash ht2)
 	      (eql (machash 'DIR 'SYN ht1) 'BS)
-	      (eql (machash 'DIR 'SYN ht2) 'FS)) ; the only case which no rule can combine 
-	 (return-from ccg-combine nil)))
+	      (eql (machash 'DIR 'SYN ht2) 'FS)) ; the only functional case which no rule can combine 
+	 (return-from ccg-combine nil))
+	((and *type-raised-p* (basicp-hash (machash 'SYN ht1)) (lowest-arg-type-p ht1))
+	 (return-from ccg-combine nil))          ; if on, implements all args are type-raised idea, on ht1
+	((and *type-raised-p* (basicp-hash (machash 'SYN ht2)) (lowest-arg-type-p ht2))
+	 (return-from ccg-combine nil))          ; if on, implements all args are type-raised idea, on ht2
+	)
   (or (and *f-apply* (f-apply ht1 ht2 lex2 coord2)) ; application -- the only relevant case for lex slash
       (and *b-apply* (b-apply ht1 ht2 lex1 coord1))
       (and *f-comp* (f-comp ht1 ht2))           ; composition
@@ -3273,20 +3312,9 @@
 	  (format t "Max z-score = ~A, Min z-score = ~A~%" maxw minw)
 	  (format t "Done. Use save-grammar to save the changes in a file"))))))
 
-(defun show-lf ()
-  (setf *lfflag* t) (format t "All LFs will be shown~%"))
-
-(defun hide-lf ()
-  (setf *lfflag* nil) (format t "Only final LF will be shown~%"))
 
 (defun mklist (obj)
   (if (listp obj) obj (list obj)))
-
-(defun oov-off ()
-  (setf *oovp* nil) (format t "OOV is reset (OOV errors reported)~%"))
-
-(defun oov-on ()
-  (setf *oovp* t) (format t "OOV is set (OOV errors not reported)~%"))
 
 (defun reset-globals()
   "resets the dynamic globals. If you change e.g. *epsilon* etc. just reload."
