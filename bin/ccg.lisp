@@ -35,6 +35,20 @@
 ;;;; == Lisp Top level needs and some general utilities
 ;;;; ==================================================
 
+(defparameter *ccglab-globals* nil) ; to keep track of all globals defined by defccglabglobal macro
+                                    ; i seem to want to define more and more and lose track
+
+(defmacro defccglabglobal (nam val)
+  (if (member nam *ccglab-globals*)
+    (format t "~%defccglab warning! the name is already defined: ~A" nam)
+    (progn 
+      (push nam *ccglab-globals*)
+      `(defparameter ,nam ,val))))  ; no defvars in this dynamic env!
+
+(defun ccglab-globals ()
+  (dolist (g (stable-sort *ccglab-globals* #'string<))
+    (format t "~%~a" g)))
+
 ;; a path language layer for multiple gethashes, to write linearly for visibility
 
 (defmacro machash (&rest path)
@@ -268,9 +282,9 @@
 ;;
 ;; Thanks to Juanjo of stackoverflow
 
-(defparameter *error-message* 'LOAD_ERROR)
-(defparameter *error-tag* 'loaderror)
-(defparameter *error* nil)
+(defccglabglobal *error-message* 'LOAD_ERROR)
+(defccglabglobal *error-tag* 'loaderror)
+(defccglabglobal *error* nil)
 
 (defun capture-error (condition)
   (setf *error*
@@ -288,91 +302,91 @@
 ;;; globals
 ;;; =======
 
-(defparameter *type-raised-p* nil) ; is the grammar compiled out for type raising (nil/t)?
-(defparameter *type-raise-targets* nil) ; the list of basic cats to type raise (i.e. argument cats list)
-(defparameter *ccglab-reserved* '(tag phon morph syn sem param insyn insem outsyn outsem bcat dir feats modal
+(defccglabglobal *type-raised-p* nil) ; is the grammar compiled out for type raising (nil/t)?
+(defccglabglobal *type-raise-targets* nil) ; the list of basic cats to type raise (i.e. argument cats list)
+(defccglabglobal *ccglab-reserved* '(tag phon morph syn sem param insyn insem outsyn outsem bcat dir feats modal
 				  left right solution result arg index lex bconst key id)) ; reserved words
-(defparameter *lispsys* nil)   ; the lisp system you are using; detected automatically by ccglab script
-(defparameter *singletons* 0)  ; singleton (string constant) category is potentially dangerous, esp. empty ones!
-(defparameter *hash-data-size* 65536)  ; for CKY and LF argmax tables. Make IT REALLY BIG for training sets
+(defccglabglobal *lispsys* nil)   ; the lisp system you are using; detected automatically by ccglab script
+(defccglabglobal *singletons* 0)  ; singleton (string constant) category is potentially dangerous, esp. empty ones!
+(defccglabglobal *hash-data-size* 65536)  ; for CKY and LF argmax tables. Make IT REALLY BIG for training sets
                                        ; involving LOOOONG sentences.
 				       ; default is 64K entries
 ;; the following two tables are created only once, and cleared before every parse. Change the variable above and reload ccglab
 ;; for very long examples and large unpredictable training sets
 
-(defparameter *cky-hashtable* (make-cky-hashtable *hash-data-size*))    ; this is the CKY table keyed by cky loop indices
-(defparameter *cky-lf-hashtable* (make-lf-hashtable *hash-data-size*)) ; All LFs for the solution in the cky table.
+(defccglabglobal *cky-hashtable* (make-cky-hashtable *hash-data-size*))    ; this is the CKY table keyed by cky loop indices
+(defccglabglobal *cky-lf-hashtable* (make-lf-hashtable *hash-data-size*)) ; All LFs for the solution in the cky table.
 
 (setf *print-readably* nil) ; In case you want to look at partial results. Turn it off to avoid print errors.
                             ; (Hard to believe but there is no consistent set of print variable values in CL that
                             ; would allow us to print lists, functions and hashtables readably at the same time.)
 (setf *print-pretty* t)     ; NB: defvar does not reset when you re-load this file.
-(defparameter *lex-rules-table* nil)  ; this table is global to avoid loading/searching it everytime we parse.
-(defparameter *cky-input* nil)        ; current input which engendered the cky-hashtable entries.  
-(defparameter *cky-max* nil)          ; current highest ranking result cell in cky table.
+(defccglabglobal *lex-rules-table* nil)  ; this table is global to avoid loading/searching it everytime we parse.
+(defccglabglobal *cky-input* nil)        ; current input which engendered the cky-hashtable entries.  
+(defccglabglobal *cky-max* nil)          ; current highest ranking result cell in cky table.
 
 ;; for beam search in inside-outside computation 
-(defparameter *beamp* t)            ; to beam or not to beam (not much of a question for big data)
-(defparameter *cky-nparses* 0)      ; *beam* is that number exp'd to *beam-exp*
-(defparameter *training-sorted-solutions-list* nil) ; to get out of loops by beam
-(defparameter *beam* 0)             ; beam width, determined by number of solutions
-(defparameter *beam-exp* 0.9)       ; must be 0 <= x <= 1 . Larger means wider beam
+(defccglabglobal *beamp* t)            ; to beam or not to beam (not much of a question for big data)
+(defccglabglobal *cky-nparses* 0)      ; *beam* is that number exp'd to *beam-exp*
+(defccglabglobal *training-sorted-solutions-list* nil) ; to get out of loops by beam
+(defccglabglobal *beam* 0)             ; beam width, determined by number of solutions
+(defccglabglobal *beam-exp* 0.9)       ; must be 0 <= x <= 1 . Larger means wider beam
 
 ;; for NF parse, Eisner 1996-style---eliminate them at the source (no cky-entry)
-(defparameter *nf-parse* t)
-(defparameter *bc* 'BC)
-(defparameter *fc* 'FC)
-(defparameter *ot* 'OT)
-(defparameter *forward-tag-set* (list *bc* *ot*))
-(defparameter *backward-tag-set* (list *fc* *ot*))
+(defccglabglobal *nf-parse* t)
+(defccglabglobal *bc* 'BC)
+(defccglabglobal *fc* 'FC)
+(defccglabglobal *ot* 'OT)
+(defccglabglobal *forward-tag-set* (list *bc* *ot*))
+(defccglabglobal *backward-tag-set* (list *fc* *ot*))
 
 ;; more globals
-(defparameter *epsilon* 0.001)        ; largest difference to be considered equal
-(defparameter *cky-lf-hashtable-sum* 0.0) ; sum of all result LFs inner product
-(defparameter *cky-argmax-lf* nil)    ; list of solutions for most likely LF
-(defparameter *cky-argmax-lf-max* nil); current highest-ranking cell in cky table for the most likely LF.
-(defparameter *cky-lf* nil)           ; LF with the argmax
-(defparameter *ccg-grammar* nil)      ; current ccg grammar, as a list of Lisp-translated lex specs
-(defparameter *ccg-grammar-keys* nil) ; unique keys for each entry; from 1 to n
-(defparameter *loaded-grammar* nil)   ; The source of currently loaded grammar
+(defccglabglobal *epsilon* 0.001)        ; largest difference to be considered equal
+(defccglabglobal *cky-lf-hashtable-sum* 0.0) ; sum of all result LFs inner product
+(defccglabglobal *cky-argmax-lf* nil)    ; list of solutions for most likely LF
+(defccglabglobal *cky-argmax-lf-max* nil); current highest-ranking cell in cky table for the most likely LF.
+(defccglabglobal *cky-lf* nil)           ; LF with the argmax
+(defccglabglobal *ccg-grammar* nil)      ; current ccg grammar, as a list of Lisp-translated lex specs
+(defccglabglobal *ccg-grammar-keys* nil) ; unique keys for each entry; from 1 to n
+(defccglabglobal *loaded-grammar* nil)   ; The source of currently loaded grammar
 
-(defparameter *lfflag* t) ; whether to show intermediate LFs in the output (final one always shown)
-(defparameter *abv* nil) ; list of shortcuts for common functions-- see the bottom
-(defparameter *oovp* nil) ; set it to t to avoid out of vocabulary errors---two entries with uknown LFs will be created 
+(defccglabglobal *lfflag* t) ; whether to show intermediate LFs in the output (final one always shown)
+(defccglabglobal *abv* nil) ; list of shortcuts for common functions-- see the bottom
+(defccglabglobal *oovp* nil) ; set it to t to avoid out of vocabulary errors---two entries with uknown LFs will be created 
                           ;  to get partial parses as much as possible in a knowledge-poor way.
 
 ;; rule switches
-(defparameter *f-apply* t)   ;application
-(defparameter *b-apply* t)
-(defparameter *f-comp* t  )  ;composition
-(defparameter *b-comp* t)
-(defparameter *fx-comp* t)
-(defparameter *bx-comp* t)
-(defparameter *f-sub* t  )   ;substitution
-(defparameter *b-sub* t)
-(defparameter *fx-sub* t)
-(defparameter *bx-sub* t)
-(defparameter *f-subbar* nil ) ;substitution bar (aka lost combinator)
-(defparameter *b-subbar* nil)
-(defparameter *fx-subbar* nil)
-(defparameter *bx-subbar* nil)
-(defparameter *f-subcomp* nil );subcomposition (i.e. D)
-(defparameter *b-subcomp* nil)
-(defparameter *fx-subcomp* nil)
-(defparameter *bx-subcomp* nil)
-(defparameter *f2-subcomp* nil) ; D^2
-(defparameter *f2-comp* t )     ; B^2
-(defparameter *b2-comp* t)
-(defparameter *fx2-comp* t)
-(defparameter *bx2-comp* t)
-(defparameter *f2-sub* t )   ;S'' (not S^2 of Curry)
-(defparameter *b2-sub* t)
-(defparameter *fx2-sub* t)
-(defparameter *bx2-sub* t)
-(defparameter *f3-comp* t )  ;B^3
-(defparameter *b3-comp* t)
-(defparameter *fx3-comp* t)
-(defparameter *bx3-comp* t)
+(defccglabglobal *f-apply* t)   ;application
+(defccglabglobal *b-apply* t)
+(defccglabglobal *f-comp* t  )  ;composition
+(defccglabglobal *b-comp* t)
+(defccglabglobal *fx-comp* t)
+(defccglabglobal *bx-comp* t)
+(defccglabglobal *f-sub* t  )   ;substitution
+(defccglabglobal *b-sub* t)
+(defccglabglobal *fx-sub* t)
+(defccglabglobal *bx-sub* t)
+(defccglabglobal *f-subbar* nil ) ;substitution bar (aka lost combinator)
+(defccglabglobal *b-subbar* nil)
+(defccglabglobal *fx-subbar* nil)
+(defccglabglobal *bx-subbar* nil)
+(defccglabglobal *f-subcomp* nil );subcomposition (i.e. D)
+(defccglabglobal *b-subcomp* nil)
+(defccglabglobal *fx-subcomp* nil)
+(defccglabglobal *bx-subcomp* nil)
+(defccglabglobal *f2-subcomp* nil) ; D^2
+(defccglabglobal *f2-comp* t )     ; B^2
+(defccglabglobal *b2-comp* t)
+(defccglabglobal *fx2-comp* t)
+(defccglabglobal *bx2-comp* t)
+(defccglabglobal *f2-sub* t )   ;S'' (not S^2 of Curry)
+(defccglabglobal *b2-sub* t)
+(defccglabglobal *fx2-sub* t)
+(defccglabglobal *bx2-sub* t)
+(defccglabglobal *f3-comp* t )  ;B^3
+(defccglabglobal *b3-comp* t)
+(defccglabglobal *fx3-comp* t)
+(defccglabglobal *bx3-comp* t)
 
 ;; NF control
 (defmacro backward-nf ()
@@ -1252,8 +1266,8 @@
 ;;  NB2: As much as I wanted to keep CCG's / and \ in the data, Lisp readers do
 ;;       implementation-dependent stuff with special symbol \, even if you enclose it within '|'s. 
 ;;       The parser will replace them with FS and BS. We live in sad times.
-  (defparameter grammar 
-    '((gram    --> start              #'(lambda (start) (list 'defparameter '*ccg-grammar* `(quote ,start))))
+  (defccglabglobal grammar 
+    '((gram    --> start              #'(lambda (start) (list 'defccglabglobal '*ccg-grammar* `(quote ,start))))
       (start   --> start lex END      #'(lambda (start lex END) (declare (ignore END))(append start (list lex))))
       (start   --> lex END            #'(lambda (lex END)(declare (ignore END))(list lex)))
       (lex     --> ID mtag SPECOP cat #'(lambda (ID mtag SPECOP cat)
@@ -1334,10 +1348,10 @@
 					  (identity lterm)))  ; there can be lots of inner lambdas as long as parenthesised
       (body    --> ID                 #'(lambda (ID)(cadr ID)))
       ))
-  (defparameter lexforms '(VALFS ID MODAL END VALBS 
+  (defccglabglobal lexforms '(VALFS ID MODAL END VALBS 
 				 VALDOT SPECOP COLON ARROW
 				 LP RP LB RB COMMA EQOP))
-  (defparameter lexicon '((|/| VALFS)
+  (defccglabglobal lexicon '((|/| VALFS)
 			  (\\ VALBS)
 			  (\^ MODAL)
 			  (\* MODAL)
@@ -1357,7 +1371,7 @@
 			  ))
   ;; if you change the end-marker, change its hardcopy above in lexicon above as well.
   ;; (because LALR parser does not evaluate its lexicon symbols---sorry.)
-  (defparameter *ENDMARKER* '$)  
+  (defccglabglobal *ENDMARKER* '$)  
   ) ; of tranformer/ccg
 
 ;;; to automatically generate the parser by LALR parser generator
@@ -1404,7 +1418,7 @@
 ;; LALR parser demands lexical insertion by a pre-terminal for every terminal
 ;; (i.e. do not use constants in the RHSs of lalr rules)
 ;;  NB: We must have ID tag in 'lexforms' although there is nothing with that tag in the lexicon!
-  (defparameter grammar 
+  (defccglabglobal grammar 
     '((gram    --> start              #'(lambda (start) (identity start)))
       (start   --> start lex END      #'(lambda (start lex END) (declare (ignore END))(append start (list lex))))
       (start   --> lex END            #'(lambda (lex END)(declare (ignore END))(list lex)))
@@ -1431,10 +1445,10 @@
 					  (identity lterm)))  ; there can be lots of inner lambdas as long as parenthesised
       (body    --> ID                 #'(lambda (ID)(cadr ID)))
       ))
-  (defparameter lexforms '(ID END VALBS 
+  (defccglabglobal lexforms '(ID END VALBS 
 				 VALDOT COLON 
 				 LP RP))
-  (defparameter lexicon '((|.| VALDOT)
+  (defccglabglobal lexicon '((|.| VALDOT)
 			  (\\ VALBS)
 			  (|,| COMMA)
 			  (\; END)
@@ -1445,7 +1459,7 @@
 			  ))
   ;; if you change the end-marker, change its hardcopy above in lexicon above as well.
   ;; (because LALR parser does not evaluate its lexicon symbols---sorry.)
-  (defparameter *ENDMARKER* '$)  
+  (defccglabglobal *ENDMARKER* '$)  
   )
 
 (defun make-transformer/sup ()
@@ -2965,15 +2979,15 @@
 ;; We recommend you write modeling code as add-on, rather than plugging it in here.
 ;; NB the manual for a suggested workflow.
 
-(defparameter *bign* 0) ; N in Z&C05 -- number of iterations over training data
-(defparameter *supervision-pairs-list* nil) ; set of (Si Li) pairs
-(defparameter *smalln* 0) ; size of (Si,Li).  n in Z&C05 -- number of supervision data
-(defparameter *n-paramaters* 0) ; size of training grammar (which is the number of parameters)
-(defparameter *alpha0* 1.0)       ; alpha_0 of Z&C05 - learning rate parameter
-(defparameter *c* 1.0)            ; c of Z&C05       - learning rate parameter
-(defparameter *training-hashtable* nil); parameter vector x partial derivative hash table, for training
-(defparameter *training-hashtable-x4* nil); for extrapolation from 4 runs over training data
-(defparameter *training-non0-hashtable* nil); parameter vector and current nonzero counts
+(defccglabglobal *bign* 0) ; N in Z&C05 -- number of iterations over training data
+(defccglabglobal *supervision-pairs-list* nil) ; set of (Si Li) pairs
+(defccglabglobal *smalln* 0) ; size of (Si,Li).  n in Z&C05 -- number of supervision data
+(defccglabglobal *n-paramaters* 0) ; size of training grammar (which is the number of parameters)
+(defccglabglobal *alpha0* 1.0)       ; alpha_0 of Z&C05 - learning rate parameter
+(defccglabglobal *c* 1.0)            ; c of Z&C05       - learning rate parameter
+(defccglabglobal *training-hashtable* nil); parameter vector x partial derivative hash table, for training
+(defccglabglobal *training-hashtable-x4* nil); for extrapolation from 4 runs over training data
+(defccglabglobal *training-non0-hashtable* nil); parameter vector and current nonzero counts
 
 (defun extrapolate-parameters ()
   "runs over every parameter trained 4 times---input val is a 4-item dotted lists of (param . derivative), 
@@ -3267,7 +3281,7 @@
 (defun save-grammar (out)
   "this save is baroque to make it lisp reload-able"
   (with-open-file (s out :direction :output :if-exists :supersede) 
-    (format s "(defparameter *ccg-grammar*~%")
+    (format s "(defccglabglobal *ccg-grammar*~%")
     (format s "'")
     (prin1 *ccg-grammar* s)
     (format s ")~%")))
@@ -3360,7 +3374,7 @@
 	 (mapcar 
 	   #'car
 	   (mapcar  ;returns list of grammars
-	     ; 1st: defparameter 2nd:grammar name 3rd: (quote grammar)
+	     ; 1st: defccglabglobal 2nd:grammar name 3rd: (quote grammar)
 	     #'(lambda (m) (second (third (read1 m)))) 
 	     models)))))
 
