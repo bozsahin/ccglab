@@ -1266,7 +1266,7 @@
 ;;  NB2: As much as I wanted to keep CCG's / and \ in the data, Lisp readers do
 ;;       implementation-dependent stuff with special symbol \, even if you enclose it within '|'s. 
 ;;       The parser will replace them with FS and BS. We live in sad times.
-  (defparameter grammar 
+  (defccglab grammar 
     '((gram    --> start              #'(lambda (start) (list 'defparameter '*ccg-grammar* `(quote ,start))))
       (start   --> start lex END      #'(lambda (start lex END) (declare (ignore END))(append start (list lex))))
       (start   --> lex END            #'(lambda (lex END)(declare (ignore END))(list lex)))
@@ -1348,10 +1348,10 @@
 					  (identity lterm)))  ; there can be lots of inner lambdas as long as parenthesised
       (body    --> ID                 #'(lambda (ID)(cadr ID)))
       ))
-  (defparameter lexforms '(VALFS ID MODAL END VALBS 
+  (defccglab lexforms '(VALFS ID MODAL END VALBS 
 				 VALDOT SPECOP COLON ARROW
 				 LP RP LB RB COMMA EQOP))
-  (defparameter lexicon '((|/| VALFS)
+  (defccglab lexicon '((|/| VALFS)
 			  (\\ VALBS)
 			  (\^ MODAL)
 			  (\* MODAL)
@@ -1371,7 +1371,7 @@
 			  ))
   ;; if you change the end-marker, change its hardcopy above in lexicon above as well.
   ;; (because LALR parser does not evaluate its lexicon symbols---sorry.)
-  (defparameter *ENDMARKER* '$)  
+  (defccglab *ENDMARKER* '$)  
   ) ; of tranformer/ccg
 
 ;;; to automatically generate the parser by LALR parser generator
@@ -1418,7 +1418,7 @@
 ;; LALR parser demands lexical insertion by a pre-terminal for every terminal
 ;; (i.e. do not use constants in the RHSs of lalr rules)
 ;;  NB: We must have ID tag in 'lexforms' although there is nothing with that tag in the lexicon!
-  (defparameter grammar 
+  (defccglab grammar 
     '((gram    --> start              #'(lambda (start) (identity start)))
       (start   --> start lex END      #'(lambda (start lex END) (declare (ignore END))(append start (list lex))))
       (start   --> lex END            #'(lambda (lex END)(declare (ignore END))(list lex)))
@@ -1445,10 +1445,10 @@
 					  (identity lterm)))  ; there can be lots of inner lambdas as long as parenthesised
       (body    --> ID                 #'(lambda (ID)(cadr ID)))
       ))
-  (defparameter lexforms '(ID END VALBS 
+  (defccglab lexforms '(ID END VALBS 
 				 VALDOT COLON 
 				 LP RP))
-  (defparameter lexicon '((|.| VALDOT)
+  (defccglab lexicon '((|.| VALDOT)
 			  (\\ VALBS)
 			  (|,| COMMA)
 			  (\; END)
@@ -1459,7 +1459,7 @@
 			  ))
   ;; if you change the end-marker, change its hardcopy above in lexicon above as well.
   ;; (because LALR parser does not evaluate its lexicon symbols---sorry.)
-  (defparameter *ENDMARKER* '$)  
+  (defccglab *ENDMARKER* '$)  
   )
 
 (defun make-transformer/sup ()
