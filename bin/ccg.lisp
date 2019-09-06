@@ -37,19 +37,33 @@
 
 (defparameter *ccglab-globals* nil) ; to keep track of all globals defined by defccglab macro
                                     ; i seem to want to define more and more and lose track
+(defparameter *ccglab-switches* nil) ; to keep track of all on/off switches
+                                    ; i seem to want to define more and more and lose track
 
 (defmacro defccglab (nam val)
   (if (member nam *ccglab-globals*)
-    (format t "~%defccglab warning! the name is already defined: ~A" nam)
+    (format t "~%defccglab warning! the name is RE-defined: ~A" nam)
     (push nam *ccglab-globals*))
   `(defparameter ,nam ,val))  ; do the def in any case 
                               ; no defvars in this dynamic env!
 
-(defun ccglab-globals ()
+(defmacro defswitch (nam val)
+  (if (member nam *ccglab-switches*)
+    (format t "~%defswitch warning! the name is RE-defined: ~A" nam)
+    (push nam *ccglab-switches*)) ; do the def in any case 
+  `(defparameter ,nam ,val))      ; no defvars in this dynamic env!
+
+(defun globals ()
   (dolist (g (sort (copy-seq *ccglab-globals*) #'string<))
     (format t "~%~a" g)))
 
+(defun onoff ()
+  (dolist (g (sort (copy-seq *ccglab-switches*) #'string<))
+    (format t "~%~a : ~a" g (eval g))))
+
+;; -----------------
 ;; a path language layer for multiple gethashes, to write linearly for visibility
+;; -----------------
 
 (defmacro machash (&rest path)
   "Instead of native (gethash 'F1 (gethash 'F2 ht)), we write (machash 'F1 'F2 ht)
@@ -302,7 +316,7 @@
 ;;; globals
 ;;; =======
 
-(defccglab *type-raised-p* nil) ; is the grammar compiled out for type raising (nil/t)?
+(defswitch *type-raised-p* nil) ; is the grammar compiled out for type raising (nil/t)?
 (defccglab *type-raise-targets* nil) ; the list of basic cats to type raise (i.e. argument cats list)
 (defccglab *ccglab-reserved* '(tag phon morph syn sem param insyn insem outsyn outsem bcat dir feats modal
 				  left right solution result arg index lex bconst key id)) ; reserved words
@@ -326,14 +340,14 @@
 (defccglab *cky-max* nil)          ; current highest ranking result cell in cky table.
 
 ;; for beam search in inside-outside computation 
-(defccglab *beamp* t)            ; to beam or not to beam (not much of a question for big data)
+(defswitch *beamp* t)            ; to beam or not to beam (not much of a question for big data)
 (defccglab *cky-nparses* 0)      ; *beam* is that number exp'd to *beam-exp*
 (defccglab *training-sorted-solutions-list* nil) ; to get out of loops by beam
 (defccglab *beam* 0)             ; beam width, determined by number of solutions
 (defccglab *beam-exp* 0.9)       ; must be 0 <= x <= 1 . Larger means wider beam
 
 ;; for NF parse, Eisner 1996-style---eliminate them at the source (no cky-entry)
-(defccglab *nf-parse* t)
+(defswitch *nf-parse* t)
 (defccglab *bc* 'BC)
 (defccglab *fc* 'FC)
 (defccglab *ot* 'OT)
@@ -350,9 +364,9 @@
 (defccglab *ccg-grammar-keys* nil) ; unique keys for each entry; from 1 to n
 (defccglab *loaded-grammar* nil)   ; The source of currently loaded grammar
 
-(defccglab *lfflag* t) ; whether to show intermediate LFs in the output (final one always shown)
+(defswitch *lfflag* t) ; whether to show intermediate LFs in the output (final one always shown)
 (defccglab *abv* nil) ; list of shortcuts for common functions-- see the bottom
-(defccglab *oovp* nil) ; set it to t to avoid out of vocabulary errors---two entries with uknown LFs will be created 
+(defswitch *oovp* nil) ; set it to t to avoid out of vocabulary errors---two entries with uknown LFs will be created 
                           ;  to get partial parses as much as possible in a knowledge-poor way.
 
 ;; rule switches
@@ -407,8 +421,7 @@
 ;; rule switch wholesale control
 (defun basic-ccg (&optional (ok t))
   (case ok
-    ((on t) (format t "Using standard rule set~%") 
-	    (setf 
+    ((on t) (setf 
 	      *f-apply* t   ;application
 	      *b-apply* t
 	      *f-comp* t    ;composition
@@ -440,7 +453,7 @@
 	      *b3-comp* t
 	      *fx3-comp* t
 	      *bx3-comp* t))
-    ((off nil) (format t "Rule set controlled by user.~%")
+    ((off nil) (format t "~%All rules set. Rule set to be controlled by user.~%")
 	       (setf 
 		 *f-apply* t   ;application
 		 *b-apply* t
@@ -476,7 +489,7 @@
     (otherwise (format t "~%Error: expected a value on/off/t/nil~%Continuing with current values"))))
 
 
-(defun switches ()
+(defun rules ()
   (format t  "To change a switch, use (setf <switchname> <value>)
 	      where <value> is T (on) or NIL (off)
 	  *f-apply*     ~A
@@ -524,11 +537,8 @@
 
 (defun status(&optional (all-lfs nil))
   "returns all equivalent LFS if all-lfs is not nil"
-  (format t "~%To see rule switches, do (switches)~%")
+  (format t "~2%  do (rules) or (onoff) for rules and switches~%")
   (format t "  ---------------------------~%")
-  (format t "  To beam or not to beam    : ~A~%" *beamp*)
-  (format t "  Normal Form (NF) parse    : ~A~%" *nf-parse*)
-  (format t "  Out of vocabulary flag    : ~A~%" *oovp*)
   (format t "  Any non-standard rule     ? ~A~%" (if (or *f-subbar* *b-subbar* *fx-subbar* *bx-subbar* *f-subcomp* *b-subcomp* 
 							 *fx-subcomp* *bx-subcomp*)
 						   'yes 'no))
@@ -548,7 +558,7 @@
   )
 
 (defun which-ccglab ()
-  "CCGlab, version 5.4")
+  "CCGlab, version 6.0")
 
 (defun set-lisp-system (lispsys)
   (case lispsys
@@ -594,6 +604,36 @@
 ;;; user controllable switches 
 ;;; ==========================
 
+(defun beam (on)
+  (if (or (eq on t) (equal on 'on))
+    (setf *beamp* t)
+    (setf *beamp* nil)))
+
+(defun nf-parse (on)
+  (if (or (eq on t) (equal on 'on))
+    (setf *nf-parse* t)
+    (setf *nf-parse* nil)))
+
+(defun oov (on)
+  (if (or (eq on t) (equal on 'on))
+    (setf *oovp* t)
+    (setf *oovp* nil)))
+
+(defun type-raise (on)
+  (if (or (eq on t) (equal on 'on))
+    (progn 
+      (setf *type-raised-p* t)
+      (or *type-raise-targets* 
+	  (format t "~%Your list of arguments to type raise is nil.~%Call type-raise-targets to set it.")))
+    (setf *type-raised-p* nil)))
+
+(defun lf (on)
+  (if (or (eq on t) (equal on 'on))
+    (setf *lfflag* t)
+    (setf *lfflag* nil)))
+
+; keeping below as legacy access  to switches
+
 (defun beam-off ()
   (setf *beamp* nil)(beam-value))
 
@@ -619,10 +659,6 @@
   (setf *type-raised-p* t)
   (or *type-raise-targets* (format t "~%Your list of arguments to type raise is nil.~%Call type-raise-targets to set it.")))
 
-(defun type-raise-targets (targets)
-  (setf *type-raise-targets* targets)
-  (type-raise-on))
-
 (defun show-lf ()
   (setf *lfflag* t) (format t "All LFs will be shown~%"))
 
@@ -630,6 +666,11 @@
   (setf *lfflag* nil) (format t "Only final LF will be shown~%"))
 
 ;; ==========================
+
+(defun type-raise-targets (targets)
+  "this function turns type-raising on and eliminates basic lower types in targets from applying because of the way apply functions work."
+  (setf *type-raise-targets* targets)
+  (type-raise-on))
 
 (defun beamer ()
   "use this to set beam only after a parse so that *cky-nparses* is known."
@@ -3332,7 +3373,6 @@
 
 (defun reset-globals()
   "resets the dynamic globals. If you change e.g. *epsilon* etc. just reload."
-  (format t "~%============= activated CCGlab options ==============~%")
   (setf *print-readably* nil)
   (setf *print-pretty* t) 
   (setf *lex-rules-table* nil)
@@ -3347,10 +3387,10 @@
   (setf *loaded-grammar* "")
   (setf *ccg-grammar*  nil)
   (setf *ccg-grammar-keys*  0)
-  (nf-parse-on)
-  (show-lf)
-  (beam-off)
-  (oov-off)
+  (nf-parse t)
+  (lf t)
+  (beam nil)
+  (oov nil)
   (basic-ccg)) ; turn experimental rules off by default
 
 (defun almost-eq (x y)
