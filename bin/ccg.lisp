@@ -578,8 +578,7 @@
        (format t "~%Gradient extrapolation now available.~%Type-raise compiling now available.")))
 
 (defun welcome (&optional (lispsys *lispsys*))
-  (status)
-  (format t "~%If you've got WARNINGS during loading,~%   you can ignore them.")
+  (format t "~2%If you've got WARNINGS during loading,~%   you can ignore them.")
   (format t "~%====================================================")
   (format t "~%Welcome to ~A" (which-ccglab))
   (format t "~%----------------------------------------------------")
@@ -589,10 +588,10 @@
   (format t "~%====================================================~%"))
 
 (defun beam-value ()
-  (format t "*Beamp* = ~A  *Beam-exp* = ~A~%" *beamp* *beam-exp*))
+  (format t "~%*Beamp* = ~A  *Beam-exp* = ~A~%" *beamp* *beam-exp*))
 
 (defun nf-parse-value ()
-  (format t "*nf-parse* = ~A~%" *nf-parse*))
+  (format t "~%*nf-parse* = ~A~%" *nf-parse*))
 
 (defun set-beam-exp (val)
   (and (> val 1.0) (format t "Beware! impossible beam = ~A~%" val))
@@ -664,6 +663,14 @@
 
 (defun hide-lf ()
   (setf *lfflag* nil) (format t "Only final LF will be shown~%"))
+
+; this one is easier summary
+
+(defun show-config ()
+  (format t "~2%~A~2%" (which-ccglab))
+  (rules)
+  (onoff)
+  (beam-value))
 
 ;; ==========================
 
@@ -3288,11 +3295,9 @@
 (defun show-training ()
   "show the values of parameters per key before and after training"
   (format t "The rule set used in the experiment:~%")
-  (switches)
-  (which-ccglab)
+  (show-config)
   (format t "~%Training parameters: N = ~a alpha0 = ~a c = ~a n = ~a  " 
 	  *bign*  *alpha0* *c* *smalln*)
-  (beam-value)
   (format t "~%Model parameters before and after training~%================================================")
   (format t "~%key   lex             initial  final    diff ~%------------------------------------------------")
   (dolist (l *ccg-grammar*)
@@ -3305,11 +3310,9 @@
 (defun show-training-xp ()
   "show the values of parameters per key before and after training"
   (format t "The rule set used in the experiment:~%")
-  (switches)
-  (which-ccglab)
+  (show-config)
   (format t "~%Training parameters: N = ~a alpha0 = ~a c = ~a n = ~a  " 
 	  *bign*  *alpha0* *c* *smalln*)
-  (beam-value)
   (format t "~%Model parameters before and after training and extrapolation~%================================================")
   (format t "~%key   lex             initial  final    diff ~%------------------------------------------------")
   (dolist (l *ccg-grammar*)
