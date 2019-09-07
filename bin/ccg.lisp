@@ -603,6 +603,8 @@
 ;;; user controllable switches 
 ;;; ==========================
 
+; not passing on or t resets the switches to nil
+
 (defun beam (on)
   (if (or (eq on t) (equal on 'on))
     (setf *beamp* t)
@@ -3453,7 +3455,12 @@
   (dolist (a *abv*) (format t "~5A ~A~%" (first a) (second a))))
 
 (abbrevs lg load-grammar 
-         lm load-model
+	 tr compile-and-subsume-tr
+	 trc compile-tr
+	 loads safely-load
+	 trt type-raise-targets
+         savetr save-subsumption
+	 lm load-model
 	 cd ccg-deduce
 	 ci ccg-induce
 	 p  ccg-deduce
