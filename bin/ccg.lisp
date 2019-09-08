@@ -3466,6 +3466,7 @@
 	 p  ccg-deduce
 	 pp ccg-induce
 	 rank ccg-induce
+	 switches onoff
 	 ders cky-show-deduction
 	 csd cky-show-deduction
 	 csi cky-show-induction
