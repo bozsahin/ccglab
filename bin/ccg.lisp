@@ -558,7 +558,7 @@
   )
 
 (defun which-ccglab ()
-  "CCGlab, version 6.0")
+  "CCGlab, version 6.0.1")
 
 (defun set-lisp-system (lispsys)
   (case lispsys
@@ -2728,8 +2728,15 @@
       (and *b-apply* (b-apply ht1 ht2 lex1 coord1))
       (and *f-comp* (f-comp ht1 ht2))           ; composition
       (and *b-comp* (b-comp ht1 ht2))
-      (and *fx-comp* (fx-comp ht1 ht2))
-      (and *bx-comp* (bx-comp ht1 ht2))
+                                                ; <Bx and >Bx cannot be short-circuited if X=Z in X/Y Y\Z
+      (and (or *fx-comp* *bx-comp*) (multiple-value-bind (s1 s2) (values (and *fx-comp* (fx-comp ht1 ht2))
+									 (and *bx-comp* (bx-comp ht1 ht2)))
+				      (if s1    ; short-circuit if at least one succeeds -- pass the succesful one first for 'and'
+					(return-from ccg-combine (values s1 s2))
+					(if s2 
+					  (return-from ccg-combine (values s2 s1))
+					  nil))))
+
       (and *f-sub* (f-sub ht1 ht2))             ; substitution
       (and *b-sub* (b-sub ht1 ht2))
       (and *fx-sub* (fx-sub ht1 ht2))
@@ -2748,8 +2755,14 @@
       (and *bx2-comp* (bx2-comp ht1 ht2))
       (and *f2-sub* (f2-sub ht1 ht2))           ; (not S^2 of Curry; see Bozsahin CL book)
       (and *b2-sub* (b2-sub ht1 ht2))
-      (and *fx2-sub* (fx2-sub ht1 ht2))
-      (and *bx2-sub* (bx2-sub ht1 ht2))
+                                                ; <S2x and >S2x cannot be short-circuited if X=W (check out CL book p.117)
+      (and (or *fx2-sub* *bx2-sub*) (multiple-value-bind (s1 s2) (values (and *fx2-sub* (fx2-sub ht1 ht2)) 
+									 (and *bx2-sub* (bx2-sub ht1 ht2)))
+				     (if s1    ; short-circuit if at least one succeeds -- pass the succesful one first for 'and'
+				       (return-from ccg-combine (values s1 s2))
+				       (if s2
+					 (return-from ccg-combine (values s2 s1))
+					 nil))))
       (and *f2-subcomp* (f2-subcomp ht1 ht2))   ; D^2
       (and *f3-comp* (f3-comp ht1 ht2))         ; B^3
       (and *b3-comp* (b3-comp ht1 ht2))
@@ -2843,34 +2856,34 @@
 		     ((not (machash (list k j p) *cky-hashtable*)))
 		     (do ((q 1 (+ q 1)))
 		         ((not (machash (list (- i k) (+ j k) q) *cky-hashtable*)))
-                         (let ((result (ccg-combine 
+                         (multiple-value-bind (r1 r2) (ccg-combine 
                                  (nv-list-val 'SOLUTION (machash (list k j p) *cky-hashtable*))
 				 (nv-list-val 'SOLUTION (machash (list (- i k) (+ j k) q) *cky-hashtable*))
 				 (nv-list-val 'LEX (machash (list k j p) *cky-hashtable*))
 				 (nv-list-val 'LEX (machash (list (- i k) (+ j k) q) *cky-hashtable*))
 				 (list k j)             ; pass the string coordinates too, for singletons
-				 (list (- i k) (+ j k)) ;  length and position only
-				 )))
-			   (and result 
-				(setf (machash 'PARAM result)  ; calculate inner product on the fly
-				      (f-param-inner-prod 
-					(machash 'PARAM 
-						 (nv-list-val 'SOLUTION 
+				 (list (- i k) (+ j k))) ;  length and position only
+			   (dolist (result (list r1 r2)) ; multiple solutions may come from <Bx/>Bx and <S2x/>S2x pairs
+			     (and result 
+				  (setf (machash 'PARAM result)  ; calculate inner product on the fly
+					(f-param-inner-prod 
+					  (machash 'PARAM 
+						   (nv-list-val 'SOLUTION 
 								(machash (list k j p) *cky-hashtable*)))
-					(machash 'PARAM 
-						 (nv-list-val 'SOLUTION (machash (list (- i k) (+ j k) q)
-				                                   *cky-hashtable*)))))
-                                (setf a (+ a 1))
-				(setf (machash (list i j a) *cky-hashtable*)
-				      (if (machash 'LEX result)  ; if result is lexical, this is marked in its hashtable, pass it on to cky
-					(list (list 'LEFT (list k j p))
-					      (list 'RIGHT (list (- i k) (+ j k) q))
-					      (list 'LEX t)
-					      (list 'SOLUTION result))
-					(list (list 'LEFT (list k j p))
-					      (list 'RIGHT (list (- i k) (+ j k) q))
-					      (list 'SOLUTION result))))) ; first result's code ends
-			   )   
+					  (machash 'PARAM 
+						   (nv-list-val 'SOLUTION (machash (list (- i k) (+ j k) q)
+										   *cky-hashtable*)))))
+				  (setf a (+ a 1))
+				  (setf (machash (list i j a) *cky-hashtable*)
+					(if (machash 'LEX result)  ; if result is lexical, this is marked in its hashtable, pass it on to cky
+					  (list (list 'LEFT (list k j p))
+						(list 'RIGHT (list (- i k) (+ j k) q))
+						(list 'LEX t)
+						(list 'SOLUTION result))
+					  (list (list 'LEFT (list k j p))
+						(list 'RIGHT (list (- i k) (+ j k) q))
+						(list 'SOLUTION result))))) ; first result's code ends
+			     ))   
 			 )))
 	       (apply-unary-rules i j a nil)))
 	   (and (machash (list n 1 1) *cky-hashtable*) t)))  ; if a rule applied, result would be in n 1 1 
