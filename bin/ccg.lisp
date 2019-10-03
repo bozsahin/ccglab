@@ -3068,7 +3068,7 @@
   (let ((supname (concatenate 'string pname ".sup")))
     (with-open-file (s supname  :direction :input :if-does-not-exist :error) 
       (setf *supervision-pairs-list* (read s)))
-    (format t "~%Supervision file loaded: ~A" supname))
+    (format t "~%Supervision file loaded: ~A~%" supname))
   (dolist (s-lf *supervision-pairs-list*)
     (cond ((not (beta-normalize-outer (sup-lf s-lf))) 
 	   (format t "~%Warning! This S-LF pair has unnormalizable LF, and may give unexpected stats :~% ~a"
