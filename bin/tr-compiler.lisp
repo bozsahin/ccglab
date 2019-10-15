@@ -1,7 +1,12 @@
 ;;; ------------------------------------------
-;;; implementing the type-raising algorithm
-;;; -implemented by Oguzhan Demir
-;;;  with some code support from Cem Bozsahin
+;;; A compiler for type-raising
+;;; credits:
+;;;  compile-tr
+;;;    design : Cem Bozsahin 
+;;;    code   : Oguzhan Demir and Cem Bozsahin
+;;;  subsume-tr
+;;;    design : Cem Bozsahin
+;;;    code   : Cem Bozsahin
 ;;; ------------------------------------------
 
 (defccglab *ht-tr* nil) ; hash table for derived tr rules--for subsumption check after compile
