@@ -20,7 +20,7 @@ Design and development of CCGlab continues to be in SBCL, then checked with CCL.
 
 <b>FOR WINDOWS</b>
 
-You need a linux/unix system for CCGlab. There are three options for windows:
+You need a linux system for CCGlab. There are three options for windows:
 
 <ol>
            <li> For windows 10: Follow these <a href="docs/windows10-directions.txt">directions</a>. No partitions, no virtualnox, no hassles. You now have linux as a W10 app with ccglab in it.
