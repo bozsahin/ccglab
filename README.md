@@ -1,5 +1,6 @@
 # ccglab
-Combinatory Categorial Grammar (CCG): All combinators,  parsing to logical form, and parameter estimation for CCG and probabilistic CCG.
+Combinatory Categorial Grammar (CCG): CCG and probabilistic CCG, with all combinators and their powers.
+
 
 <b>There is an installer for ccglab, which I describe toward the bottom of README.
            Please read the preliminaries first to make it ready.</b>
