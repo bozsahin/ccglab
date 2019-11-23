@@ -115,8 +115,8 @@ which is always this copy. Just clone this repo rather than download the release
 If you're tired of weird defaults of linux installers, try the safe and longer way:
 
 <ul>
-<li> If you use Windows, install virtualbox, set an Ubuntu or Mint machine (easiest ones), and follow the instructions above for install.
-<li> If you have another linux (arch, debian suse etc.), just clone this repo, get <a href="http://web.science.mq.edu.au/~mjohnson/code/lalrparser.lisp">lalr</a>
+
+<li> Just clone this repo, get <a href="http://web.science.mq.edu.au/~mjohnson/code/lalrparser.lisp">lalr</a>
 somewhere in your machine, and set and <code>export</code> the following bash variables:
 <ol>
 <li><code>CCGLAB_HOME</code> to where the <code>ccglab</code> repo is
