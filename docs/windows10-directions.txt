@@ -6,15 +6,13 @@ Thanks.
 
 You need to be on version 1909 of Windows10, build 18363.476. Versions and/or builds newer than these are unlikely to cause problems.
 
-This document is adapted from: https://docs.microsoft.com/en-us/windows/wsl/install-win10
+This document is based on: https://docs.microsoft.com/en-us/windows/wsl/install-win10
 
-1. Open a Powershell window WITH ADMINISTRATOR RIGHTS and execute the following command:
+1. Open a Powershell window *with administrator rights* and execute the following command:
 
 	Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
 
 	(This will ask at the end your computer to be restarted; press 'Enter' at the prompt)
-	
-	[Powershell can be located from left bottom corner window logo. Right click will show admin run option.]
 
 2. Go to Windows Store (search for "store" in Windows Search), and search for "Linux"
 	- Download your preferred distribution (we recommend Ubuntu, which requires the least amount of effort in configuration.)
@@ -23,7 +21,18 @@ This document is adapted from: https://docs.microsoft.com/en-us/windows/wsl/inst
 
 3. do: pwd
 
-This shows the full path of your username. It's best to use that path in installing all ccglab-related software when asked.
+This shows the full path of your username. It's best to use that path in installing all ccglab related software when asked.
 
-4. do: w10-install
+4. do: cd ~
 
+5. do: git clone https://github.com/bozsahin/ccglab 
+
+6. Proceed with ccglab installation guide (for Ubuntu) at  https://github.com/bozsahin/ccglab/README.md.
+
+7. do: bash
+
+8. do: ccglab
+
+You are ready to go. You can close the linux app when you are done. 
+
+Next time you run the linux app, just do step 8.
