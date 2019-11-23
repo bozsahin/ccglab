@@ -1,0 +1,38 @@
+This guide is prepared by Efecan Yilmaz. It gives you first a linux as W10 app, then ccglab. 
+No partitions, no virtualbox.
+Thanks.
+
+---------------
+
+You need to be on version 1909 of Windows10, build 18363.476. Versions and/or builds newer than these are unlikely to cause problems.
+
+First part of this document refers to: https://docs.microsoft.com/en-us/windows/wsl/install-win10
+
+1. Open a Powershell window *with administrator rights* and execute the following command:
+
+	Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
+
+	(This will ask at the end your computer to be restarted; press 'Enter' at the prompt)
+
+2. Go to Windows Store (search for "store" in Windows Search), and search for "Linux"
+	- Download your preferred distribution (we recommend Ubuntu, which requires the least amount of effort in configuration.)
+	- When the download and installation finishes, click on "Launch" in the Store window for the first time installation to take place.
+	- Please note your username and password at the end of the installation. 
+
+3. do: pwd
+
+This shows the full path of your username. It's best to use that path in installing all ccglab related software when asked.
+
+4. do: cd ~
+
+5. do: git clone https://github.com/bozsahin/ccglab 
+
+6. Proceed with ccglab installation guide (for Ubuntu) at  https://github.com/bozsahin/ccglab/README.md.
+
+7. do: bash
+
+8. do: ccglab
+
+You are ready to go. You can close the linux app when you are done. 
+
+Next time you run the linux app, just do step 8.
