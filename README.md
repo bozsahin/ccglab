@@ -144,13 +144,6 @@ And here is my <code>~/.bash_profile</code> file (create one if you don't have i
 
 The installer fetches the relevant sources (lalrparser, sbcl, rlwrap) and does the manual install automatically, and saves it in the files <code>.bash_profile, .bashrc</code> at your home.
 
-<b>Have a look at the companion repos, <a href="https://github.com/bozsahin/ccglab-grammars">ccglab-grammars</a>, 
-and <a href="https://github.com/bozsahin/ccglab-models">ccglab-models</a>, which contain grammars and models developed in CCGlab</b>.
-
-<b>TO DO:</b> 
-<ul>
-<li> bidirectional unary rules.
-<li> web server, for use without install.
-</ul>
+Have a look at <a href="https://github.com/bozsahin/ccglab-database">the companion repo</a>, which contains grammars and models developed in CCGlab
 
 enjoy.--Cem Bozsahin
