@@ -6,13 +6,15 @@ Thanks.
 
 You need to be on version 1909 of Windows10, build 18363.476. Versions and/or builds newer than these are unlikely to cause problems.
 
-First part of this document refers to: https://docs.microsoft.com/en-us/windows/wsl/install-win10
+This document is adapted from: https://docs.microsoft.com/en-us/windows/wsl/install-win10
 
 1. Open a Powershell window WITH ADMINISTRATOR RIGHTS and execute the following command:
 
 	Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
 
 	(This will ask at the end your computer to be restarted; press 'Enter' at the prompt)
+	
+	[Powershell can be located from left bottom corner window logo. Right click will show admin run option.]
 
 2. Go to Windows Store (search for "store" in Windows Search), and search for "Linux"
 	- Download your preferred distribution (we recommend Ubuntu, which requires the least amount of effort in configuration.)
