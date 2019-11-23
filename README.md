@@ -18,7 +18,7 @@ you will avoid it and spend most of your time garbage-collecting rather than doi
 Design and development of CCGlab continues to be in SBCL, then checked with CCL. Fingers crossed for Allegro CL.
 (One experiment I ran on SBCL which took 3 hours of CPU time still runs in Allegro CL as I write after 19 hours, spewing out lots of garbage-collection messages.)
 
-<b>PRELIMINARIES FOR WINDOWS</b>
+<b>FOR WINDOWS</b>
 
 You need a linux/unix system for CCGlab. There are three options for windows:
 
