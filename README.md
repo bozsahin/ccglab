@@ -1,29 +1,27 @@
 # ccglab
-Combinatory Categorial Grammar (CCG): All combinators,  parsing to logical form and parameter estimation for CCG and probabilistic CCG.
+Combinatory Categorial Grammar (CCG): All combinators,  parsing to logical form, and parameter estimation for CCG and probabilistic CCG.
 
 <b>There is an installer for ccglab, which I describe toward the bottom of README.
+           Please read the preliminaries first to make it ready.</b>
            
-Please read the preliminaries first to make it ready.</b>
-           
-This is Common Lisp code running on linux/macos. If you already have an ANSI Common Lisp, it can work with it too.
+This is Common Lisp code. It needs a real linux, or one in macosphere or windowsphere.
 
-(GCL and CLisp are ANSI but the first one does not come with CLOS, and CLisp has weird locks on standard package files to turn them on. This is unfortunate because some dispatch macros
-for the Lisp reader needs methods, therefore not usable in GCL/Clisp out of the box.)
+SBCL and CCL are usable out of the box for CCGlab. If you already have an ANSI Common Lisp, it can work with it too.
 
-SBCL and CCL are usable out of the box for CCGlab. 
+GCL and CLisp are ANSI but the first one does not come with CLOS, and CLisp has weird locks on standard package files to turn them on. This is unfortunate because some dispatch macros
+for the Lisp reader needs methods, therefore not usable in GCL/Clisp out of the box.
 
 I added Allegro CL support for CCGlab (for calling bash scripts etc.), but somewhat reluctantly. Its free versions are so cryptic about heap control 
 you will avoid it and spend most of your time garbage-collecting rather than doing useful work. Not worth it, folks.
 
-Design and development of CCGlab continues to be in SBCL, then checked with CCL. Fingers crossed for Allegro CL.
-(One experiment I ran on SBCL which took 3 hours of CPU time still runs in Allegro CL as I write after 19 hours, spewing out lots of garbage-collection messages.)
+Design and development of CCGlab continues to be in SBCL, then checked with CCL. 
 
 <b>FOR WINDOWS</b>
 
-You need a linux system for CCGlab. There are three options for windows:
+You need a linux system for ccglab. There are three options for windows (I recommend the first one):
 
 <ol>
-           <li> For windows 10: Follow these <a href="docs/windows10-directions.txt">directions</a>. No partitions, no virtualnox, no hassles. You now have linux as a W10 app with ccglab in it.
+           <li> For windows 10: Follow these <a href="docs/windows10-directions.txt">directions</a>. No partitions, no virtualbox, no hassles. You now have linux as a W10 app with ccglab in it.
 <li> For windows earlier than W10: install a virtual box such as Oracle's: https://www.virtualbox.org/.
 
 Then follow one of the advices below for linuxes for ccglab install, depending on your (virtual) machine.
@@ -33,10 +31,10 @@ I recommend setting up an Ubuntu virtualbox, because it allows you to try withou
 If you use CCGLAB from a virtualbox, save your machine state rather than power off the virtual machine.
 You won't have to do all of the above over and over.
 
-<li>For any windows: put a linux partition on your machine if you intend to use CCGlab quite often.  
+<li>For any windows: put a linux partition in your machine.   
 </ol>
 
-<b>PRELIMINARIES for LINUX/MACOS USERS</b>
+<b>PRELIMINARIES for LINUX/MACOS</b>
 
 You need
 <ol>
@@ -88,7 +86,7 @@ Arch, Suse, MacOS do not seem to have this peculiar Ubuntu and RedHat/Fedora cas
 
 The packages for sbcl and rlwrap are available for them. CCL Lisp too, if you feel like using it instead of SBCL.
 
-<B>FIRST TIME INSTALL of CCGLAB</B>
+<B>INSTALLING CCGLAB</B>
 
 <ol>
 <li> <code>cd h</code>, where <code>h</code> is your chosen parent directory for CCGlab.
@@ -114,9 +112,8 @@ which is always this copy. Just clone this repo rather than download the release
 
 If you're tired of weird defaults of linux installers, try the safe and longer way:
 
-<ul>
 
-<li> Just clone this repo, get <a href="http://web.science.mq.edu.au/~mjohnson/code/lalrparser.lisp">lalr</a>
+<li> Just clone this repo, get the <a href="http://web.science.mq.edu.au/~mjohnson/code/lalrparser.lisp">LALR parser</a>
 somewhere in your machine, and set and <code>export</code> the following bash variables:
 <ol>
 <li><code>CCGLAB_HOME</code> to where the <code>ccglab</code> repo is
@@ -126,7 +123,6 @@ somewhere in your machine, and set and <code>export</code> the following bash va
 <li><code>PATH=:.:$CCGLAB_HOME/bin:$PATH</code> to overrride earlier installs of ccglab.
 <li> Then open a new <code>bash</code> terminal and run <code>ccglab</code>
 </ol>
-</ul>
 
 Here is my local setup in <code>~/.bashrc</code> file (create one if you don't have it):
 
@@ -144,6 +140,6 @@ And here is my <code>~/.bash_profile</code> file (create one if you don't have i
 
 The installer fetches the relevant sources (lalrparser, sbcl, rlwrap) and does the manual install automatically, and saves it in the files <code>.bash_profile, .bashrc</code> at your home.
 
-Have a look at <a href="https://github.com/bozsahin/ccglab-database">the companion repo</a>, which contains grammars and models developed in CCGlab
+Also have a look at <a href="https://github.com/bozsahin/ccglab-database">the companion repo</a>, which contains grammars and models developed in CCGlab
 
 enjoy.--Cem Bozsahin
