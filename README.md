@@ -35,7 +35,7 @@ You won't have to do all of the above over and over.
 <li>For any windows: put a linux partition in your machine. This one is for experienced users.
 </ol>
 
-<b>PRELIMINARIES</b>
+<b>PRELIMINARIES for others</b>
 
 You need
 <ol>
