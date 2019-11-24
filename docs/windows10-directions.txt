@@ -8,30 +8,29 @@ You need to be on version 1909 of Windows10, build 18363.476. Versions and/or bu
 
 This document is based on: https://docs.microsoft.com/en-us/windows/wsl/install-win10
 
-1. Open a Powershell window *with administrator rights* and execute the following command:
+1. Open a PowerShell window *with administrator rights* and execute the following command:
 
 	Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
 
-	(This will ask at the end your computer to be restarted; say YES)
+	(This will ask, at the end, your computer to be restarted; say YES)
 
 2. Go to Windows Store (search for "store" in Windows Search), and search for "Linux"
 	- Download your preferred distribution (our guide is for Ubuntu, which requires the least amount of effort in configuration.)
 	- When the download and installation finishes, click on "Launch" in the Store window for the first time installation to take place.
 	- Please note your username and password at the end of the installation. 
 
-
-3. Assuming you are in the terminal app that Ubuntu opened for you when asking for userid, do: 
+3. Assuming you are in the terminal app that Ubuntu opened for you when asking for username, do: 
 
 cd ~
+
+	- If you use your Linux home directory (cd ~) for your projects, then note that this directory is tied to your Linux installation as Windows subsystem for Linux, and that all your project data will be lost (unless otherwise backed up) upon the removal of this Linux "app" from Windows. We recommend frequent backups if you chose to use your Linux home folder. Additionally, the Linux subsystem has direct access (even as root) to the Windows file system, and as a result you can use your Windows main directories via /mnt.
 
 4. do: 
 
 git clone https://github.com/bozsahin/ccglab 
 
-5. Proceed with ccglab installation guide (for Ubuntu) at  https://github.com/bozsahin/ccglab/README.md.
-
+5. Proceed with ccglab installation guide (for Ubuntu) at https://github.com/bozsahin/ccglab/blob/master/README.md.
 
 You are ready to go. You can close the linux app when you are done. 
 
-To run again, locate ubuntu app from windows left corner button and run; once in ubuntu, just call cccglab. 
-
+To run again, locate Ubuntu app from Windows left corner button and run. Alternatively, you can access the Linux subsystem by typing "bash" in PowerShell or CMD. Once in the Ubuntu environment, just call ccglab.
