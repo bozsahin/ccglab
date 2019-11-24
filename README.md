@@ -1,7 +1,7 @@
 # ccglab
 Combinatory Categorial Grammar (CCG): CCG and probabilistic CCG, with all combinators and their powers.
 
-Install instructions are <a href="#install">here</a>. There are certain things you need to do depending
+Install instructions are in this README, <a href="#install">here</a>. There are certain things you need to do depending
 on your OS, so please follow the install after reading through this README.
 
            
