@@ -15,24 +15,34 @@ This document is based on: https://docs.microsoft.com/en-us/windows/wsl/install-
 	(This will ask at the end your computer to be restarted; say YES)
 
 2. Go to Windows Store (search for "store" in Windows Search), and search for "Linux"
-	- Download your preferred distribution (we recommend Ubuntu, which requires the least amount of effort in configuration.)
+	- Download your preferred distribution (our guide is for Ubuntu, which requires the least amount of effort in configuration.)
 	- When the download and installation finishes, click on "Launch" in the Store window for the first time installation to take place.
 	- Please note your username and password at the end of the installation. 
 
 
-3. Assuming you are in the terminal app that Ubuntu opened for when asking for userid, do: cd ~
+3. Assuming you are in the terminal app that Ubuntu opened for you when asking for userid, do: 
 
-4. do: pwd
+cd ~
+
+4. do: 
+
+pwd
 
 This shows the full path of your username. It's best to use that path in installing all ccglab related software if asked.
 
-5. do: git clone https://github.com/bozsahin/ccglab 
+5. do: 
+
+git clone https://github.com/bozsahin/ccglab 
 
 6. Proceed with ccglab installation guide (for Ubuntu) at  https://github.com/bozsahin/ccglab/README.md.
 
-7. do: bash
+7. do: 
 
-8. do: ccglab
+bash
+
+8. do: 
+
+ccglab
 
 You are ready to go. You can close the linux app when you are done. 
 
