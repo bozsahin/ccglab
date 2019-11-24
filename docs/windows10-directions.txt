@@ -19,11 +19,12 @@ This document is based on: https://docs.microsoft.com/en-us/windows/wsl/install-
 	- When the download and installation finishes, click on "Launch" in the Store window for the first time installation to take place.
 	- Please note your username and password at the end of the installation. 
 
-3. do: pwd
 
-This shows the full path of your username. It's best to use that path in installing all ccglab related software when asked.
+3. do: cd ~
 
-4. do: cd ~
+4. do: pwd
+
+This shows the full path of your username. It's best to use that path in installing all ccglab related software if asked.
 
 5. do: git clone https://github.com/bozsahin/ccglab 
 
@@ -33,6 +34,6 @@ This shows the full path of your username. It's best to use that path in install
 
 8. do: ccglab
 
-You are ready to go. You can close the linux app when you are done. 
+You are ready to go. You can close the linux app when you are done. To run again, locate ubuntu app from windows left corner button and run; once in ubuntu, just call cccglab. 
 
 Next time you run the linux app, just do step 8.
