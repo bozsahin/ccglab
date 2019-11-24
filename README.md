@@ -1,7 +1,7 @@
 # ccglab
 Combinatory Categorial Grammar (CCG): CCG and probabilistic CCG, with all combinators and their powers.
 
-Install instructions are <a href="#install">here</a>. There are certain things you ned to do depending
+Install instructions are <a href="#install">here</a>. There are certain things you need to do depending
 on your OS, so please follow the install after reading through this README.
 
            
@@ -9,17 +9,17 @@ This is Common Lisp code. It needs a linux, a native one or one in macosphere or
 
 SBCL and CCL Lisps are usable out of the box for CCGlab. If you already have an ANSI Common Lisp, it can work with it too.
 
-GCL and CLisp are ANSI but the first one does not come with CLOS, and CLisp has weird locks on standard package files to turn them on. This is unfortunate because some dispatch macros
+GCL and CLisp are ANSI but the first one does not come with CLOS, and CLisp has weird locks on standard package files to turn them on. This is unfortunate because some CCGlab macros
 for the Lisp reader needs methods, therefore not usable in GCL/Clisp out of the box.
 
 I added Allegro CL support for CCGlab (for calling bash scripts etc.), but somewhat reluctantly. Its free versions are so cryptic about heap control 
-you will avoid it and spend most of your time garbage-collecting rather than doing useful work. Not worth it, folks.
+you will avoid it, and spend most of your time garbage-collecting rather than doing useful work. Not worth it, folks.
 
 Design and development of CCGlab continues to be in SBCL, then checked with CCL. 
 
 <b>FOR WINDOWS</b>
 
-You need a linux system for ccglab. There are three options for windows (I recommend the first one):
+You need a linux system for CCGlab. There are three options for windows (I recommend the first one):
 
 <ol>
            <li> For windows 10: Follow these <a href="docs/windows10-directions.txt">directions</a>. No partitions, no virtualbox, no hassles. You now have linux as a W10 app with ccglab in it.
