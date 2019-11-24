@@ -78,7 +78,8 @@ printf '%s\n' '# end of stuff added by CCGlab installer' >> ~/.bashrc
 printf '%s\n' '# stuff added by CCGlab installer' >> ~/.bash_profile
 printf '%s\n' 'if [ -f ~/.bashrc ]; then source ~/.bashrc; fi' >> ~/.bash_profile
 echo ' : Just do "git pull" in ccglab home for updates from now on.'
-echo " : I wouldnt do updates in standard files of $ccglabdir. They will be overridden by next git pull"
+echo " : I wouldnt do updates in standard files of $ccglabdir."
+echo "   They will be overridden by next git pull"
 echo '   The manual has some pointers for grammar and model development workflows'
 echo ' : To run, first open a fresh terminal, or logout and login. Then do'
 echo ' : ccglab'
