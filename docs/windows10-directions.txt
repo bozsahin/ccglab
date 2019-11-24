@@ -26,23 +26,10 @@ cd ~
 
 4. do: 
 
-pwd
-
-This shows the full path of your username. It's best to use that path in installing all ccglab related software if asked.
-
-5. do: 
-
 git clone https://github.com/bozsahin/ccglab 
 
-6. Proceed with ccglab installation guide (for Ubuntu) at  https://github.com/bozsahin/ccglab/README.md.
+5. Proceed with ccglab installation guide (for Ubuntu) at  https://github.com/bozsahin/ccglab/README.md.
 
-7. do: 
-
-bash
-
-8. do: 
-
-ccglab
 
 You are ready to go. You can close the linux app when you are done. 
 
