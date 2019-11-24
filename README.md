@@ -1,13 +1,13 @@
 # ccglab
 Combinatory Categorial Grammar (CCG): CCG and probabilistic CCG, with all combinators and their powers.
 
+Install instructions are <a href="#install">here</a>. There are certain things you ned to do depending
+on your OS, so please follow the install after reading through this README.
 
-<b>There is an installer for ccglab, which I describe toward the bottom of README.
-           Please read the preliminaries first to make it ready.</b>
            
-This is Common Lisp code. It needs a real linux, or one in macosphere or windowsphere.
+This is Common Lisp code. It needs a linux, a native one or one in macosphere or windowsphere.
 
-SBCL and CCL are usable out of the box for CCGlab. If you already have an ANSI Common Lisp, it can work with it too.
+SBCL and CCL Lisps are usable out of the box for CCGlab. If you already have an ANSI Common Lisp, it can work with it too.
 
 GCL and CLisp are ANSI but the first one does not come with CLOS, and CLisp has weird locks on standard package files to turn them on. This is unfortunate because some dispatch macros
 for the Lisp reader needs methods, therefore not usable in GCL/Clisp out of the box.
@@ -87,6 +87,8 @@ Arch, Suse, MacOS do not seem to have this peculiar Ubuntu and RedHat/Fedora cas
 
 The packages for sbcl and rlwrap are available for them. CCL Lisp too, if you feel like using it instead of SBCL.
 
+<a name="install">
+           
 <B>INSTALLING CCGLAB</B>
 
 <ol>
