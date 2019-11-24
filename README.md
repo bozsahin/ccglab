@@ -143,6 +143,6 @@ And here is my <code>~/.bash_profile</code> file (create one if you don't have i
 
 The installer fetches the relevant sources (lalrparser, sbcl, rlwrap) and does the manual install automatically, and saves it in the files <code>.bash_profile, .bashrc</code> at your home.
 
-Also have a look at <a href="https://github.com/bozsahin/ccglab-database">the companion repo</a>, which contains grammars and models developed in CCGlab
+Also have a look at the companion repo called <a href="https://github.com/bozsahin/ccglab-database">ccglab-database</a>, which contains grammars and models developed in CCGlab
 
 enjoy.--Cem Bozsahin
