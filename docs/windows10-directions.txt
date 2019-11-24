@@ -20,7 +20,7 @@ This document is based on: https://docs.microsoft.com/en-us/windows/wsl/install-
 	- Please note your username and password at the end of the installation. 
 
 
-3. do: cd ~
+3. Assuming you are in the terminal app that Ubuntu opened for when asking for userid, do: cd ~
 
 4. do: pwd
 
@@ -34,6 +34,7 @@ This shows the full path of your username. It's best to use that path in install
 
 8. do: ccglab
 
-You are ready to go. You can close the linux app when you are done. To run again, locate ubuntu app from windows left corner button and run; once in ubuntu, just call cccglab. 
+You are ready to go. You can close the linux app when you are done. 
 
-Next time you run the linux app, just do step 8.
+To run again, locate ubuntu app from windows left corner button and run; once in ubuntu, just call cccglab. 
+
