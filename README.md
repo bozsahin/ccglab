@@ -35,7 +35,7 @@ You won't have to do all of the above over and over.
 <li>For any windows: put a linux partition in your machine. This one is for experienced users.
 </ol>
 
-<b>PRELIMINARIES for LINUX/MACOS</b>
+<b>PRELIMINARIES</b>
 
 You need
 <ol>
@@ -47,7 +47,7 @@ You need
 The installers have quirky options for finding packages that CCGlab needs.
 Do the following to get the preliminaries out of the way properly:
 
-<em>MACOS</em>
+<em>preliminaries for MACOS</em>
 
 <ol>
 <li> Open the <code>terminal</code> app.
@@ -58,7 +58,7 @@ Do the following to get the preliminaries out of the way properly:
 </ol>
 
 
-<em>UBUNTU/DEBIAN/MINT</em>
+<em>preliminaries for UBUNTU/DEBIAN/MINT</em>
 
 <ol>
 <li> <code>sudo add-apt-repository universe</code>
@@ -71,7 +71,7 @@ Do the following to get the preliminaries out of the way properly:
 </ol>
 
 
-<em>FEDORA/RedHat</em>
+<em>preliminaries for FEDORA/RedHat</em>
 
 
 <ol>
@@ -81,7 +81,7 @@ Do the following to get the preliminaries out of the way properly:
 <li> <code>sudo yum install wget</code>
 </ol>
 
-<em>OTHER LINUXES</em>
+<em>for OTHER LINUXES</em>
 
 Arch, Suse, MacOS do not seem to have this peculiar Ubuntu and RedHat/Fedora caste of packages. 
 
