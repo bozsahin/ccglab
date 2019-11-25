@@ -1254,6 +1254,10 @@
   (and make (lispify-project pname *lispsys*)) ; generates the .ded file and/or .lisptokens file 
   (load-project pname 'grammar))
 
+(defmacro make-and-load-grammar (pname)
+  "simple macro for make and load"
+  `(load-grammar ,pname :make t))        
+
 (defun get-ht (phon ht-list)
   "returns the hashtable in ht-list that has PHON feature same as phon.
   Used for testing purposes only."
@@ -3468,6 +3472,7 @@
   (dolist (a *abv*) (format t "~5A ~A~%" (first a) (second a))))
 
 (abbrevs lg load-grammar 
+	 mlg make-and-load-grammar
 	 tr compile-and-subsume-tr
 	 trc compile-tr
 	 loads safely-load
