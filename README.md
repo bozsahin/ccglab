@@ -32,20 +32,9 @@ I recommend setting up an Ubuntu virtualbox, because it allows you to try withou
 If you use CCGLAB from a virtualbox, save your machine state rather than power off the virtual machine.
 You won't have to do all of the above over and over.
 
-<li>For any windows: put a linux partition in your machine. This one is for experienced users.
+<li>For any windows: put a linux partition in your machine, and follow the instructions below
+depending on your linux. This one is for experienced users.
 </ol>
-
-<b>PRELIMINARIES for others</b>
-
-You need
-<ol>
-<li> git
-<li> wget
-<li> an installer (apt-get, yum, or brew, depending on your architecture)
-</ol>
-
-The installers have quirky options for finding packages that CCGlab needs.
-Do the following to get the preliminaries out of the way properly:
 
 <em>preliminaries for MACOS</em>
 
@@ -61,10 +50,6 @@ Do the following to get the preliminaries out of the way properly:
 <em>preliminaries for UBUNTU/DEBIAN/MINT</em>
 
 <ol>
-<li> <code>sudo add-apt-repository universe</code>
-
-<li> <code>sudo apt-get update</code>
-
 <li> <code>sudo apt-get install git</code>
 
 <li> <code>sudo apt-get install wget</code>
@@ -75,17 +60,14 @@ Do the following to get the preliminaries out of the way properly:
 
 
 <ol>
-<li> <code>sudo yum install yum-utils</code>
-<li> <code>sudo yum-config-manager --enable \*</code>
 <li> <code>sudo yum install git</code>
 <li> <code>sudo yum install wget</code>
 </ol>
 
 <em>for OTHER LINUXES</em>
 
-Arch, Suse, MacOS do not seem to have this peculiar Ubuntu and RedHat/Fedora caste of packages. 
-
-The packages for sbcl and rlwrap are available for them. CCL Lisp too, if you feel like using it instead of SBCL.
+Arch, Suse, MacOS do not seem to have the peculiar Ubuntu and RedHat/Fedora caste of packages,
+so everything should be fine to run the CCGlab installer.
 
 <a name="install">
            
@@ -97,7 +79,7 @@ The packages for sbcl and rlwrap are available for them. CCL Lisp too, if you fe
 <br>This will create the repository in <code>h/ccglab</code>
 <br>This is your ccglab home.
 <li> <code>cd ccglab</code>
-<li> Execute <code>./run-to-complete-first-time-install</code> bash script in the repo to get the extras needed, and to set up the paths so that CCGlab is usable from anywhere in your user account. <br>
+<li> Execute <code>./install</code> bash script in the repo to get the extras needed, and to set up the paths so that CCGlab is usable from anywhere in your user account. <br>
 <li> Open a new bash terminal and run <code>ccglab</code> script from anywhere.
 </ol>
 

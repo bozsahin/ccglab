@@ -40,9 +40,15 @@ fi
 if [ ! "$locallisp" ]; then
   if [ -x /usr/bin/yum ] || [ -x /usr/local/bin/yum ]; then
 	  packager=yum   
+	  # open library space of yum
+	  sudo yum install yum-utils
+	  sudo yum-config-manager --enable \*
   fi
   if [ -x /usr/bin/apt-get ] || [ -x /usr/local/bin/apt-get ]; then
 	packager=apt-get
+	# open library space of apt-get and refresh
+	sudo add-apt-repository universe
+	sudo apt-get update
   fi
   if [ -x /usr/local/bin/brew ] || [ -x /sw/bin/brew ] || [ -x /sw/local/bin/brew ]; then
     	packager=brew
