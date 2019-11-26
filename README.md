@@ -36,7 +36,7 @@ You won't have to do all of the above over and over.
 depending on your linux. This one is for experienced users.
 </ol>
 
-<em>preliminaries for MACOS</em>
+<b>Preliminaries for MACOS</b>
 
 <ol>
 <li> Open the <code>terminal</code> app.
@@ -47,7 +47,7 @@ depending on your linux. This one is for experienced users.
 </ol>
 
 
-<em>preliminaries for UBUNTU/DEBIAN/MINT</em>
+<b>Preliminaries for UBUNTU/DEBIAN/MINT</b>
 
 <ol>
 <li> <code>sudo apt-get install git</code>
@@ -56,7 +56,7 @@ depending on your linux. This one is for experienced users.
 </ol>
 
 
-<em>preliminaries for FEDORA/RedHat</em>
+<b>preliminaries for FEDORA/RedHat</b>
 
 
 <ol>
@@ -64,7 +64,7 @@ depending on your linux. This one is for experienced users.
 <li> <code>sudo yum install wget</code>
 </ol>
 
-<em>for OTHER LINUXES</em>
+<b>For OTHER LINUXES</b>
 
 Arch, Suse, MacOS do not seem to have the peculiar Ubuntu and RedHat/Fedora caste of packages,
 so everything should be fine to run the CCGlab installer.
