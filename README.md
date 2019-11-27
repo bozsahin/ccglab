@@ -56,7 +56,7 @@ depending on your linux. This one is for experienced users.
 </ol>
 
 
-<b>preliminaries for FEDORA/RedHat</b>
+<b>Preliminaries for FEDORA/RedHat</b>
 
 
 <ol>
@@ -64,9 +64,9 @@ depending on your linux. This one is for experienced users.
 <li> <code>sudo yum install wget</code>
 </ol>
 
-<b>For OTHER LINUXES</b>
+<b>For other linuxes</b>
 
-Arch, Suse, MacOS do not seem to have the peculiar Ubuntu and RedHat/Fedora caste of packages,
+Arch and Suse do not seem to have the peculiar Ubuntu and RedHat/Fedora caste of packages,
 so everything should be fine to run the CCGlab installer.
 
 <a name="install">
