@@ -5,7 +5,7 @@ Install instructions are in this README, <a href="#install">here</a>. There are 
 on your OS, so please follow the install after reading through this README.
 
            
-This is Common Lisp code. It needs a linux, a native one or one in macosphere or windowsphere.
+This is Common Lisp code with some <code>bash</code> string processing. It needs a linux, a native one or one in macosphere or windowsphere.
 
 SBCL and CCL Lisps are usable out of the box for CCGlab. If you already have an ANSI Common Lisp, it can work with it too.
 
