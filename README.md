@@ -7,7 +7,8 @@ on your OS, so please follow the install after reading through this README.
            
 This is Common Lisp code with some <code>bash</code> string processing. It needs a linux, a native one or one in macosphere or windowsphere.
 
-SBCL and CCL Lisps are usable out of the box for CCGlab. If you already have an ANSI Common Lisp, it can work with it too.
+SBCL and CCL Common Lisps are usable out of the box for CCGlab. The <code>install</code> script sets up SBCL for CCGlab.
+If you already have an ANSI Common Lisp, it can work with it too.
 
 GCL and CLisp are ANSI but the first one does not come with CLOS, and CLisp has weird locks on standard package files to turn them on. This is unfortunate because some CCGlab macros
 for the Lisp reader needs methods, therefore not usable in GCL/Clisp out of the box.
@@ -25,9 +26,9 @@ You need a linux system for CCGlab. There are three options for windows (I recom
            <li> For windows 10: Follow these <a href="docs/windows10-directions.txt">directions</a>. No partitions, no virtualbox, no hassles. You now have linux as a W10 app with ccglab in it.
 <li> For windows earlier than W10: install a virtual box such as Oracle's: https://www.virtualbox.org/.
 
-Then follow one of the advices below for linuxes for ccglab install, depending on your (virtual) machine.
+Then follow one of the advices below for linuxes for ccglab install, depending on your virtual machine.
 
-I recommend setting up an Ubuntu virtualbox, because it allows you to try without fully installing it.
+I recommend setting up an Ubuntu or Mint virtualbox if you have no prior linux experience.
 
 If you use CCGLAB from a virtualbox, save your machine state rather than power off the virtual machine.
 You won't have to do all of the above over and over.
