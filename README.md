@@ -7,8 +7,7 @@ on your OS, so please follow the install after reading through this README.
            
 This is Common Lisp code with some <code>bash</code> string processing. It needs a linux, a native one or one in macosphere or windowsphere.
 
-SBCL and CCL Common Lisps are usable out of the box for CCGlab. The <code>install</code> script sets up SBCL for CCGlab.
-If you already have an ANSI Common Lisp, it can work with it too.
+SBCL and CCL Common Lisps are usable out of the box for CCGlab. The <code>install</code> script sets up SBCL for CCGlab if you haven't got one already. If you have an ANSI Common Lisp, it can work with it too.
 
 GCL and CLisp are ANSI but the first one does not come with CLOS, and CLisp has weird locks on standard package files to turn them on. This is unfortunate because some CCGlab macros
 for the Lisp reader needs methods, therefore not usable in GCL/Clisp out of the box.
