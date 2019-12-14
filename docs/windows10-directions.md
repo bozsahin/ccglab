@@ -1,10 +1,12 @@
+#CCGlab in Windows10 as a antive linux app.
+
 This guide is prepared by Efecan Yilmaz. It gives you first a linux as W10 app, then ccglab. 
 No partitions, no virtualbox.
 Thanks Efe.
 
----------------
+-----------------------------
 
-You need to be on version 1909 of Windows10, build 18363.476. Versions and/or builds newer than these are unlikely to cause problems.
+You need to be on version 1909 of Windows10, build 18363.476 or later. 
 
 This document is based on: https://docs.microsoft.com/en-us/windows/wsl/install-win10
 
