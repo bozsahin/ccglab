@@ -32,7 +32,7 @@ cd ~
 
 git clone https://github.com/bozsahin/ccglab 
 
-5. Proceed with  <a href="https://github.io/bozsahin/blob/ccglab/README.md">ccglab installation guide</a>.
+5. Proceed with  <a href="https://github.com/bozsahin/ccglab/blob/master/README.md">ccglab installation guide</a>.
 
 You are ready to go. You can close the linux app when you are done without loss of work. 
 
