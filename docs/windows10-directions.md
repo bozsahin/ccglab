@@ -1,4 +1,4 @@
-#CCGlab in Windows10 as a antive linux app.
+# CCGlab in Windows10 as a antive linux app.
 
 This guide is prepared by Efecan Yilmaz. It gives you first a linux as W10 app, then ccglab. 
 No partitions, no virtualbox.
@@ -32,7 +32,7 @@ cd ~
 
 git clone https://github.com/bozsahin/ccglab 
 
-5. Proceed with  <a href="https://github.com/bozsahin/ccglab/README.md">ccglab installation guide</a>.
+5. Proceed with  <a href="https://github.io/bozsahin/blob/ccglab/README.md">ccglab installation guide</a>.
 
 You are ready to go. You can close the linux app when you are done without loss of work. 
 
