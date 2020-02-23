@@ -31,7 +31,7 @@ if [ -x /usr/local/bin/sbcl ] || [ -x /usr/bin/sbcl ] || [ -x /usr/local/bin/ccl
   fi
   if [ `which sbcl` ]; then
   	echo " : You have `which sbcl`"
-	locallisp=`which sbcl`
+	locallisp="`which sbcl` --noinform"
   fi
   echo      " : using $locallisp as Lisp" 
   echo      '   you can change that in .bashrc file'

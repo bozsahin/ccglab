@@ -20,7 +20,7 @@
 					(OUTSYN NIL)
 					(OUTSEM (LAM LF (LAM P (P LF))))  ; all auto-generated tr rules use these var names--no need for semantic unification
 					(INDEX NIL)
-					(PARAM 1.0)))  ;; may be different if an .ind file is compiled --hhcb
+					(PARAM 1.0)))  ;; may be different from other parameters if grammar is trained --hhcb
 (defccglab *SYNS* NIL)
 (defccglab *LAST-KEY-ID* NIL)
 (defccglab *ARGS* NIL)
@@ -43,8 +43,8 @@
 	(assoc 'DIR l))
 
 (defun get-last-key-id (l)
-	"latest key id in the structure---no guarantee that .ded or .ind file is ordered by key; find the max"
-	(setf *LAST-KEY-ID* -1) ; no negatives in translation from .ccg to .ded --hope it continues in .ind
+	"latest key id in the structure---no guarantee that the grammarfile is ordered by key; find the max"
+	(setf *LAST-KEY-ID* -1) ; no negatives in translation from .ccg to .bin  
 	(dolist (e l)
 		(if (< *LAST-KEY-ID* (second (assoc 'KEY e)))
 		  (setf *LAST-KEY-ID* (second (assoc 'KEY e))))))
@@ -88,11 +88,6 @@
 	"replaces the X in the structure (OUTSYN X)"
 	(rplacd (assoc 'outsyn l) (wrap X)))
 ;------------end of set methods-----------------;
-
-(defun load-gram (path_to_gr)
-  "load the ded or ind file from a path"
-  (safely-load path_to_gr)
-  (if *error* (format t "~%No such file: ~A" path_to_gr)))
 
 (defun find-morph-v (ccg-grammar morphs)
 	"find verb morphemes"
@@ -224,10 +219,10 @@
 ;------------to create lex-rule entries-------------------------
 ;---------------------------------------------------------------
 
-(defun compile-tr (arg morphs) 
+(defun compile-tr (pname morphs) 
   (setf *RAISED-LEX-RULES* NIL) ;set to default
   (setf *VERBS-IN-GRAMMAR* NIL)
-  (load-gram arg)  ; ded and ind have same format
+  (load-grammar pname)  
   (if *error* (progn (format t "~%aborting compile; currently loaded grammar is unchanged")
 		     (return-from compile-tr)))
   (find-morph-v *ccg-grammar* morphs)
@@ -293,3 +288,7 @@
   (compile-tr gname vmorphs) ; result in *RAISED-LEX-RULES* in reverse order of find
   (hash-tr)
   (subsume-tr))
+
+(abbrevs tr compile-and-subsume-tr) ;; add these to *abv* list
+(abbrevs trc compile-tr)
+(abbrevs trt type-raise-targets)

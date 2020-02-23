@@ -1,5 +1,5 @@
 ;;;; =========================================================================== 
-;;;; == CCGlab  -Cem Bozsahin, 2015-2019, Lisboa, Ankara                      ==
+;;;; == CCGlab  -Cem Bozsahin, 2015-2020  Lisboa, Ankara, Datca               ==
 ;;;; ===========================================================================
 ;;;; 
 ;;;; GNU GPL license applies.
@@ -40,16 +40,16 @@
 (defparameter *ccglab-switches* nil) ; to keep track of all on/off switches
                                     ; i seem to want to define more and more and lose track
 
-(defmacro defccglab (nam val)
+(defmacro defccglab (nam val &optional (msg nil))
   (if (member nam *ccglab-globals*)
-    (format t "~%defccglab warning! the name is RE-defined: ~A" nam)
+    (and msg (format t "~%defccglab warning! the name is RE-defined: ~A" nam))
     (push nam *ccglab-globals*))
   `(defparameter ,nam ,val))  ; do the def in any case 
                               ; no defvars in this dynamic env!
 
-(defmacro defswitch (nam val)
+(defmacro defswitch (nam val &optional (msg nil))
   (if (member nam *ccglab-switches*)
-    (format t "~%defswitch warning! the name is RE-defined: ~A" nam)
+    (and msg (format t "~%defswitch warning! the name is RE-defined: ~A" nam))
     (push nam *ccglab-switches*)) ; do the def in any case 
   `(defparameter ,nam ,val))      ; no defvars in this dynamic env!
 
@@ -234,7 +234,7 @@
   The only hashtable that has potential clash is the basic cat table because only there we have
   user features.
   Called during parsing .ccg to lisp code"
-  `(if (member ,feat *ccglab-reserved*) (format t "~%*** CCGlab warning ** Your feature name clashes with built-in features; please rename : ~A" ,feat)))
+  `(if (member ,feat *ccglab-reserved*) (format t "~%*** CCGlab warning *** Your feature name clashes with built-in features; please rename : ~A" ,feat)))
 
 (defun make-lex-hashtable ()
   "keys are: index key param sem syn morph phon tag. Tag is NF tag"
@@ -316,6 +316,7 @@
 ;;; globals
 ;;; =======
 
+(defccglab *ccg-tokenizer* "tokens") ; call this sed script for all CCG tokenization
 (defswitch *type-raised-p* nil) ; is the grammar compiled out for type raising (nil/t)?
 (defccglab *type-raise-targets* nil) ; the list of basic cats to type raise (i.e. argument cats list)
 (defccglab *ccglab-reserved* '(tag phon morph syn sem param insyn insem outsyn outsem bcat dir feats modal
@@ -558,7 +559,7 @@
   )
 
 (defun which-ccglab ()
-  "CCGlab, version 6.0.1")
+  "CCGlab, version 7.0")
 
 (defun set-lisp-system (lispsys)
   (case lispsys
@@ -571,14 +572,13 @@
     (progn 
       (setf *lispsys* 'sbcl)
       (format t "~%I am using run-program API as ~A does." *lispsys*)
-      (format t "~%You may not be able to re-make .ded or .sup files if this is wrong."))))
+      (format t "~%You may not be able to re-make .bin or .sup files if this is wrong."))))
 
 (defun flash-news (&optional (report t))
   (and report 
-       (format t "~%Gradient extrapolation now available.~%Type-raise compiling now available.")))
+       (format t "~%Gradient extrapolation now available.~%Type-raise compiling now available.~%.ded and .ind file types deprecated.~%All compiled grammars have .bin extension.")))
 
 (defun welcome (&optional (lispsys *lispsys*))
-  (format t "~2%If you've got WARNINGS during loading,~%   you can ignore them.")
   (format t "~%====================================================")
   (format t "~%Welcome to ~A" (which-ccglab))
   (format t "~%----------------------------------------------------")
@@ -1162,14 +1162,14 @@
 
 (defun lispify-project (pname maker)
    "reads paper-style tokenized specs for the project pname, and feeds that into 
-  parse/1 to generate pname.ded"
-   (let ((ofilename (concatenate 'string pname ".ded"))
+  parse/1 to generate pname.bin"
+   (let ((ofilename (concatenate 'string pname ".bin"))
 	 (sfilename (concatenate 'string pname ".ccg"))
 	 (infilename (concatenate 'string pname ".lisptokens")))
      (case maker ;; one of these will generate .lisptokens
-       (sbcl (run-program "tokens" (list pname) :search t :wait t))
-       (ccl  (run-program "tokens" (list pname) :wait t))
-       (alisp  (run-shell-command (concatenate 'string "tokens " pname) :wait t))
+       (sbcl (run-program *ccg-tokenizer* (list sfilename infilename) :search t :wait t))
+       (ccl  (run-program *ccg-tokenizer* (list sfilename infilename) :wait t))
+       (alisp  (run-shell-command (concatenate 'string *ccg-tokenizer* " " sfilename infilename) :wait t))
        (otherwise (format t "~%Reading from off-line generated ~A" infilename)))
      (with-open-file (strm infilename :direction :input :if-does-not-exist nil)
        (if (streamp strm)
@@ -1180,78 +1180,64 @@
 	 (progn (format t "~%**ERROR in load: ~A or ~A or ~A." sfilename infilename ofilename)
 		(return-from lispify-project))))
      (and (> *singletons* 0) 
-	  (format t "~%=============================================================================~%** CCGlab warning ** There are ~A string-constant categories in your grammar, make sure NONE are void" *singletons*))
-     (format t "~2%=========================== p r e p a r i n g ===============================~%")
-     (format t "~%Project name: ~A~%  Input : ~A ~%  Output: ~A ~%Check to see if output contains any spec errors.~%Fix and re-run if it does." pname infilename ofilename)
-     (format t "~%You can also re/create ~A by running 'tokens ~A' sed script offline." infilename pname)))
+	  (format t "~%=============================================================================~%*** CCGlab warning *** There are ~A string-constant categories in your grammar~% make sure NONE are void" *singletons*))
+     (format t "~2%======================= c o m p i l i n g ===================================~%")
+     (format t "~%Project name: ~A~%  Input : (~A, ~A)~%  Output: ~A ~%** Check ~A for errors if load fails." pname sfilename infilename ofilename ofilename)))
 
-(defun lispify-supervision (pname maker)
-   "reads semicolon-terminated supervision pairs and forms the token file pname.suptokens"
-   (let ((ofilename (concatenate 'string pname ".sup"))
-	 (infilename (concatenate 'string pname ".suptokens")))
-     (case maker ;; one of these will generate .suptokens
-       (sbcl (run-program "suptokens"  (list pname) :search t :wait t))
-       (ccl  (run-program "suptokens" (list pname) :wait t))
-       (alisp  (run-shell-command (concatenate 'string "suptokens " pname) :wait t))
-       (otherwise (format t "~%Reading from off-line generated ~A" infilename)))
-     (with-open-file (strm infilename :direction :input :if-does-not-exist nil)
-       (if (streamp strm)
-	 (with-open-file (s ofilename  :direction :output :if-exists :supersede)
-	   (format s "~A" (parse/2 (read strm)))) ; this is the interface to LALR transformer's parse
-	 (progn (format t "~%**ERROR in loading ~A" infilename)
-		(return-from lispify-supervision))))
-     (format t "~%=========================== p r e p a r i n g ===============================~%")
-     (format t "~%Project name: ~A~%  Input : ~A ~%  Output: ~A ~%Check to see if output contains any spec errors.~%Fix and re-run if it does." pname infilename ofilename)
-     (format t "~%You can also re/create ~A by running 'suptokens ~A' sed script offline." infilename pname)))
+(defun lispify-supervision (pname ofilename sourcefile infilename maker)
+  (case maker ;; one of these will generate .suptokens
+    (sbcl (run-program *ccg-tokenizer*  (list sourcefile infilename) :search t :wait t))
+    (ccl  (run-program *ccg-tokenizer* (list sourcefile infilename) :wait t))
+    (alisp  (run-shell-command (concatenate 'string *ccg-tokenizer* " " sourcefile infilename) :wait t))
+    (otherwise (format t "~%Reading from off-line generated ~A" infilename)))
+  (with-open-file (strm infilename :direction :input :if-does-not-exist nil)
+    (if (streamp strm)
+      (with-open-file (s ofilename  :direction :output :if-exists :supersede)
+	(format s "~A" (parse/2 (read strm)))) ; this is the interface to LALR transformer's parse
+      (progn (format t "~%**ERROR in loading ~A" infilename)
+	     (return-from lispify-supervision))))
+  (format t "~%Project name: ~A~%  Input : (~A, ~A) ~%  Output: ~A ~%Check ~A for errors and retry if load of ~A fails." 
+	  pname sourcefile infilename ofilename sourcefile ofilename)
+  (load-supervision pname))
 
-(defun load-project (pname pfile)
+(defun load-project (pname &optional (pfile 'model))
   (let* ((sname (concatenate 'string pname ".ccg"))
 	 (tname (concatenate 'string pname ".lisptokens"))
-	 (gname (concatenate 'string pname ".ded"))
-	 (mname (concatenate 'string pname ".ind"))
-	 (cname (concatenate 'string pname ".lisp"))
-	 (suname (concatenate 'string pname ".sup"))
-	 (lfile (if (eq pfile 'model) mname gname)))
+	 (gname (concatenate 'string pname ".bin"))
+	 (suname (concatenate 'string pname ".sup")))
     (format t "~%======================= l o a d i n g =======================================~%")
     (setf *error* nil)
-    (safely-load lfile)             ; this will set the *ccg-grammar* list 
+    (safely-load gname)             ; this will set the *ccg-grammar* variable
     (cond ((not *error*)
 	   (setf *lex-rules-table* nil)
-	   (setf *loaded-grammar* lfile)
+	   (setf *loaded-grammar* gname)
 	   (dolist (l *ccg-grammar*)(and (not (lexp l)) (push-t (hash-lexrule l) *lex-rules-table*))) ; we get reversed list of rules
 	   (setf *lex-rules-table* (reverse *lex-rules-table*)) ; it is important that the rules apply in the order specified
-	   (format t "~%Project [~A] is assumed to consist of" pname)
+	   (format t "~%Project ~A files" pname)
            (format t "~%-----------------------------------------------------------------------------")
-	   (format t "~%  CCG grammar source : ~A $" sname)
-	   (format t "~%    Its token form   : ~A $" tname)
-	   (format t "~%  Deduction grammar  : ~A $ (derived from ~A)" gname tname)
-	   (format t "~%  Induction grammar  : ~A #" mname)
-	   (format t "~%  Supervision source : ~A ^" suname)
-	   (format t "~%  Model-specific code: ~A ^" cname)
-	   (format t "~%   and other model-specific files you may create.")
-	   (format t "~%       *CCG-GRAMMAR* : set from ~A" lfile)
-	   (format t "~%  *LEX-RULES-TABLE*  : set from ~A" lfile)
-	   (format t "~%Expected files       : $ for deduction, # for induction, ^ for model development")
+	   (format t "~%  CCG grammar source      : ~A" sname)
+	   (format t "~%    Its token form        : ~A" tname)
+	   (format t "~%  Compiled/loaded grammar : ~A" gname)
+	   (format t "~%  Supervision source      : ~A (optional)" suname)
+	   (format t "~%       *CCG-GRAMMAR*      : ~A entries" (length *ccg-grammar*))
+	   (format t "~%   *LEX-RULES-TABLE*      : ~A entries" (length *lex-rules-table*))
 	   (format t "~%=============================================================================~%")
 	   t)
-	  (t (if (eq pfile 'model)
-	       (format t "~%ERROR loading the model file ~A" mname)
-	       (progn
-		 (format t "~%**ERROR loading the project ~A.~%  A required ~A file does not exist or ~A has syntax error." pname pname sname)
-		 (format t "~%  Have a look at ~A to see if there is error in ~A." gname sname)))
+	  (t (format t "~%**ERROR in loading project ~A." pname)
+	     (format t "~%  Have a look at ~A to see THE FIRST ERROR in ~A." gname sname)
 	     (format t "~%Project ~A cannot be loaded:" pname)
 	     (format t "~%  *ccg-grammar* is unchanged.")
 	     (format t "~%  *lex-rules-table* is unchanged.~%")
 	     nil))))
 
-(defun load-model (pname)
-  (load-project pname 'model))
-
+(defmacro load-model (pname)
+  "kept as legacy code"
+  `(load-project ,pname))
 
 (defun load-grammar (pname &key (maker nil) (make (if maker t nil)))
   "Prepares and loads a Lisp-translated CCG grammar, and prepares the lexical rule hashtable for the project.
   Maker is a legacy argument; I kept it for people who have scripts with e.g. (load-grammar .. :maker 'sbcl)."
-  (and make (lispify-project pname *lispsys*)) ; generates the .ded file and/or .lisptokens file 
+  (and make (lispify-project pname *lispsys*)) ; generates the .bin file and/or .lisptokens file 
   (load-project pname 'grammar))
 
 (defmacro make-and-load-grammar (pname)
@@ -1435,10 +1421,14 @@
   (compile (eval (make-parser grammar lexforms *ENDMARKER*)))) 
 
 (defun make-transformer/ccg ()
-  (terpri) ; to clean up Lisp warnings
-  (load-transformer/ccg)
-  (terpri)
-  (make-lalrparser))
+  "using Nikodemus Siivola message suppression"
+  (let* ((nada (make-broadcast-stream))
+	 (*standard-output* nada)
+	 (*error-output* nada))
+    (load-transformer/ccg)
+    (make-lalrparser))
+  t)
+
 
 (make-transformer/ccg)
 
@@ -1517,10 +1507,13 @@
   )
 
 (defun make-transformer/sup ()
-  (terpri)  ; to clean up Lisp warnings
-  (load-transformer/sup)
-  (terpri)
-  (make-lalrparser))
+  "using Nikodemus Siivola message suppression"
+  (let* ((nada (make-broadcast-stream))
+	 (*standard-output* nada)
+	 (*error-output* nada))
+    (load-transformer/sup)
+    (make-lalrparser))
+  t)
 
 (defun make-supervision (pname &key (maker t))
   "Makes a lisp-ready pname.sup file from pname.supervision and pname.suptokens.
@@ -1529,11 +1522,8 @@
 	(sourcefile (concatenate 'string pname ".supervision"))
 	(infilename (concatenate 'string pname ".suptokens")))
     (make-transformer/sup)
-    (and maker (lispify-supervision pname *lispsys*))
-    (make-transformer/ccg) ; reset to CCG input parsing because there can be one LALR grammar at any time
-    (format t "~%=========================== p r e p a r i n g ===============================~%")
-    (format t "~%Project name: ~A~%  Input : ~A and ~A~%  Output: ~A ~%Check to see if output contains any spec errors.~%Fix and re-run if it does." pname sourcefile infilename ofilename)
-    (format t "~%You can also re/create ~A by running 'suptokens ~A' sed script offline." infilename pname)))
+    (and maker (lispify-supervision pname ofilename sourcefile infilename *lispsys*))
+    (make-transformer/ccg))) ; reset to CCG input parsing because there can be one LALR grammar at any time
 
 ;;;; =============================================================================
 ;;;; == Part 2: The CKY parser for CCG -- the deductive component               ==
@@ -3426,6 +3416,15 @@
   "writes one lisp object to file fn in one fell swoop"
   (with-open-file (s fn :direction :output :if-exists :error) (format  s "~A~%" obj)))
 
+(defun write1f (fn obj)
+  "force writes one lisp object to file fn in one fell swoop"
+  (with-open-file (s fn :direction :output :if-exists :supersede) (pprint-linear s obj)))
+
+(defun write1fperline (fn obj)
+  "force writes the list in obj one element per line"
+  (with-open-file (s fn :direction :output :if-exists :supersede)
+    (format s "(~%~{~A~%~})" obj)))
+
 (defun gradient-profile (&rest models)
   "lists pairwise gradient difference in a sequence of models in files. 
   Assumes models are parallel; i.e. keys in same order."
@@ -3461,7 +3460,7 @@
   "let here is not really necessary; i use it to show destructive
   effects of sort. without copy-seq the last reference to np gives error."
   (let ((np (group names 2)))
-    (setf *abv* (sort (copy-seq np) #'string< :key #'car)) ; beware: sort is destructive
+    (setf *abv* (sort (append (copy-seq np) *abv*) #'string< :key #'car)) ; beware: sort is destructive
     `(progn 
        ,@(mapcar #'(lambda (pair) `(abbrev ,@pair))
 	       np))))
@@ -3473,10 +3472,7 @@
 
 (abbrevs lg load-grammar 
 	 mlg make-and-load-grammar
-	 tr compile-and-subsume-tr
-	 trc compile-tr
 	 loads safely-load
-	 trt type-raise-targets
          savetr save-subsumption
 	 lm load-model
 	 cd ccg-deduce
