@@ -9,8 +9,8 @@ if [ $lispbinary ] && [ $lispbinary = sbcl ]; then
 elif [ $lispbinary ] && [ $lispbinary = ccl ]; then
 	load='--load'
 	eval='--eval'
-	P="(write-to-string '"
-	R=')'
+	P='(write-to-string (quote '
+	R='))'
 elif [ $lispbinary ] && [ $lispbinary = alisp ] || [ $lispbinary = mlisp ]; then
 	load='-L'
 	eval='-e'
