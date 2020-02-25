@@ -1182,7 +1182,7 @@
      (and (> *singletons* 0) 
 	  (format t "~%=============================================================================~%*** CCGlab warning *** There are ~A string-constant categories in your grammar~% make sure NONE are void" *singletons*))
      (format t "~2%======================= c o m p i l i n g ===================================~%")
-     (format t "~%Project name: ~A~%  Input : (~A, ~A)~%  Output: ~A ~%** Check ~A for errors if load fails." pname sfilename infilename ofilename ofilename)))
+     (format t "~%Project name: ~A~%  Input : (~A, ~A)~%  Output: ~A ~%** Check ~A for THE FIRST ERROR in ~A if load fails." pname sfilename infilename ofilename ofilename sfilename)))
 
 (defun lispify-supervision (pname ofilename sourcefile infilename maker)
   (case maker ;; one of these will generate .suptokens
@@ -1224,7 +1224,7 @@
 	   (format t "~%=============================================================================~%")
 	   t)
 	  (t (format t "~%**ERROR in loading project ~A." pname)
-	     (format t "~%  Have a look at ~A to see THE FIRST ERROR in ~A." gname sname)
+	     (format t "~%  Have a look at ~A to see THE FIRST ERROR in ~A (does it exist?)" gname sname)
 	     (format t "~%Project ~A cannot be loaded:" pname)
 	     (format t "~%  *ccg-grammar* is unchanged.")
 	     (format t "~%  *lex-rules-table* is unchanged.~%")
@@ -1234,9 +1234,13 @@
   "kept as legacy code"
   `(load-project ,pname))
 
-(defun load-grammar (pname &key (maker nil) (make (if maker t nil)))
+(defun load-grammar (pname &key (maker nil) (make (if maker t nil)) (sure nil))
   "Prepares and loads a Lisp-translated CCG grammar, and prepares the lexical rule hashtable for the project.
   Maker is a legacy argument; I kept it for people who have scripts with e.g. (load-grammar .. :maker 'sbcl)."
+  (if (and make (not sure))
+    (progn (format t "You may be about to override a modified ~A file.~%If you are sure, use :sure t option with :make t" 
+		   (concatenate 'string pname ".ccg.lisp"))
+	   (return-from load-grammar)))
   (and make (lispify-project pname *lispsys*)) ; generates the .ccg.lisp file and/or .lisptokens file 
   (load-project pname 'grammar))
 
