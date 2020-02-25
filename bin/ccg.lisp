@@ -572,11 +572,11 @@
     (progn 
       (setf *lispsys* 'sbcl)
       (format t "~%I am using run-program API as ~A does." *lispsys*)
-      (format t "~%You may not be able to re-make .bin or .sup files if this is wrong."))))
+      (format t "~%You may not be able to re-make .ccg.lisp or .sup files if this is wrong."))))
 
 (defun flash-news (&optional (report t))
   (and report 
-       (format t "~%Gradient extrapolation now available.~%Type-raise compiling now available.~%.ded and .ind file types deprecated.~%All compiled grammars have .bin extension.")))
+       (format t "~%Gradient extrapolation now available.~%Type-raise compiling now available.~%.ded and .ind file types deprecated.~%All compiled grammars have .ccg.lisp extension.")))
 
 (defun welcome (&optional (lispsys *lispsys*))
   (format t "~%====================================================")
@@ -1162,8 +1162,8 @@
 
 (defun lispify-project (pname maker)
    "reads paper-style tokenized specs for the project pname, and feeds that into 
-  parse/1 to generate pname.bin"
-   (let ((ofilename (concatenate 'string pname ".bin"))
+  parse/1 to generate compiled pname file"
+   (let ((ofilename (concatenate 'string pname ".ccg.lisp"))
 	 (sfilename (concatenate 'string pname ".ccg"))
 	 (infilename (concatenate 'string pname ".lisptokens")))
      (case maker ;; one of these will generate .lisptokens
@@ -1203,7 +1203,7 @@
 (defun load-project (pname &optional (pfile 'model))
   (let* ((sname (concatenate 'string pname ".ccg"))
 	 (tname (concatenate 'string pname ".lisptokens"))
-	 (gname (concatenate 'string pname ".bin"))
+	 (gname (concatenate 'string pname ".ccg.lisp"))
 	 (suname (concatenate 'string pname ".sup")))
     (format t "~%======================= l o a d i n g =======================================~%")
     (setf *error* nil)
@@ -1237,7 +1237,7 @@
 (defun load-grammar (pname &key (maker nil) (make (if maker t nil)))
   "Prepares and loads a Lisp-translated CCG grammar, and prepares the lexical rule hashtable for the project.
   Maker is a legacy argument; I kept it for people who have scripts with e.g. (load-grammar .. :maker 'sbcl)."
-  (and make (lispify-project pname *lispsys*)) ; generates the .bin file and/or .lisptokens file 
+  (and make (lispify-project pname *lispsys*)) ; generates the .ccg.lisp file and/or .lisptokens file 
   (load-project pname 'grammar))
 
 (defmacro make-and-load-grammar (pname)
