@@ -44,7 +44,7 @@
 
 (defun get-last-key-id (l)
 	"latest key id in the structure---no guarantee that the grammarfile is ordered by key; find the max"
-	(setf *LAST-KEY-ID* -1) ; no negatives in translation from .ccg to .bin  
+	(setf *LAST-KEY-ID* -1) ; no negatives in translation from .ccg to .ccg.lisp  
 	(dolist (e l)
 		(if (< *LAST-KEY-ID* (second (assoc 'KEY e)))
 		  (setf *LAST-KEY-ID* (second (assoc 'KEY e))))))

@@ -576,16 +576,16 @@
 
 (defun flash-news (&optional (report t))
   (and report 
-       (format t "~%Gradient extrapolation now available.~%Type-raise compiling now available.~%.ded and .ind file types deprecated.~%All compiled grammars have .ccg.lisp extension.")))
+       (format t "~%Gradient extrapolation available.~%Type-raising compiler available.~%.ded and .ind file types deprecated.~%Grammars & models compile to/load from .ccg.lisp file")))
 
 (defun welcome (&optional (lispsys *lispsys*))
-  (format t "~%====================================================")
+  (format t "~%=====================================================")
   (format t "~%Welcome to ~A" (which-ccglab))
-  (format t "~%----------------------------------------------------")
+  (format t "~%-----------------------------------------------------")
   (set-lisp-system lispsys)
   (flash-news)
   (format t "~%Ready.")
-  (format t "~%====================================================~%"))
+  (format t "~%=====================================================~%"))
 
 (defun beam-value ()
   (format t "~%*Beamp* = ~A  *Beam-exp* = ~A~%" *beamp* *beam-exp*))
@@ -1200,7 +1200,7 @@
 	  pname sourcefile infilename ofilename sourcefile ofilename)
   (load-supervision pname))
 
-(defun load-project (pname &optional (pfile 'model))
+(defun load-project (pname)
   (let* ((sname (concatenate 'string pname ".ccg"))
 	 (tname (concatenate 'string pname ".lisptokens"))
 	 (gname (concatenate 'string pname ".ccg.lisp"))
@@ -1238,15 +1238,15 @@
   "Prepares and loads a Lisp-translated CCG grammar, and prepares the lexical rule hashtable for the project.
   Maker is a legacy argument; I kept it for people who have scripts with e.g. (load-grammar .. :maker 'sbcl)."
   (if (and make (not sure))
-    (progn (format t "You may be about to override a modified ~A file.~%If you are sure, use :sure t option with :make t" 
+    (progn (format t "You may be about to override a modified ~A file.~%If you are sure, use make-and-load-grammar (aka mlg)" 
 		   (concatenate 'string pname ".ccg.lisp"))
 	   (return-from load-grammar)))
   (and make (lispify-project pname *lispsys*)) ; generates the .ccg.lisp file and/or .lisptokens file 
-  (load-project pname 'grammar))
+  (load-project pname))
 
 (defmacro make-and-load-grammar (pname)
-  "simple macro for make and load"
-  `(load-grammar ,pname :make t))        
+  "simple macro for make and load, assuming you know what you are doing"
+  `(load-grammar ,pname :make t :sure t))        
 
 (defun get-ht (phon ht-list)
   "returns the hashtable in ht-list that has PHON feature same as phon.
@@ -3054,7 +3054,6 @@
   "runs over every parameter trained 4 times---input val is a 4-item dotted lists of (param . derivative), 
   and extrapolates a limit in the fifth column."
   (maphash #'(lambda (key val)
-	       (declare (ignore key))
 	       (let ((p1 (first val))
 		     (p2 (second val))
 		     (p3 (third val))
