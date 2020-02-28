@@ -59,7 +59,7 @@ if [ ! "$locallisp" ]; then
 	echo '   Installing SBCL and rlwrap from standard repositories'
 	echo ' : WARNING: you need install and write access now'
 	$SUDO $packager install sbcl
-	locallisp=`which sbcl`
+	locallisp="`which sbcl` --noinform"
 	if [ -x /usr/local/bin/rlwrap ] || [ -x /usr/bin/rlwrap ] || [ -x /sw/bin/rlwrap ] || [ -x /sw/local/bin/rlwrap ]; then
 		echo ' : Using local rlwrap'
 	else 
