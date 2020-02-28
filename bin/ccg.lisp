@@ -3356,11 +3356,12 @@
     (setf (nv-list-val 'PARAM l) (get-key-param-xp (nv-list-val 'KEY l))))
   (save-grammar out))
 
-(defun z-score-grammar ()
+(defun z-score-grammar (&key (cutoff nil))
   "turns current parameter values to z-scores with normal distribution N(0,1).
-  Now all parameters are factors apart from population standard deviation with same variance as original sample."
+  Now all parameters are factors apart from population standard deviation with same variance as original sample.
+  If cutoff is not nil, it will ask in the end for a threshold to produce a filtered grammar."
   (if (< (length *ccg-grammar*) 2)
-    (format t "Nothing to z-score!")
+    (format t "~%Nothing to z-score!")
     (let ((sumsq 0.0) ; find standard deviation and mean in one pass, from Guttman/Wilks/Hunter 
 	  (sum  0.0)
 	  (std  0.0)
@@ -3371,7 +3372,7 @@
 	(setf sum (+ sum (nv-list-val 'PARAM item))))
       (setf std (sqrt (/ (- sumsq (/ (expt sum 2) n)) (- n 1))))
       (if (< std least-positive-short-float) 
-	(format t "No variation, no change")
+	(format t "~%No variation, no change")
 	(let ((minw most-positive-single-float)
 	      (maxw most-negative-single-float))
 	  (setf mean (/ sum n))
@@ -3379,8 +3380,19 @@
 	    (setf (nv-list-val 'PARAM item) (/ (- (nv-list-val 'PARAM item) mean) std))
 	    (if (> (nv-list-val 'PARAM item) maxw) (setf maxw (nv-list-val 'PARAM item)))
 	    (if (< (nv-list-val 'PARAM item) minw) (setf minw (nv-list-val 'PARAM item))))
-	  (format t "Max z-score = ~A, Min z-score = ~A~%" maxw minw)
-	  (format t "Done. Use save-grammar to save the changes in a file"))))))
+	  (format t "~%Currently loaded grammar is z-scored.")
+	  (format t "~%Max z-score = ~A, Min z-score = ~A" maxw minw)
+	  (or cutoff (format t "~%Done. Use save-grammar to save the changes in a file"))
+	  (if cutoff 
+	    (let* ((fg nil) ; filtered grammar
+		  (threshold (progn (format t "~%Enter lowest z-score value for cut off: ") (read)))
+		  (fn (progn (format t "~%Enter a filename in quotes for filtered grammar: ") (read))))
+	      (dolist (item *ccg-grammar*)
+		(if (>= (nv-list-val 'PARAM item) threshold) (push item fg)))
+	      (setf *ccg-grammar* (reverse fg))
+	      (save-grammar fn)
+	      ))
+	  )))))
 
 
 (defun mklist (obj)
