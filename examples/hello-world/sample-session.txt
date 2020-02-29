@@ -1,0 +1,71 @@
+
+> (which-ccglab)
+
+"CCGlab, version 7.0"
+> (make-and-load-grammar "hw")
+
+
+======================= c o m p i l i n g ===================================
+
+Project name: hw
+  Input : (hw.ccg, hw.lisptokens)
+  Output: hw.ccg.lisp 
+** Check hw.ccg.lisp for THE FIRST ERROR in hw.ccg if load fails.
+======================= l o a d i n g =======================================
+
+Project hw files
+-----------------------------------------------------------------------------
+  CCG grammar source      : hw.ccg
+    Its token form        : hw.lisptokens
+  Compiled/loaded grammar : hw.ccg.lisp
+  Supervision source      : hw.sup (optional)
+       *CCG-GRAMMAR*      : 6 entries
+   *LEX-RULES-TABLE*      : 0 entries
+=============================================================================
+T
+> (p '(every cat sat on the mat))
+
+T
+> (ders)
+
+
+Derivation 1
+--------------
+LEX   (EVERY) := (S/(S\NP))/*N
+        : (LAM P (LAM Q (LAM X ((EVERY (P X)) (Q X)))))
+LEX   (CAT) := N
+        : (LAM Y (CAT Y))
+>     (EVERY)(CAT) := S/(S\NP)
+        : ((LAM P (LAM Q (LAM X ((EVERY (P X)) (Q X))))) (LAM Y (CAT Y)))
+LEX   (SAT) := S\NP
+        : (LAM Z (SAT Z))
+LEX   (ON) := ((S\NP)\(S\NP))/NP
+        : (LAM X (LAM P (LAM Y ((AND (P Y)) ((ON X) Y)))))
+LEX   (THE) := NP/*N
+        : (LAM X (DEF X))
+LEX   (MAT) := N
+        : (LAM Y (MAT Y))
+>     (THE)(MAT) := NP
+        : ((LAM X (DEF X)) (LAM Y (MAT Y)))
+>     (ON)(THE MAT) := (S\NP)\(S\NP)
+        : ((LAM X (LAM P (LAM Y ((AND (P Y)) ((ON X) Y)))))
+           ((LAM X (DEF X)) (LAM Y (MAT Y))))
+<     (SAT)(ON THE MAT) := S\NP
+        : (((LAM X (LAM P (LAM Y ((AND (P Y)) ((ON X) Y)))))
+            ((LAM X (DEF X)) (LAM Y (MAT Y))))
+           (LAM Z (SAT Z)))
+>     (EVERY CAT)(SAT ON THE MAT) := S
+        : (((LAM P (LAM Q (LAM X ((EVERY (P X)) (Q X))))) (LAM Y (CAT Y)))
+           (((LAM X (LAM P (LAM Y ((AND (P Y)) ((ON X) Y)))))
+             ((LAM X (DEF X)) (LAM Y (MAT Y))))
+            (LAM Z (SAT Z))))
+
+Final LF, normal-order evaluated: 
+
+    (LAM X ((EVERY (CAT X)) ((AND (SAT X)) ((ON (DEF (LAM Y (MAT Y)))) X)))) =
+    (\ X . EVERY (CAT X) (AND (SAT X) (ON (DEF (\ Y . MAT Y)) X)))
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+NIL
+> (dribble)

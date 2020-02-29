@@ -1,41 +1,26 @@
 
-> (status)
+> (mlg "fg2018")
 
-To see rule switches, do (switches)
-  To beam or not to beam    : NIL
-  Normal Form (NF) parse    : T
-  Out of vocabulary flag    : NIL
- *PRINT-READABLY*           : NIL
- *PRINT-PRETTY*             : T
-  Currently loaded grammar  : 
- *CCG-GRAMMAR*              : 0 items
- *LEX-RULES-TABLE*          : 0 items
- *CKY-HASHTABLE*            : 0 items
- *CKY-INPUT* for the table  : NIL 
-  Most likely LF w/weight   : NIL 
-  Its most likely derivation: NIL
-  Sum of weighted counts    : 0.0 
-  Most likely LF's cells    : NIL 
-  Number of differing LFs   : 0 
-  Most weighted derivation  : NIL 
-NIL
-> (lg "fg2018")
+=============================================================================
+*** CCGlab warning *** There are 13 string-constant categories in your grammar
+ make sure NONE are void
 
+======================= c o m p i l i n g ===================================
+
+Project name: fg2018
+  Input : (fg2018.ccg, fg2018.lisptokens)
+  Output: fg2018.ccg.lisp 
+** Check fg2018.ccg.lisp for THE FIRST ERROR in fg2018.ccg if load fails.
 ======================= l o a d i n g =======================================
-; loading #P"/Users/bozsahin/myrepos/ccglab/examples/grammar-with-workflow/fg2018.ded"
 
-Project [fg2018] is assumed to consist of
+Project fg2018 files
 -----------------------------------------------------------------------------
-  CCG grammar source : fg2018.ccg $
-    Its token form   : fg2018.lisptokens $
-  Deduction grammar  : fg2018.ded $ (derived from fg2018.lisptokens)
-  Induction grammar  : fg2018.ind #
-  Supervision source : fg2018.sup ^
-  Model-specific code: fg2018.lisp ^
-   and other model-specific files you may create.
-       *CCG-GRAMMAR* : set from fg2018.ded
-  *LEX-RULES-TABLE*  : set from fg2018.ded
-Expected files       : $ for deduction, # for induction, ^ for model development
+  CCG grammar source      : fg2018.ccg
+    Its token form        : fg2018.lisptokens
+  Compiled/loaded grammar : fg2018.ccg.lisp
+  Supervision source      : fg2018.sup (optional)
+       *CCG-GRAMMAR*      : 60 entries
+   *LEX-RULES-TABLE*      : 0 entries
 =============================================================================
 T
 > (load "testsuite.lisp")
@@ -43,7 +28,7 @@ T
 T
 > (test-ders)
 
-"CCGlab, version 5.2"
+"CCGlab, version 7.0"
 "showing results onto intended categories only"
 =======
 2
@@ -1558,5 +1543,382 @@ Final LF, normal-order evaluated:
 
 Try (cky-pprint) to see the details including the features and slash modalities.
     (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+NIL
+> (test-lfs)
+
+"CCGlab, version 7.0"
+=======
+2
+========
+
+
+Derivation 1
+----------------
+Results are alpha equivalent
+Inner: (((PERSUADE ((HIT (DEF TARGET)) M)) M) J)
+Outer: (((PERSUADE ((HIT (DEF TARGET)) M)) M) J)
+
+
+
+Derivation 2
+----------------
+Results are alpha equivalent
+Inner: (((PERSUADE ((HIT (DEF TARGET)) M)) M) J)
+Outer: (((PERSUADE ((HIT (DEF TARGET)) M)) M) J)
+
+
+
+Derivation 3
+----------------
+Results are alpha equivalent
+Inner: (((PERSUADE ((HIT (DEF TARGET)) M)) M) J)
+Outer: (((PERSUADE ((HIT (DEF TARGET)) M)) M) J)
+
+
+=======
+|2A|
+========
+
+=======
+|2B|
+========
+
+=======
+3
+========
+
+
+Derivation 1
+----------------
+Results are alpha equivalent
+Inner: (((PERSUADE ((HIT H) M)) M) J)
+Outer: (((PERSUADE ((HIT H) M)) M) J)
+
+
+
+Derivation 2
+----------------
+Results are alpha equivalent
+Inner: (((PERSUADE ((HIT H) M)) M) J)
+Outer: (((PERSUADE ((HIT H) M)) M) J)
+
+
+
+Derivation 3
+----------------
+Results are alpha equivalent
+Inner: (((PERSUADE ((HIT H) M)) M) J)
+Outer: (((PERSUADE ((HIT H) M)) M) J)
+
+
+=======
+|12A|
+========
+
+
+Derivation 1
+----------------
+Results are alpha equivalent
+Inner: (((SCORE _) C) (MY TEAM))
+Outer: (((SCORE _) C) (MY TEAM))
+
+
+=======
+14
+========
+
+
+Derivation 1
+----------------
+Results are alpha equivalent
+Inner: ((AND (DID (NOT ((KICK (DEF BUCKET)) M)))) ((KICK (DEF BUCKET)) J))
+Outer: ((AND (DID (NOT ((KICK (DEF BUCKET)) M)))) ((KICK (DEF BUCKET)) J))
+
+
+
+Derivation 2
+----------------
+Results are alpha equivalent
+Inner: ((AND (DID (NOT (((DIE _) (DEF BUCKET)) M)))) (((DIE _) (DEF BUCKET)) J))
+Outer: ((AND (DID (NOT (((DIE _) (DEF BUCKET)) M)))) (((DIE _) (DEF BUCKET)) J))
+
+
+=======
+16
+========
+
+
+Derivation 1
+----------------
+Results are alpha equivalent
+Inner: ((CAUSE
+         (INIT
+          ((((HOLD _) (LAM X (LAM P (LAM Y ((UP (P Y)) X))))) (DEF BOOK)) I)))
+        I)
+Outer: ((CAUSE
+         (INIT
+          ((((HOLD _) (LAM X (LAM P (LAM Y ((UP (P Y)) X))))) (DEF BOOK)) I)))
+        I)
+
+
+
+Derivation 2
+----------------
+Results are alpha equivalent
+Inner: ((CAUSE
+         (INIT
+          ((((HOLD _) (LAM X (LAM P (LAM Y ((UP (P Y)) X))))) (DEF BOOK)) I)))
+        I)
+Outer: ((CAUSE
+         (INIT
+          ((((HOLD _) (LAM X (LAM P (LAM Y ((UP (P Y)) X))))) (DEF BOOK)) I)))
+        I)
+
+
+=======
+|16P|
+========
+
+
+Derivation 1
+----------------
+Results are alpha equivalent
+Inner: ((((PICK _) (LAM X (LAM P (LAM Y ((UP (P Y)) X))))) (DEF BOOK)) I)
+Outer: ((((PICK _) (LAM X (LAM P (LAM Y ((UP (P Y)) X))))) (DEF BOOK)) I)
+
+
+=======
+18
+========
+
+
+Derivation 1
+----------------
+Results are alpha equivalent
+Inner: (DEF (LAM X ((AND ((KICK X) YOU)) (BUCKET X))))
+Outer: (DEF (LAM X ((AND ((KICK X) YOU)) (BUCKET X))))
+
+
+=======
+19
+========
+
+
+Derivation 1
+----------------
+Results are alpha equivalent
+Inner: ((AND ((KICK (DEF BUCKET)) J)) ((DRAG (DEF BUCKET)) M))
+Outer: ((AND ((KICK (DEF BUCKET)) J)) ((DRAG (DEF BUCKET)) M))
+
+
+=======
+|21A|
+========
+
+
+Derivation 1
+----------------
+Results are alpha equivalent
+Inner: ((((MORE EXACTLY) ((SPILL (DEF BEANS)) YOU)) _) (ANY RATE))
+Outer: ((((MORE EXACTLY) ((SPILL (DEF BEANS)) YOU)) _) (ANY RATE))
+
+
+
+Derivation 2
+----------------
+Results are alpha equivalent
+Inner: ((((MORE EXACTLY) ((((REVEAL _) (DEF BEANS)) SECRET) YOU)) _) (ANY RATE))
+Outer: ((((MORE EXACTLY) ((((REVEAL _) (DEF BEANS)) SECRET) YOU)) _) (ANY RATE))
+
+
+=======
+|21B|
+========
+
+
+Derivation 1
+----------------
+Results are alpha equivalent
+Inner: (((CONTRASTWITH _) (ANY RATE)) ((SPILL (DEF BEANS)) YOU))
+Outer: (((CONTRASTWITH _) (ANY RATE)) ((SPILL (DEF BEANS)) YOU))
+
+
+
+Derivation 2
+----------------
+Results are alpha equivalent
+Inner: (((CONTRASTWITH _) (ANY RATE)) ((((REVEAL _) (DEF BEANS)) SECRET) YOU))
+Outer: (((CONTRASTWITH _) (ANY RATE)) ((((REVEAL _) (DEF BEANS)) SECRET) YOU))
+
+
+
+Derivation 3
+----------------
+Results are alpha equivalent
+Inner: (((CONTRASTWITH _) (ANY RATE)) ((SPILL (DEF BEANS)) YOU))
+Outer: (((CONTRASTWITH _) (ANY RATE)) ((SPILL (DEF BEANS)) YOU))
+
+
+
+Derivation 4
+----------------
+Results are alpha equivalent
+Inner: (((CONTRASTWITH _) (ANY RATE)) ((((REVEAL _) (DEF BEANS)) SECRET) YOU))
+Outer: (((CONTRASTWITH _) (ANY RATE)) ((((REVEAL _) (DEF BEANS)) SECRET) YOU))
+
+
+=======
+23
+========
+
+
+Derivation 1
+----------------
+Results are alpha equivalent
+Inner: ((AND ((COOK (DEF BEANS)) M)) ((SPILL (DEF BEANS)) YOU))
+Outer: ((AND ((COOK (DEF BEANS)) M)) ((SPILL (DEF BEANS)) YOU))
+
+
+=======
+25
+========
+
+
+Derivation 1
+----------------
+Results are alpha equivalent
+Inner: ((AND ((COOK (DEF BEANS)) M)) ((SPILL (DEF BEANS)) YOU))
+Outer: ((AND ((COOK (DEF BEANS)) M)) ((SPILL (DEF BEANS)) YOU))
+
+
+=======
+|25V|
+========
+
+
+Derivation 1
+----------------
+Results are alpha equivalent
+Inner: ((AND ((SPILL (DEF BEANS)) M)) ((SPILL (DEF BEANS)) YOU))
+Outer: ((AND ((SPILL (DEF BEANS)) M)) ((SPILL (DEF BEANS)) YOU))
+
+
+
+Derivation 2
+----------------
+Results are alpha equivalent
+Inner: ((AND ((((REVEAL _) (DEF BEANS)) SECRET) M))
+        ((((REVEAL _) (DEF BEANS)) SECRET) YOU))
+Outer: ((AND ((((REVEAL _) (DEF BEANS)) SECRET) M))
+        ((((REVEAL _) (DEF BEANS)) SECRET) YOU))
+
+
+=======
+25ALT
+========
+
+
+Derivation 1
+----------------
+Results are alpha equivalent
+Inner: ((SPILL (DEF BEANS)) YOU)
+Outer: ((SPILL (DEF BEANS)) YOU)
+
+
+
+Derivation 2
+----------------
+Results are alpha equivalent
+Inner: ((((REVEAL _) (DEF BEANS)) SECRET) YOU)
+Outer: ((((REVEAL _) (DEF BEANS)) SECRET) YOU)
+
+
+=======
+26
+========
+
+
+Derivation 1
+----------------
+Results are alpha equivalent
+Inner: (DEF (LAM X ((AND ((SPILL X) YOU)) (BEANS X))))
+Outer: (DEF (LAM X ((AND ((SPILL X) YOU)) (BEANS X))))
+
+
+
+Derivation 2
+----------------
+Results are alpha equivalent
+Inner: (DEF (LAM X ((AND ((((REVEAL _) X) SECRET) YOU)) (BEANS X))))
+Outer: (DEF (LAM X ((AND ((((REVEAL _) X) SECRET) YOU)) (BEANS X))))
+
+
+=======
+29
+========
+
+
+Derivation 1
+----------------
+Results are alpha equivalent
+Inner: ((AND (((((PASS _Y) TIME) _) (SELF I)) I)) (((INALIEN POSS) THUMBS) I))
+Outer: ((AND (((((PASS _Y) TIME) _) (SELF I)) I)) (((INALIEN POSS) THUMBS) I))
+
+
+=======
+|29P|
+========
+
+=======
+|32C|
+========
+
+
+Derivation 1
+----------------
+Results are alpha equivalent
+Inner: (LAM Y (((PERSUADE (EASY ((DO (DEF DISHES)) J))) J) Y))
+Outer: (LAM Y (((PERSUADE (EASY ((DO (DEF DISHES)) J))) J) Y))
+
+
+
+Derivation 2
+----------------
+Results are alpha equivalent
+Inner: (LAM Y (((PERSUADE (EASY ((DO (DEF DISHES)) J))) J) Y))
+Outer: (LAM Y (((PERSUADE (EASY ((DO (DEF DISHES)) J))) J) Y))
+
+
+
+Derivation 3
+----------------
+Results are alpha equivalent
+Inner: (LAM Y (((PERSUADE (EASY ((DO (DEF DISHES)) J))) J) Y))
+Outer: (LAM Y (((PERSUADE (EASY ((DO (DEF DISHES)) J))) J) Y))
+
+
+
+Derivation 4
+----------------
+Results are alpha equivalent
+Inner: (LAM Y (((PERSUADE (EASY ((DO (DEF DISHES)) J))) J) Y))
+Outer: (LAM Y (((PERSUADE (EASY ((DO (DEF DISHES)) J))) J) Y))
+
+
+
+Derivation 5
+----------------
+Results are alpha equivalent
+Inner: (LAM X (EASY (((PERSUADE ((DO (DEF DISHES)) J)) J) X)))
+Outer: (LAM X (EASY (((PERSUADE ((DO (DEF DISHES)) J)) J) X)))
+
+
+
+Derivation 6
+----------------
+Results are alpha equivalent
+Inner: (LAM X (EASY (((PERSUADE ((DO (DEF DISHES)) J)) J) X)))
+Outer: (LAM X (EASY (((PERSUADE ((DO (DEF DISHES)) J)) J) X)))
+
 NIL
 > (dribble)
