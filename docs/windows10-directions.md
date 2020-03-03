@@ -26,13 +26,13 @@ This document is based on: https://docs.microsoft.com/en-us/windows/wsl/install-
 
 3. Assuming you are in the terminal app that Ubuntu opened for you when asking for userid, do: 
 
-cd ~
+<code>cd ~</code>
 
 (This is your home in linux app of w10, wherever windows created it.)
 
 4. do: 
 
-git clone https://github.com/bozsahin/ccglab 
+<code>git clone https://github.com/bozsahin/ccglab </code>
 
 5. Proceed with  <a href="https://github.com/bozsahin/ccglab/README.md">ccglab installation guide</a>.
 
