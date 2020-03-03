@@ -6,13 +6,13 @@ Thanks Efe.
 
 You need to be on version 1909 of Windows10, build 18363.476. Versions and/or builds newer than these are unlikely to cause problems.
 
-To find out your Windows 10 build, use Windows Search at bottom left for 'setting' and look at 'About' somewhere at the bottom.
+To find out your Windows 10 build, use Windows Search at bottom left for 'Settings' and look at 'About' in settings somewhere at the bottom.
 
 This document is based on: https://docs.microsoft.com/en-us/windows/wsl/install-win10
 
 1. Open a Powershell window *with administrator rights* and execute the following command:
 
-	Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
+	<code>Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux</code>
 
 	(This will ask at the end your computer to be restarted; say YES)
 
