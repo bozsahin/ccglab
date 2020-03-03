@@ -6,7 +6,9 @@ Thanks Efe.
 
 You need to be on version 1909 of Windows10, build 18363.476. Versions and/or builds newer than these are unlikely to cause problems.
 
-To find out your Windows 10 build, use Windows Search at bottom left for 'Settings' and look at 'About' in settings somewhere at the bottom.
+To find out your Windows 10 build, use Windows Search at bottom-left for 'Settings' and look at 'About' in settings somewhere at the bottom.
+
+Similarly, to locate <code>Powershell</code>, use Windows Search at bottom-left and search for 'Powershell'.
 
 This document is based on: https://docs.microsoft.com/en-us/windows/wsl/install-win10
 
