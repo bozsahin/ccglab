@@ -6,6 +6,8 @@ Thanks Efe.
 
 You need to be on version 1909 of Windows10, build 18363.476. Versions and/or builds newer than these are unlikely to cause problems.
 
+To find out your Windows 10 build, use Windows Search at bottom left for 'setting' and look at 'About' somewhere at the bottom.
+
 This document is based on: https://docs.microsoft.com/en-us/windows/wsl/install-win10
 
 1. Open a Powershell window *with administrator rights* and execute the following command:
@@ -34,5 +36,5 @@ git clone https://github.com/bozsahin/ccglab
 
 You are ready to go. You can close the linux app when you are done without loss of work. 
 
-To run again, locate ubuntu app from windows left corner button and run; once in ubuntu, just call cccglab. 
+To run again, locate ubuntu app from windows left corner button and run; once in ubuntu, just call <code>ccglab</code>. 
 
