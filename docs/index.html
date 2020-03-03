@@ -43,11 +43,11 @@ for the string. Both are based on the same CKY parse engine and the same grammar
 <p> The main features of <code>CCGlab</code> which distinguish it from other publicly available CCG code:
 <ul>
 <li> The logical form is associated with the entire category, via self-contained and lisp-free lambda-calculus.
-<li> Unification plays no linguistic role; basic categories and their atomic features are matched for term consistency only.
-<li> By default all combinators are available all the time, in their powers (linear, quadratic, cubic). 
+<li> Structural unification plays no linguistic role; basic categories and their atomic features are matched for term consistency only.
+<li> By default standard combinators are available all the time, in their powers (linear, quadratic, cubic). 
  They all have on/off switches for experimentation.
 <li> Type-raising is not built-in, because it does not combine. Facilities are provided for it, such as 
-lexical rules and morpholexical generalizations.
+lexical rules and morpholexical generalizations. There is a compiler for it.
 <li> We can do deduction on a statistically-trained grammar, and induction on a linguistically-motivated grammar, because the grammar 
 format is the same, and feature counts are always calculated by CKY independent of mode of use. The first one is helpful in fine-tuning a model. The second one is helpful in prioritizing the lexical assumptions.
 </ul>
@@ -68,8 +68,10 @@ format is the same, and feature counts are always calculated by CKY independent 
 <td>Practical information about writing <code>.ccg </code> grammars, working with projects, updates, etc.</td></tr>
 </table>
 <hr>
-<p>disclaimer: We're not related to any real lab. We dwell
+<p>disclaimer: We're not related to any real lab, and we don't experiment with animals, except kitties as lexical items 
+ in demos. We dwell
 in cyberspace, which is currently github.
+<p> And, ehm, please read the manual before calling the fire department.
 <hr>
 </font>
 </body>
