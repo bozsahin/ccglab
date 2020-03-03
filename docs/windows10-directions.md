@@ -18,7 +18,7 @@ This document is based on: https://docs.microsoft.com/en-us/windows/wsl/install-
 
 	(This will ask at the end your computer to be restarted; say YES)
 
-2. Go to Windows Store (search for "store" in Windows Search), and search for "Linux"
+2. Go to Windows Store (search for "store" in Windows Search), and search for "Linux" in the store.
 	- Download your preferred distribution (our guide is for Ubuntu, which requires the least amount of effort in configuration.)
 	- When the download and installation finishes, click on "Launch" in the Store window for the first time installation to take place.
 	- Please note your username and password at the end of the installation. 
