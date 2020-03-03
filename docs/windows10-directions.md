@@ -1,4 +1,4 @@
-This guide is prepared by Efecan Yilmaz. It gives you first a linux as W10 app, then ccglab. 
+This guide is prepared by Efecan Yilmaz. It gives you first a linux as W10 app, then <code>ccglab</code>. 
 No partitions, no virtualbox.
 Thanks Efe.
 
