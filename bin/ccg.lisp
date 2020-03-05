@@ -3356,9 +3356,10 @@
     (setf (nv-list-val 'PARAM l) (get-key-param-xp (nv-list-val 'KEY l))))
   (save-grammar out))
 
-(defun z-score-grammar (&key (cutoff nil))
+(defun z-score-grammar (&key (cutoff nil) (method '>=))
   "turns current parameter values to z-scores with normal distribution N(0,1).
   Now all parameters are factors apart from population standard deviation with same variance as original sample.
+  Method must be a funcall-suitable CL comparator comparing parameter (1st arg) with threshold (2nd).
   If cutoff is not nil, it will ask in the end for a threshold to produce a filtered grammar."
   (if (< (length *ccg-grammar*) 2)
     (format t "~%Nothing to z-score!")
@@ -3388,7 +3389,7 @@
 		  (threshold (progn (format t "~%Enter lowest z-score value for cut off: ") (read)))
 		  (fn (progn (format t "~%Enter a filename in quotes for filtered grammar: ") (read))))
 	      (dolist (item *ccg-grammar*)
-		(if (>= (nv-list-val 'PARAM item) threshold) (push item fg)))
+		(if (funcall method (nv-list-val 'PARAM item) threshold) (push item fg)))
 	      (setf *ccg-grammar* (reverse fg))
 	      (save-grammar fn)
 	      ))

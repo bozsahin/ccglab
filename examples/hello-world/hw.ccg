@@ -1,5 +1,4 @@
-% a mini-grammar for cats and mats
-
+% a mini-grammar for cats and mats 
 every det := (s/(s\np))/*n : \p\q\x.!every (p x)(q x);
 the det := np/*n : \x.!def x;
 cat n   := n : \y.!cat y;
@@ -9,9 +8,9 @@ mat n   := n : \y.!mat y;
 
 % mini-workflow for mini-grammar: at command line do ($ is the prompt)
 $ ccglab
-% (load-grammar "helloworld" :make t)
-% (ccg-deduce '(every cat sat on the mat))
-% (cky-show-deduction)
-% (ccg-deduce '(every mat sat on the cat))
-% (cky-show-deduction)
+% (make-and-load-grammar "hw")
+% (p '(every cat sat on the mat))
+% (ders)
+% (p '(every mat sat on the cat))
+% (ders)
 % check the logical forms to see if cats can defy logic
