@@ -3386,8 +3386,8 @@
 	  (or cutoff (format t "~%Done. Use save-grammar to save the changes in a file"))
 	  (if cutoff 
 	    (let* ((fg nil) ; filtered grammar
-		  (threshold (progn (format t "~%Enter lowest z-score value for cut off: ") (read)))
-		  (fn (progn (format t "~%Enter a filename in quotes for filtered grammar: ") (read))))
+		  (threshold (progn (format t "~%Enter a threshold for cutoff: ") (read)))
+		  (fn (progn (format t "~%Enter a filename IN QUOTES for saving survivors: ") (read))))
 	      (dolist (item *ccg-grammar*)
 		(if (funcall method (nv-list-val 'PARAM item) threshold) (push item fg)))
 	      (setf *ccg-grammar* (reverse fg))
