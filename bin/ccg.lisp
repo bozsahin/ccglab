@@ -21,11 +21,11 @@
 ;;;;     3) an inductive component for PCCG for parse ranking.
 ;;;;     4) A modeling component to help set/train your parameters for the inductive component.
 ;;;;
-;;;; Some CS-ey notes:
+;;;; Some CS notes:
 ;;;; - It represents offline grammars serially, as lisp lists, and parse objects as hashtables, for speed.
 ;;;; - CCGlab uses only one Lisp tool: LALR parser of Mark Johnson. Thanks for that. The rest is standard Common Lisp
 ;;;;    without libraries.
-;;;; - After seeing the LALR component, you might think CCGlab is a deterministic parser.
+;;;; - After seeing the LALR component, you might think that CCGlab is a deterministic parser. It is not.
 ;;;;     The LALR subcomponent is used to parse text descriptions of lexical items and rules to Lisp structures,
 ;;;;     which are deterministic (and probably not SLR, so thanks to MJ again).
 ;;;;
@@ -95,6 +95,9 @@
 	       collect (list key value))))
 
 ;; some common utilities
+
+(defmacro mysqrt (num)
+  `(if (> ,num 0.0) (sqrt ,num) 0.0))
 
 (defun mpe (x1 x2 x3 x4)
   "computes the Cabay & Jackson '76 limit for minimum polynomial extrapolation (MPE) from 4 stages of the gradient."
@@ -3356,14 +3359,18 @@
     (setf (nv-list-val 'PARAM l) (get-key-param-xp (nv-list-val 'KEY l))))
   (save-grammar out))
 
-(defun z-score-grammar (&key (cutoff nil) (method '>=))
-  "turns current parameter values to z-scores with normal distribution N(0,1).
+(defun z-score-grammar-legacy (&key (cutoff nil) (method '>=))
+  "Kept as legacy function. Assuming all entries to be from one distribution is dubious.
+  Use new version instead, which calculates z scores per lexical form in grammar. 
+  turns current parameter values to z-scores with normal distribution N(0,1).
   Now all parameters are factors apart from population standard deviation with same variance as original sample.
   Method must be a funcall-suitable CL comparator comparing parameter (1st arg) with threshold (2nd).
+  Useful for avoiding over/underflow as your model develops.
+  Assuming population mean & std deviation to avoid dbz check.
   If cutoff is not nil, it will ask in the end for a threshold to produce a filtered grammar."
   (if (< (length *ccg-grammar*) 2)
     (format t "~%Nothing to z-score!")
-    (let ((sumsq 0.0) ; find standard deviation and mean in one pass, from Guttman/Wilks/Hunter 
+    (let ((sumsq 0.0) ; find standard deviation and mean in one pass
 	  (sum  0.0)
 	  (std  0.0)
 	  (mean 0.0)
@@ -3371,7 +3378,7 @@
       (dolist (item *ccg-grammar*)
 	(setf sumsq (+ sumsq (expt (nv-list-val 'PARAM item) 2)))
 	(setf sum (+ sum (nv-list-val 'PARAM item))))
-      (setf std (sqrt (/ (- sumsq (/ (expt sum 2) n)) (- n 1))))
+      (setf std (mysqrt (- (/ sumsq n)  (expt (/ sum n) 2))))
       (if (< std least-positive-short-float) 
 	(format t "~%No variation, no change")
 	(let ((minw most-positive-single-float)
@@ -3395,6 +3402,58 @@
 	      ))
 	  )))))
 
+(defun z-score-grammar (&key (cutoff nil) (method '>=) (threshold 0.0))
+  "calculates z values for each lexical form separately, because they are the ones 
+  in competition with each other in parsing and ranking. Assumes a loaded grammar.
+  Assuming population mean & std deviation to avoid dbz check.
+  Method must be a funcall-suitable CL comparator comparing parameter (1st arg) with threshold (2nd).
+  Useful for avoiding over/underflow as your model develops."
+  (if (< (length *ccg-grammar*) 2)
+    (format t "~%Nothing to z-score!")
+    (let* ((n (length *ccg-grammar*))
+	   (ht (make-hash-table :test #'equal :size n)))
+      (dolist (item *ccg-grammar*)  ; initialize sums per form --collisions override same form
+	(setf (machash (nv-list-val 'PHON item) ht) '((SUMSQ 0.0)
+						      (SUM 0.0)
+						      (N 0))))
+      (dolist (item *ccg-grammar*)  ; another pass to fill in data
+	(setf (machash (nv-list-val 'PHON item) ht)
+	      (list
+		(list 'SUMSQ 
+		      (+ (nv-list-val 'SUMSQ (machash (nv-list-val 'PHON item) ht))
+			 (expt (nv-list-val 'PARAM item) 2)))
+		(list 'SUM 
+		      (+ (nv-list-val 'SUM (machash (nv-list-val 'PHON item) ht))
+			 (nv-list-val 'PARAM item)))
+		(list 'N 
+		      (+ (nv-list-val 'N (machash (nv-list-val 'PHON item) ht)) 1)))))
+      (let ((ht2 (make-hash-table :test #'equal :size (hash-table-count ht))))
+	(maphash #'(lambda (k v)  ; fix mean and  std deviation over unique forms
+		     (setf (machash k ht2)
+			   (list 
+			     (list 'MEAN (/ (nv-list-val 'SUM v) (nv-list-val 'N v)))
+			     (list 'STD (mysqrt (- (/ (nv-list-val 'SUMSQ v) (nv-list-val 'N v))
+						 (expt (/ (nv-list-val 'SUM v) 
+							  (nv-list-val 'N v)) 2)))))))
+						  
+		 ht)
+	(dolist (item *ccg-grammar*) ; now update parameters per form in currently loaded grammar
+	  (setf (nv-list-val 'PARAM item) 
+		(setf (nv-list-val 'PARAM item) 
+		      (if (/= (nv-list-val 'STD (machash (nv-list-val 'PHON item) ht2)) 0.0)
+			(/ (- (nv-list-val 'PARAM item)
+			      (nv-list-val 'MEAN (machash (nv-list-val 'PHON item) ht2)))		      
+			   (nv-list-val 'STD (machash (nv-list-val 'PHON item) ht2)))
+			0.0)))))
+      (format t "~%Currently loaded grammar is z-scored PER FORM.")
+      (or cutoff (format t "~%Done. Use save-grammar to save the changes in a file"))
+      (if cutoff
+	(let* ((fg nil) ; filtered grammar
+	       (fn (progn (format t "~%Enter a filename IN QUOTES for saving survivors: ") (read))))
+	  (dolist (item *ccg-grammar*)
+	    (if (funcall method (nv-list-val 'PARAM item) threshold) (push item fg)))
+	  (setf *ccg-grammar* (reverse fg))
+	  (save-grammar fn))))))
 
 (defun mklist (obj)
   (if (listp obj) obj (list obj)))
