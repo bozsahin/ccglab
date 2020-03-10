@@ -1225,7 +1225,7 @@
 	   (format t "~%Project ~A files" pname)
            (format t "~%-----------------------------------------------------------------------------")
 	   (and sfile   (format t "~%  CCG grammar source       : ~A" sname))
-	   (and tfile   (format t "~%    Its token form         : ~A" tname))
+	   (and tfile   (format t "~%          token form       : ~A" tname))
 	   (and gfile   (format t "~%  Compiled/loaded grammar  : ~A" gname))
 	   (and sufile  (format t "~%  Supervision native source: ~A" suname))
 	   (and sulfile (format t "~%  Supervision text source  : ~A" sulname))
