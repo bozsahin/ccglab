@@ -579,7 +579,7 @@
 
 (defun flash-news (&optional (report t))
   (and report 
-       (format t "~%Gradient extrapolation available.~%Type-raising compiler available.~%.ded and .ind file types deprecated.~%Grammars & models compile to/load from .ccg.lisp file")))
+       (format t "~%Gradient extrapolation available.~%Type-raising compiler available.~%.ded and .ind file types deprecated.~%Grammars/models compile to and load from .ccg.lisp file")))
 
 (defun welcome (&optional (lispsys *lispsys*))
   (format t "~%=====================================================")
@@ -1233,8 +1233,9 @@
 	                (format t "~%   *LEX-RULES-TABLE*       : ~A entries" (length *lex-rules-table*))
 	   (format t "~%=============================================================================~%")
 	   t)
-	  (t (format t "~%**ERROR in loading project ~A." pname)
+	  (t (format t "~%**ERROR in loading ~A." gfile)
 	     (and sfile (format t "~%  Have a look at ~A to see THE FIRST ERROR in ~A" gname sname))
+	     (or gfile  (format t "~%  ~A does not exist" gname))
 	     (format t "~%Project ~A cannot be loaded:" pname)
 	     (format t "~%  *ccg-grammar* is unchanged.")
 	     (format t "~%  *lex-rules-table* is unchanged.~%")
