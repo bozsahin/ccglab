@@ -1,13 +1,14 @@
-% this is a sketch of Bucky's expressions, see Hagit Borer's web page for the whole thing
+% this is a sketch of Bucky's words; see Hagit Borer's web page for the whole thing
 % at http://hborer.sllf.qmul.ac.uk/
 % -cem bozsahin, march 2020
 
 you n := np: !you;
 can aux := (S\np)/iv : \p\x.!can (p x);
 food n := pnp: !food;
-wordify n := pnp: !wordify;
+word n := pnp: !word;
+-ify suf := (iv/np)\\pnp: \x\y\z.x y z;
 (verb-it) pnp : lf --> iv/np: \lf\x\y.lf x y;
-(fin) iv : lf --> s\np: \lf.!fin lf; 
+(fin) iv : lf --> s\np: \lf\y.!fin (lf y); 
 anything n := np: !anything;
 if cl := (s\*s)/*s: \p\q.!if p q;
 just adv := iv/*iv : \p.!just p;
