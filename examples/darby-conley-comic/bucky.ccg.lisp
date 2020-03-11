@@ -1,0 +1,41 @@
+(DEFPARAMETER *CCG-GRAMMAR*
+  '(((KEY 1) (PHON YOU) (MORPH N) (SYN ((BCAT NP) (FEATS NIL))) (SEM "YOU")
+     (PARAM 1.0))
+    ((KEY 2) (PHON CAN) (MORPH AUX)
+     (SYN
+      ((((BCAT S) (FEATS NIL)) (DIR BS) (MODAL ALL) ((BCAT NP) (FEATS NIL)))
+       (DIR FS) (MODAL ALL) ((BCAT IV) (FEATS NIL))))
+     (SEM (LAM P (LAM X ("CAN" (P X))))) (PARAM 1.0))
+    ((KEY 3) (PHON FOOD) (MORPH N) (SYN ((BCAT PNP) (FEATS NIL))) (SEM "FOOD")
+     (PARAM 1.0))
+    ((KEY 4) (PHON WORDIFY) (MORPH N) (SYN ((BCAT PNP) (FEATS NIL)))
+     (SEM "WORDIFY") (PARAM 1.0))
+    ((KEY 5) (INSYN ((BCAT PNP) (FEATS NIL))) (INSEM LF)
+     (OUTSYN
+      (((BCAT IV) (FEATS NIL)) (DIR FS) (MODAL ALL) ((BCAT NP) (FEATS NIL))))
+     (OUTSEM (LAM LF (LAM X (LAM Y ((LF X) Y))))) (INDEX VERB-IT) (PARAM 1.0))
+    ((KEY 6) (INSYN ((BCAT IV) (FEATS NIL))) (INSEM LF)
+     (OUTSYN
+      (((BCAT S) (FEATS NIL)) (DIR BS) (MODAL ALL) ((BCAT NP) (FEATS NIL))))
+     (OUTSEM (LAM LF ("FIN" LF))) (INDEX FIN) (PARAM 1.0))
+    ((KEY 7) (PHON ANYTHING) (MORPH N) (SYN ((BCAT NP) (FEATS NIL)))
+     (SEM "ANYTHING") (PARAM 1.0))
+    ((KEY 8) (PHON IF) (MORPH CL)
+     (SYN
+      ((((BCAT S) (FEATS NIL)) (DIR BS) (MODAL STAR) ((BCAT S) (FEATS NIL)))
+       (DIR FS) (MODAL STAR) ((BCAT S) (FEATS NIL))))
+     (SEM (LAM P (LAM Q (("IF" P) Q)))) (PARAM 1.0))
+    ((KEY 9) (PHON JUST) (MORPH ADV)
+     (SYN
+      (((BCAT IV) (FEATS NIL)) (DIR FS) (MODAL STAR) ((BCAT IV) (FEATS NIL))))
+     (SEM (LAM P ("JUST" P))) (PARAM 1.0))
+    ((KEY 10) (PHON VERB) (MORPH V)
+     (SYN
+      (((BCAT IV) (FEATS NIL)) (DIR FS) (MODAL ALL) ((BCAT NP) (FEATS NIL))))
+     (SEM (LAM X (LAM Y (("VERB" X) Y)))) (PARAM 1.0))
+    ((KEY 11) (PHON EAT) (MORPH V)
+     (SYN
+      (((BCAT IV) (FEATS NIL)) (DIR FS) (MODAL ALL) ((BCAT NP) (FEATS NIL))))
+     (SEM (LAM X (LAM Y (("EAT" X) Y)))) (PARAM 1.0))
+    ((KEY 12) (PHON IT) (MORPH PRO) (SYN ((BCAT NP) (FEATS NIL))) (SEM "IT")
+     (PARAM 1.0))))
