@@ -13,6 +13,7 @@
 
 (defun test ()
   (pprint (which-ccglab))
+  (format t "~%========~%Testing without type raising~%")
   (lg "cecm")
   (dolist (pair *db*)
     (let ((no (first pair))
@@ -32,10 +33,11 @@
 
 (defun test-tr ()
   (pprint (which-ccglab))
+  (format t "~%========~%Testing with type raising~% TRC rules: TR derived from a lexical function.~% MLU rules: TR generalized from TRC/MLU rules.~%
+	  TRC: type-raise compiler, MLU: most local unifier")
   (tr "cecm" '(v)) ; loads cecm.ccg.lisp and applies TR algorithm to POS=v
   (savetr "cecm-tr.ccg.lisp") ; saves the combined grammar
   (lg "cecm-tr")              ; now resets grammar to one just saved
-  (status)                    ; show the difference summary
   (dolist (pair *db*)
     (let ((no (first pair))
 	  (exp (second pair)))

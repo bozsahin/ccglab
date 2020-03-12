@@ -5,6 +5,9 @@ T
 > (test)
 
 "CCGlab, version 7.0"
+========
+Testing without type raising
+
 ======================= l o a d i n g =======================================
 
 Project cecm files
@@ -310,6 +313,12 @@ NIL
 > (test-tr)
 
 "CCGlab, version 7.0"
+========
+Testing with type raising
+ TRC rules: TR derived from a lexical function.
+ MLU rules: TR generalized from TRC/MLU rules.
+
+	  TRC: type-raise compiler, MLU: most local unifier
 ======================= l o a d i n g =======================================
 
 Project cecm files
@@ -331,23 +340,6 @@ Project cecm-tr files
        *CCG-GRAMMAR*       : 27 entries
    *LEX-RULES-TABLE*       : 9 entries
 =============================================================================
-
-
-  do (rules) or (onoff) for rules and switches
-  ---------------------------
-  Any non-standard rule     ? NO
-  Currently loaded grammar  : cecm-tr.ccg.lisp
- *CCG-GRAMMAR*              : 27 items
- *LEX-RULES-TABLE*          : 9 items
- *CKY-HASHTABLE*            : 13 items
- *CKY-INPUT* for the table  : (THE CAR SEEMED JOHN TO HAVE BOUGHT) 
-  Most likely LF w/weight   : NIL 
-  Its most likely derivation: NIL
-  Sum of weighted counts    : 0.0 
-  Most likely LF's cells    : NIL 
-  Number of differing LFs   : 0 
-  Most weighted derivation  : NIL 
-  ---------------------------
 
 Lowest types (NP VP PROPP S) will be eliminated
 
