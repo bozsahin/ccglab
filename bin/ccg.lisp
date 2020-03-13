@@ -1235,6 +1235,7 @@
 	   t)
 	  (t (format t "~%**ERROR in loading ~A." gfile)
 	     (and sfile (format t "~%  Have a look at ~A to see THE FIRST ERROR in ~A" gname sname))
+	     (or sfile  (format t "~%  ~A does not exist" sname))
 	     (or gfile  (format t "~%  ~A does not exist" gname))
 	     (format t "~%Project ~A cannot be loaded:" pname)
 	     (format t "~%  *ccg-grammar* is unchanged.")

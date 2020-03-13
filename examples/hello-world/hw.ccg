@@ -1,7 +1,7 @@
 % a mini-grammar for cats and mats 
 sat v   := s\np: \z.!sat z;
 on  p   := ((s\np)\(s\np))/np: \x\p\y.!and (p y)(!on x y) ;
-every det := (s/(s\np))/*n : \p\q\x.!every (p x)(q x); % generalized quant 
+every  det := (s/(s\np))/*n : \p\q\x.!every (p x)(q x); % generalized quant 
 the det := np/*n : \x.!def x;   % no value-raising
 cat n   := n : \y.!cat y;
 mat n   := n : \y.!mat y;
