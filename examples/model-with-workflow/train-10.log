@@ -1,0 +1,114 @@
+;; here's one output of running 'train-sbcl-multithread g1.exp'
+======= Log file ============
+I am called as: /Users/bozsahin/myrepos/ccglab/bin/trainer-sbcl 4000 2000 g1 t 10 0.5 1.0 train-10
+            at: 16 Mar 2020 Pts +03 22:42:45
+Log goes to   : train-10.log
+I will call sbcl as: /usr/local/bin/sbcl --dynamic-space-size 4000
+It will call train-nohup-sbcl in /Users/bozsahin/myrepos/ccglab/bin/init-sbcl.lisp as: (train-nohup-sbcl "g1" 2000 t "g1.train-10.10N.0.5a.1.0c.ccg.lisp" 10 0.5 1.0)
+=======          ============
+This is SBCL 1.5.1, an implementation of ANSI Common Lisp.
+More information about SBCL is available at <http://www.sbcl.org/>.
+
+SBCL is free software, provided as is, with absolutely no warranty.
+It is mostly in the public domain; some portions are provided under
+BSD-style licenses.  See the CREDITS and COPYING files in the
+distribution for more information.
+
+init-sbcl.lisp loaded
+init-user.lisp loaded
+*Beamp* = NIL  *Beam-exp* = 0.9
+
+======================= l o a d i n g =======================================
+
+Project g1 files
+-----------------------------------------------------------------------------
+  CCG grammar source       : g1.ccg
+          token form       : g1.lisptokens
+  Compiled/loaded grammar  : g1.ccg.lisp
+  Supervision native source: g1.sup
+  Supervision text source  : g1.supervision
+       *CCG-GRAMMAR*       : 18 entries
+   *LEX-RULES-TABLE*       : 0 entries
+=============================================================================
+
+Supervision file loaded: g1.sup
+
+Done. use (show-training/save-training) to see/save the results
+Evaluation took:
+  1.089 seconds of real time
+  1.086930 seconds of total run time (1.083266 user, 0.003664 system)
+  99.82% CPU
+  6 forms interpreted
+  3,920,103,826 processor cycles
+  153,203,872 bytes consed
+  
+The rule set used in the experiment:
+
+
+CCGlab, version 7.0
+
+To change a switch, use (setf <switchname> <value>)
+	      where <value> is T (on) or NIL (off)
+	  *f-apply*     T
+	  *b-apply*     T
+	  *f-comp*      T
+	  *b-comp*      T
+	  *fx-comp*     T
+	  *bx-comp*     T
+	  *f-sub*       T
+	  *b-sub*       T
+	  *fx-sub*      T
+	  *bx-sub*      T
+          *f-subbar*    NIL
+	  *b-subbar*    NIL
+	  *fx-subbar*   NIL
+	  *bx-subbar*   NIL
+	  *f-subcomp*   NIL
+	  *b-subcomp*   NIL
+	  *fx-subcomp*  NIL
+	  *bx-subcomp*  NIL
+          *f2-comp*     T
+	  *b2-comp*     T
+	  *fx2-comp*    T
+	  *bx2-comp*    T
+	  *f2-sub*      T
+	  *b2-sub*      T
+	  *fx2-sub*     T
+	  *bx2-sub*     T
+	  *f2-subcomp*  NIL
+	  *f3-comp*     T
+	  *b3-comp*     T
+	  *fx3-comp*    T
+	  *bx3-comp*    T
+
+*BEAMP* : NIL
+*LFFLAG* : T
+*NF-PARSE* : T
+*OOVP* : NIL
+*TYPE-RAISED-P* : NIL
+*Beamp* = NIL  *Beam-exp* = 0.9
+
+Training parameters: N = 10 alpha0 = 0.5 c = 1.0 n = 6  
+Model parameters before and after training
+================================================
+key   lex             initial  final    diff 
+------------------------------------------------
+1     KNOWS             1.0  3.86293  ( 2.86293)
+2     KNOWS             1.0  2.21802  ( 1.21802)
+3     KNOWS             1.0 -.431465  (-1.43147)
+4     KNOWS             1.0 -.790037  (-1.79004)
+5     LOVES             1.0 4.241246  (3.241246)
+6     LOVES             1.0 -2.24125  (-3.24125)
+7     JOHN              1.0 3.266829  (2.266829)
+8     JOHN              1.0 1.991181  (.9911809)
+9     JOHN              1.0  2.43346  ( 1.43346)
+10    JOHN              1.0 -.176982  (-1.17698)
+11    MARY              1.0 3.047616  (2.047616)
+12    MARY              1.0 2.136666  (1.136666)
+13    MARY              1.0 2.646367  (1.646367)
+14    MARY              1.0 -.360356  (-1.36036)
+15    JOHN              1.0 -1.17425  (-2.17425)
+16    JOHN              1.0 -.176982  (-1.17698)
+17    MARY              1.0 -1.08843  (-2.08843)
+18    MARY              1.0 -.360356  (-1.36036)
+================================================
