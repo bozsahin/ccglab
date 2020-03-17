@@ -373,7 +373,7 @@
 (defswitch *oovp* nil) ; set it to t to avoid out of vocabulary errors---two entries with uknown LFs will be created 
                           ;  to get partial parses as much as possible in a knowledge-poor way.
 
-;; rule switches
+;; rule switches and default values
 (defccglab *f-apply* t)   ;application
 (defccglab *b-apply* t)
 (defccglab *f-comp* t  )  ;composition
@@ -422,76 +422,129 @@
 (defmacro set-nf-tag (ht tag)
   `(and *nf-parse* (setf (machash 'TAG ,ht) ,tag)))
 
-;; rule switch wholesale control
-(defun basic-ccg (&optional (ok t))
-  (case ok
-    ((on t) (setf 
-	      *f-apply* t   ;application
-	      *b-apply* t
-	      *f-comp* t    ;composition
-	      *b-comp* t
-	      *fx-comp* t
-	      *bx-comp* t
-	      *f-sub* t     ;substitution
-	      *b-sub* t
-	      *fx-sub* t
-	      *bx-sub* t
-	      *f-subbar* nil  ;substitution bar (aka lost combinator)
-	      *b-subbar* nil
-	      *fx-subbar* nil
-	      *bx-subbar* nil
-	      *f-subcomp* nil ;subcomposition (i.e. D)
-	      *f2-subcomp* nil ; D^2
-	      *b-subcomp* nil
-	      *fx-subcomp* nil
-	      *bx-subcomp* nil
-	      *f2-comp* t   ;B^2
-	      *b2-comp* t
-	      *fx2-comp* t
-	      *bx2-comp* t
-	      *f2-sub* t    ;S'' (not S^2 of Curry)
-	      *b2-sub* t
-	      *fx2-sub* t
-	      *bx2-sub* t
-	      *f3-comp* t   ;B^3
-	      *b3-comp* t
-	      *fx3-comp* t
-	      *bx3-comp* t))
-    ((off nil) (format t "~%All rules set. Rule set to be controlled by user.~%")
-	       (setf 
-		 *f-apply* t   ;application
-		 *b-apply* t
-		 *f-comp* t    ;composition
-		 *b-comp* t
-		 *fx-comp* t
-		 *bx-comp* t
-		 *f-sub* t     ;substitution
-		 *b-sub* t
-		 *fx-sub* t
-		 *bx-sub* t
-		 *f-subbar* t  ;substitution bar (aka lost combinator)
-		 *b-subbar* t
-		 *fx-subbar* t
-		 *bx-subbar* t
-		 *f-subcomp* t ;subcomposition (i.e. D)
-		 *f2-subcomp* t ; D^2
-		 *b-subcomp* t
-		 *fx-subcomp* t
-		 *bx-subcomp* t
-		 *f2-comp* t   ;B^2
-		 *b2-comp* t
-		 *fx2-comp* t
-		 *bx2-comp* t
-		 *f2-sub* t    ;S'' (not S^2 of Curry)
-		 *b2-sub* t
-		 *fx2-sub* t
-		 *bx2-sub* t
-		 *f3-comp* t   ;B^3
-		 *b3-comp* t
-		 *fx3-comp* t
-		 *bx3-comp* t))
-    (otherwise (format t "~%Error: expected a value on/off/t/nil~%Continuing with current values"))))
+;; ------------------------------
+;; rule switch wholesale controls
+;; ------------------------------
 
+(defun basic-ccg (&key (nf-parse t) (lf t) (beam nil) (oov nil) (type-raise nil))
+  "experimental rules are turned off"
+  (nf-parse nf-parse)
+  (lf lf)
+  (beam beam)
+  (oov oov)
+  (type-raise type-raise)
+  (setf 
+    *f-apply* t   ;application
+    *b-apply* t
+    *f-comp* t    ;composition
+    *b-comp* t
+    *fx-comp* t
+    *bx-comp* t
+    *f-sub* t     ;substitution
+    *b-sub* t
+    *fx-sub* t
+    *bx-sub* t
+    *f-subbar* nil  ;substitution bar (aka lost combinator)
+    *b-subbar* nil
+    *fx-subbar* nil
+    *bx-subbar* nil
+    *f-subcomp* nil ;subcomposition (i.e. D)
+    *f2-subcomp* nil ; D^2
+    *b-subcomp* nil
+    *fx-subcomp* nil
+    *bx-subcomp* nil
+    *f2-comp* t   ;B^2
+    *b2-comp* t
+    *fx2-comp* t
+    *bx2-comp* t
+    *f2-sub* t    ;S'' (not S^2 of Curry)
+    *b2-sub* t
+    *fx2-sub* t
+    *bx2-sub* t
+    *f3-comp* t   ;B^3
+    *b3-comp* t
+    *fx3-comp* t
+    *bx3-comp* t))
+
+(defun simple-ccg (&key (nf-parse t) (lf t) (beam nil) (oov nil) (type-raise nil))
+  "only application, harmonic composition and its powers are turned on"
+  (nf-parse nf-parse)
+  (lf lf)
+  (beam beam)
+  (oov oov)
+  (type-raise type-raise)
+  (setf 
+    *f-apply* t   ;application
+    *b-apply* t
+    *f-comp* t    ;composition
+    *b-comp* t
+    *fx-comp* nil
+    *bx-comp* nil
+    *f-sub* nil     ;substitution
+    *b-sub* nil
+    *fx-sub* nil
+    *bx-sub* nil
+    *f-subbar* nil  ;substitution bar (aka lost combinator)
+    *b-subbar* nil
+    *fx-subbar* nil
+    *bx-subbar* nil
+    *f-subcomp* nil ;subcomposition (i.e. D)
+    *f2-subcomp* nil ; D^2
+    *b-subcomp* nil
+    *fx-subcomp* nil
+    *bx-subcomp* nil
+    *f2-comp* t   ;B^2
+    *b2-comp* t
+    *fx2-comp* nil
+    *bx2-comp* nil
+    *f2-sub* nil    ;S'' (not S^2 of Curry)
+    *b2-sub* nil
+    *fx2-sub* nil
+    *bx2-sub* nil
+    *f3-comp* t   ;B^3
+    *b3-comp* t
+    *fx3-comp* nil
+    *bx3-comp* nil))
+
+(defun app-ccg (&key (nf-parse t) (lf t) (beam nil) (oov nil) (type-raise nil))
+  "only application is turned on. This is the Bar-Hillel fragment."
+  (nf-parse nf-parse)
+  (lf lf)
+  (beam beam)
+  (oov oov)
+  (type-raise type-raise)
+  (setf 
+    *f-apply* t   ;application
+    *b-apply* t
+    *f-comp* nil    ;composition
+    *b-comp* nil
+    *fx-comp* nil
+    *bx-comp* nil
+    *f-sub* nil     ;substitution
+    *b-sub* nil
+    *fx-sub* nil
+    *bx-sub* nil
+    *f-subbar* nil  ;substitution bar (aka lost combinator)
+    *b-subbar* nil
+    *fx-subbar* nil
+    *bx-subbar* nil
+    *f-subcomp* nil ;subcomposition (i.e. D)
+    *f2-subcomp* nil ; D^2
+    *b-subcomp* nil
+    *fx-subcomp* nil
+    *bx-subcomp* nil
+    *f2-comp* nil   ;B^2
+    *b2-comp* nil
+    *fx2-comp* nil
+    *bx2-comp* nil
+    *f2-sub* nil    ;S'' (not S^2 of Curry)
+    *b2-sub* nil
+    *fx2-sub* nil
+    *bx2-sub* nil
+    *f3-comp* nil   ;B^3
+    *b3-comp* nil
+    *fx3-comp* nil
+    *bx3-comp* nil))
 
 (defun rules ()
   (format t  "To change a switch, use (setf <switchname> <value>)
@@ -3483,11 +3536,8 @@
   (setf *loaded-grammar* "")
   (setf *ccg-grammar*  nil)
   (setf *ccg-grammar-keys*  0)
-  (nf-parse t)
-  (lf t)
-  (beam nil)
-  (oov nil)
-  (basic-ccg)) ; turn experimental rules off by default
+  (basic-ccg :nf-parse t :lf t :beam nil 
+	     :oov nil :type-raise nil)) ; turn experimental rules off by default
 
 (defun almost-eq (x y)
   (<= (abs (- x y)) *epsilon*))
