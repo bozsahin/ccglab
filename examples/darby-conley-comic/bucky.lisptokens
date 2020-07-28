@@ -1,0 +1,18 @@
+(
+
+
+
+you n  |:=|  np |:|  !you |;| 
+can aux  |:=|   |(| S |\\| np |)|  |/| iv  |:|   |\\| p |\\| x |.| !can  |(| p x |)|  |;| 
+food n  |:=|  pnp |:|  !food |;| 
+word n  |:=|  pnp |:|  !word |;| 
+-ify suf  |:=|   |(| iv |/| np |)|  |\\|  |\\| pnp |:|   |\\| x |\\| y |\\| z |.| x y z |;| 
+ |(| verb-it |)|  pnp  |:|  lf  |-->|  iv |/| np |:|   |\\| lf |\\| x |\\| y |.| lf x y |;| 
+ |(| fin |)|  iv  |:|  lf  |-->|  s |\\| np |:|   |\\| lf |\\| y |.| !fin  |(| lf y |)|  |;|  
+anything n  |:=|  np |:|  !anything |;| 
+if cl  |:=|   |(| s |\\|  |*| s |)|  |/|  |*| s |:|   |\\| p |\\| q |.| !if p q |;| 
+just adv  |:=|  iv |/|  |*| iv  |:|   |\\| p |.| !just p |;| 
+verb v  |:=|  iv |/| np |:|  |\\| x |\\| y |.| !verb x y |;| 
+eat v  |:=|  iv |/| np |:|  |\\| x |\\| y |.| !eat x y |;| 
+it pro  |:=|  np |:| !it |;| 
+)

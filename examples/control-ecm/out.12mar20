@@ -1,0 +1,1100 @@
+
+> (load "testsuite.lisp")
+
+T
+> (test)
+
+"CCGlab, version 7.0"
+========
+Testing without type raising
+
+======================= l o a d i n g =======================================
+
+Project cecm files
+-----------------------------------------------------------------------------
+  CCG grammar source       : cecm.ccg
+          token form       : cecm.lisptokens
+  Compiled/loaded grammar  : cecm.ccg.lisp
+       *CCG-GRAMMAR*       : 18 entries
+   *LEX-RULES-TABLE*       : 0 entries
+=============================================================================
+
+
+===== 1 : (JOHN PERSUADED MARY TO BUY THE CAR) ===== parsed? T
+
+
+Derivation 1
+--------------
+LEX   (JOHN) := NP
+        : JOHN
+LEX   (PERSUADED) := ((S\NP)/VP)/NP
+        : (LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y))))
+LEX   (MARY) := NP
+        : MARY
+>     (PERSUADED)(MARY) := (S\NP)/VP
+        : ((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) MARY)
+LEX   (TO) := VP/IV
+        : (LAM P P)
+LEX   (BUY) := IV/NP
+        : (LAM X (LAM Y ((BUY X) Y)))
+LEX   (THE) := NP/*N
+        : DEF
+LEX   (CAR) := N
+        : CAR
+>     (THE)(CAR) := NP
+        : (DEF CAR)
+>     (BUY)(THE CAR) := IV
+        : ((LAM X (LAM Y ((BUY X) Y))) (DEF CAR))
+>     (TO)(BUY THE CAR) := VP
+        : ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) (DEF CAR)))
+>     (PERSUADED MARY)(TO BUY THE CAR) := S\NP
+        : (((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) MARY)
+           ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) (DEF CAR))))
+<     (JOHN)(PERSUADED MARY TO BUY THE CAR) := S
+        : ((((LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))) MARY)
+            ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) (DEF CAR))))
+           JOHN)
+
+Final LF, normal-order evaluated: 
+
+    (((PERSUADE ((BUY (DEF CAR)) MARY)) MARY) JOHN) =
+    (PERSUADE (BUY (DEF CAR) MARY) MARY JOHN)
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+
+===== 2 : (JOHN PROMISED MARY TO BUY THE CAR) ===== parsed? T
+
+
+Derivation 1
+--------------
+LEX   (JOHN) := NP
+        : JOHN
+LEX   (PROMISED) := ((S\NP)/VP)/NP
+        : (LAM X (LAM P (LAM Y (((PROMISE (P Y)) X) Y))))
+LEX   (MARY) := NP
+        : MARY
+>     (PROMISED)(MARY) := (S\NP)/VP
+        : ((LAM X (LAM P (LAM Y (((PROMISE (P Y)) X) Y)))) MARY)
+LEX   (TO) := VP/IV
+        : (LAM P P)
+LEX   (BUY) := IV/NP
+        : (LAM X (LAM Y ((BUY X) Y)))
+LEX   (THE) := NP/*N
+        : DEF
+LEX   (CAR) := N
+        : CAR
+>     (THE)(CAR) := NP
+        : (DEF CAR)
+>     (BUY)(THE CAR) := IV
+        : ((LAM X (LAM Y ((BUY X) Y))) (DEF CAR))
+>     (TO)(BUY THE CAR) := VP
+        : ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) (DEF CAR)))
+>     (PROMISED MARY)(TO BUY THE CAR) := S\NP
+        : (((LAM X (LAM P (LAM Y (((PROMISE (P Y)) X) Y)))) MARY)
+           ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) (DEF CAR))))
+<     (JOHN)(PROMISED MARY TO BUY THE CAR) := S
+        : ((((LAM X (LAM P (LAM Y (((PROMISE (P Y)) X) Y)))) MARY)
+            ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) (DEF CAR))))
+           JOHN)
+
+Final LF, normal-order evaluated: 
+
+    (((PROMISE ((BUY (DEF CAR)) JOHN)) MARY) JOHN) =
+    (PROMISE (BUY (DEF CAR) JOHN) MARY JOHN)
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+
+===== 3 : (JOHN WANTED MARY TO BUY THE CAR) ===== parsed? T
+
+
+Derivation 1
+--------------
+LEX   (JOHN) := NP
+        : JOHN
+LEX   (WANTED) := ((S\NP)/VP)/NP
+        : (LAM X (LAM P (LAM Y ((WANT (P X)) Y))))
+LEX   (MARY) := NP
+        : MARY
+>     (WANTED)(MARY) := (S\NP)/VP
+        : ((LAM X (LAM P (LAM Y ((WANT (P X)) Y)))) MARY)
+LEX   (TO) := VP/IV
+        : (LAM P P)
+LEX   (BUY) := IV/NP
+        : (LAM X (LAM Y ((BUY X) Y)))
+LEX   (THE) := NP/*N
+        : DEF
+LEX   (CAR) := N
+        : CAR
+>     (THE)(CAR) := NP
+        : (DEF CAR)
+>     (BUY)(THE CAR) := IV
+        : ((LAM X (LAM Y ((BUY X) Y))) (DEF CAR))
+>     (TO)(BUY THE CAR) := VP
+        : ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) (DEF CAR)))
+>     (WANTED MARY)(TO BUY THE CAR) := S\NP
+        : (((LAM X (LAM P (LAM Y ((WANT (P X)) Y)))) MARY)
+           ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) (DEF CAR))))
+<     (JOHN)(WANTED MARY TO BUY THE CAR) := S
+        : ((((LAM X (LAM P (LAM Y ((WANT (P X)) Y)))) MARY)
+            ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) (DEF CAR))))
+           JOHN)
+
+Final LF, normal-order evaluated: 
+
+    ((WANT ((BUY (DEF CAR)) MARY)) JOHN) =
+    (WANT (BUY (DEF CAR) MARY) JOHN)
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+
+===== 4 : (JOHN EXPECTED MARY TO BUY THE CAR) ===== parsed? T
+
+
+Derivation 1
+--------------
+LEX   (JOHN) := NP
+        : JOHN
+LEX   (EXPECTED) := ((S\NP)/VP)/NP
+        : (LAM X (LAM P (LAM Y ((EXPECT (P X)) Y))))
+LEX   (MARY) := NP
+        : MARY
+>     (EXPECTED)(MARY) := (S\NP)/VP
+        : ((LAM X (LAM P (LAM Y ((EXPECT (P X)) Y)))) MARY)
+LEX   (TO) := VP/IV
+        : (LAM P P)
+LEX   (BUY) := IV/NP
+        : (LAM X (LAM Y ((BUY X) Y)))
+LEX   (THE) := NP/*N
+        : DEF
+LEX   (CAR) := N
+        : CAR
+>     (THE)(CAR) := NP
+        : (DEF CAR)
+>     (BUY)(THE CAR) := IV
+        : ((LAM X (LAM Y ((BUY X) Y))) (DEF CAR))
+>     (TO)(BUY THE CAR) := VP
+        : ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) (DEF CAR)))
+>     (EXPECTED MARY)(TO BUY THE CAR) := S\NP
+        : (((LAM X (LAM P (LAM Y ((EXPECT (P X)) Y)))) MARY)
+           ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) (DEF CAR))))
+<     (JOHN)(EXPECTED MARY TO BUY THE CAR) := S
+        : ((((LAM X (LAM P (LAM Y ((EXPECT (P X)) Y)))) MARY)
+            ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) (DEF CAR))))
+           JOHN)
+
+Final LF, normal-order evaluated: 
+
+    ((EXPECT ((BUY (DEF CAR)) MARY)) JOHN) =
+    (EXPECT (BUY (DEF CAR) MARY) JOHN)
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+
+===== 5 : (MARY CONSIDERED JOHN HANDSOME) ===== parsed? T
+
+
+Derivation 1
+--------------
+LEX   (MARY) := NP
+        : MARY
+LEX   (CONSIDERED) := ((S\NP)/PROPP)/NP
+        : (LAM X (LAM P (LAM Y ((CONSIDER (P X)) Y))))
+LEX   (JOHN) := NP
+        : JOHN
+>     (CONSIDERED)(JOHN) := (S\NP)/PROPP
+        : ((LAM X (LAM P (LAM Y ((CONSIDER (P X)) Y)))) JOHN)
+LEX   (HANDSOME) := PROPP
+        : (LAM X (HANDSOME X))
+>     (CONSIDERED JOHN)(HANDSOME) := S\NP
+        : (((LAM X (LAM P (LAM Y ((CONSIDER (P X)) Y)))) JOHN)
+           (LAM X (HANDSOME X)))
+<     (MARY)(CONSIDERED JOHN HANDSOME) := S
+        : ((((LAM X (LAM P (LAM Y ((CONSIDER (P X)) Y)))) JOHN)
+            (LAM X (HANDSOME X)))
+           MARY)
+
+Final LF, normal-order evaluated: 
+
+    ((CONSIDER (HANDSOME JOHN)) MARY) =
+    (CONSIDER (HANDSOME JOHN) MARY)
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+
+===== 6 : (IT SEEMED JOHN BOUGHT THE CAR) ===== parsed? T
+
+
+Derivation 1
+--------------
+LEX   (IT) := XP
+        : IT
+LEX   (SEEMED) := (S\XP)/S
+        : (LAM P (LAM X (SEEM P)))
+LEX   (JOHN) := NP
+        : JOHN
+LEX   (BOUGHT) := (S\NP)/NP
+        : (LAM X (LAM Y ((BUY X) Y)))
+LEX   (THE) := NP/*N
+        : DEF
+LEX   (CAR) := N
+        : CAR
+>     (THE)(CAR) := NP
+        : (DEF CAR)
+>     (BOUGHT)(THE CAR) := S\NP
+        : ((LAM X (LAM Y ((BUY X) Y))) (DEF CAR))
+<     (JOHN)(BOUGHT THE CAR) := S
+        : (((LAM X (LAM Y ((BUY X) Y))) (DEF CAR)) JOHN)
+>     (SEEMED)(JOHN BOUGHT THE CAR) := S\XP
+        : ((LAM P (LAM X (SEEM P)))
+           (((LAM X (LAM Y ((BUY X) Y))) (DEF CAR)) JOHN))
+<     (IT)(SEEMED JOHN BOUGHT THE CAR) := S
+        : (((LAM P (LAM X (SEEM P)))
+            (((LAM X (LAM Y ((BUY X) Y))) (DEF CAR)) JOHN))
+           IT)
+
+Final LF, normal-order evaluated: 
+
+    (SEEM ((BUY (DEF CAR)) JOHN)) =
+    (SEEM (BUY (DEF CAR) JOHN))
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+
+===== 7 : (JOHN SEEMED TO HAVE BOUGHT THE CAR) ===== parsed? T
+
+
+Derivation 1
+--------------
+LEX   (JOHN) := NP
+        : JOHN
+LEX   (SEEMED) := (S\NP)/VP
+        : (LAM P (LAM X (SEEM (P X))))
+LEX   (TO) := VP/IV
+        : (LAM P P)
+LEX   (HAVE) := IV/IV
+        : (LAM P P)
+LEX   (BOUGHT) := IV/NP
+        : (LAM X (LAM Y ((BUY X) Y)))
+LEX   (THE) := NP/*N
+        : DEF
+LEX   (CAR) := N
+        : CAR
+>     (THE)(CAR) := NP
+        : (DEF CAR)
+>     (BOUGHT)(THE CAR) := IV
+        : ((LAM X (LAM Y ((BUY X) Y))) (DEF CAR))
+>     (HAVE)(BOUGHT THE CAR) := IV
+        : ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) (DEF CAR)))
+>     (TO)(HAVE BOUGHT THE CAR) := VP
+        : ((LAM P P) ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) (DEF CAR))))
+>     (SEEMED)(TO HAVE BOUGHT THE CAR) := S\NP
+        : ((LAM P (LAM X (SEEM (P X))))
+           ((LAM P P) ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) (DEF CAR)))))
+<     (JOHN)(SEEMED TO HAVE BOUGHT THE CAR) := S
+        : (((LAM P (LAM X (SEEM (P X))))
+            ((LAM P P) ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) (DEF CAR)))))
+           JOHN)
+
+Final LF, normal-order evaluated: 
+
+    (SEEM ((BUY (DEF CAR)) JOHN)) =
+    (SEEM (BUY (DEF CAR) JOHN))
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+
+===== 8BAD : (THE CAR SEEMED JOHN TO HAVE BOUGHT) ===== parsed? NIL
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+NIL
+> (test-tr)
+
+"CCGlab, version 7.0"
+========
+Testing with type raising
+ TRC rules: TR derived from a lexical function.
+ MLU rules: TR generalized from TRC/MLU rules.
+
+	  TRC: type-raise compiler, MLU: most local unifier
+======================= l o a d i n g =======================================
+
+Project cecm files
+-----------------------------------------------------------------------------
+  CCG grammar source       : cecm.ccg
+          token form       : cecm.lisptokens
+  Compiled/loaded grammar  : cecm.ccg.lisp
+       *CCG-GRAMMAR*       : 18 entries
+   *LEX-RULES-TABLE*       : 0 entries
+=============================================================================
+
+Type-raising rules added at the end of *ccg-grammar*
+compiled, subsumed and saved.
+======================= l o a d i n g =======================================
+
+Project cecm-tr files
+-----------------------------------------------------------------------------
+  Compiled/loaded grammar  : cecm-tr.ccg.lisp
+       *CCG-GRAMMAR*       : 27 entries
+   *LEX-RULES-TABLE*       : 9 entries
+=============================================================================
+
+Lowest types (NP VP PROPP S) will be eliminated
+
+Derivations of (1 (JOHN PERSUADED MARY TO BUY THE CAR)) onto S
+
+
+
+Derivation 1
+--------------
+LEX   (THE) := NP/*N
+        : DEF
+LEX   (CAR) := N
+        : CAR
+>     (THE)(CAR) := NP
+        : (DEF CAR)
+LEX   (TO) := VP/IV
+        : (LAM P P)
+LEX   (BUY) := IV/NP
+        : (LAM X (LAM Y ((BUY X) Y)))
+_MLU399 (THE CAR) := IV\(IV/NP)
+        : ((LAM LF (LAM P (P LF))) (DEF CAR))
+<     (BUY)(THE CAR) := IV
+        : (((LAM LF (LAM P (P LF))) (DEF CAR)) (LAM X (LAM Y ((BUY X) Y))))
+>     (TO)(BUY THE CAR) := VP
+        : ((LAM P P)
+           (((LAM LF (LAM P (P LF))) (DEF CAR)) (LAM X (LAM Y ((BUY X) Y)))))
+_MLU438 (JOHN) := S/(S\NP)
+        : ((LAM LF (LAM P (P LF))) JOHN)
+LEX   (PERSUADED) := ((S\NP)/VP)/NP
+        : (LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y))))
+_MLU448 (MARY) := ((S\NP)/VP)\(((S\NP)/VP)/NP)
+        : ((LAM LF (LAM P (P LF))) MARY)
+<     (PERSUADED)(MARY) := (S\NP)/VP
+        : (((LAM LF (LAM P (P LF))) MARY)
+           (LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))))
+_MLU446 (TO BUY THE CAR) := (S\NP)\((S\NP)/VP)
+        : ((LAM LF (LAM P (P LF)))
+           ((LAM P P)
+            (((LAM LF (LAM P (P LF))) (DEF CAR)) (LAM X (LAM Y ((BUY X) Y))))))
+<     (PERSUADED MARY)(TO BUY THE CAR) := S\NP
+        : (((LAM LF (LAM P (P LF)))
+            ((LAM P P)
+             (((LAM LF (LAM P (P LF))) (DEF CAR))
+              (LAM X (LAM Y ((BUY X) Y))))))
+           (((LAM LF (LAM P (P LF))) MARY)
+            (LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y))))))
+>     (JOHN)(PERSUADED MARY TO BUY THE CAR) := S
+        : (((LAM LF (LAM P (P LF))) JOHN)
+           (((LAM LF (LAM P (P LF)))
+             ((LAM P P)
+              (((LAM LF (LAM P (P LF))) (DEF CAR))
+               (LAM X (LAM Y ((BUY X) Y))))))
+            (((LAM LF (LAM P (P LF))) MARY)
+             (LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))))))
+
+Final LF, normal-order evaluated: 
+
+    (((PERSUADE ((BUY (DEF CAR)) MARY)) MARY) JOHN) =
+    (PERSUADE (BUY (DEF CAR) MARY) MARY JOHN)
+
+Derivation 2
+--------------
+LEX   (THE) := NP/*N
+        : DEF
+LEX   (CAR) := N
+        : CAR
+>     (THE)(CAR) := NP
+        : (DEF CAR)
+_MLU438 (JOHN) := S/(S\NP)
+        : ((LAM LF (LAM P (P LF))) JOHN)
+LEX   (PERSUADED) := ((S\NP)/VP)/NP
+        : (LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y))))
+_MLU448 (MARY) := ((S\NP)/VP)\(((S\NP)/VP)/NP)
+        : ((LAM LF (LAM P (P LF))) MARY)
+<     (PERSUADED)(MARY) := (S\NP)/VP
+        : (((LAM LF (LAM P (P LF))) MARY)
+           (LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))))
+LEX   (TO) := VP/IV
+        : (LAM P P)
+LEX   (BUY) := IV/NP
+        : (LAM X (LAM Y ((BUY X) Y)))
+>B    (TO)(BUY) := VP/NP
+        : (LAM X ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) X)))
+>B    (PERSUADED MARY)(TO BUY) := (S\NP)/NP
+        : (LAM X
+           ((((LAM LF (LAM P (P LF))) MARY)
+             (LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))))
+            ((LAM X ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) X))) X)))
+_TRC378 (THE CAR) := (S\NP)\((S\NP)/NP)
+        : ((LAM LF (LAM P (P LF))) (DEF CAR))
+<     (PERSUADED MARY TO BUY)(THE CAR) := S\NP
+        : (((LAM LF (LAM P (P LF))) (DEF CAR))
+           (LAM X
+            ((((LAM LF (LAM P (P LF))) MARY)
+              (LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))))
+             ((LAM X ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) X))) X))))
+>     (JOHN)(PERSUADED MARY TO BUY THE CAR) := S
+        : (((LAM LF (LAM P (P LF))) JOHN)
+           (((LAM LF (LAM P (P LF))) (DEF CAR))
+            (LAM X
+             ((((LAM LF (LAM P (P LF))) MARY)
+               (LAM X (LAM P (LAM Y (((PERSUADE (P X)) X) Y)))))
+              ((LAM X ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) X))) X)))))
+
+Final LF, normal-order evaluated: 
+
+    (((PERSUADE ((BUY (DEF CAR)) MARY)) MARY) JOHN) =
+    (PERSUADE (BUY (DEF CAR) MARY) MARY JOHN)
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+Lowest types (NP VP PROPP S) will be eliminated
+
+Derivations of (2 (JOHN PROMISED MARY TO BUY THE CAR)) onto S
+
+
+
+Derivation 1
+--------------
+LEX   (THE) := NP/*N
+        : DEF
+LEX   (CAR) := N
+        : CAR
+>     (THE)(CAR) := NP
+        : (DEF CAR)
+LEX   (TO) := VP/IV
+        : (LAM P P)
+LEX   (BUY) := IV/NP
+        : (LAM X (LAM Y ((BUY X) Y)))
+_MLU399 (THE CAR) := IV\(IV/NP)
+        : ((LAM LF (LAM P (P LF))) (DEF CAR))
+<     (BUY)(THE CAR) := IV
+        : (((LAM LF (LAM P (P LF))) (DEF CAR)) (LAM X (LAM Y ((BUY X) Y))))
+>     (TO)(BUY THE CAR) := VP
+        : ((LAM P P)
+           (((LAM LF (LAM P (P LF))) (DEF CAR)) (LAM X (LAM Y ((BUY X) Y)))))
+_MLU438 (JOHN) := S/(S\NP)
+        : ((LAM LF (LAM P (P LF))) JOHN)
+LEX   (PROMISED) := ((S\NP)/VP)/NP
+        : (LAM X (LAM P (LAM Y (((PROMISE (P Y)) X) Y))))
+_MLU448 (MARY) := ((S\NP)/VP)\(((S\NP)/VP)/NP)
+        : ((LAM LF (LAM P (P LF))) MARY)
+<     (PROMISED)(MARY) := (S\NP)/VP
+        : (((LAM LF (LAM P (P LF))) MARY)
+           (LAM X (LAM P (LAM Y (((PROMISE (P Y)) X) Y)))))
+_MLU446 (TO BUY THE CAR) := (S\NP)\((S\NP)/VP)
+        : ((LAM LF (LAM P (P LF)))
+           ((LAM P P)
+            (((LAM LF (LAM P (P LF))) (DEF CAR)) (LAM X (LAM Y ((BUY X) Y))))))
+<     (PROMISED MARY)(TO BUY THE CAR) := S\NP
+        : (((LAM LF (LAM P (P LF)))
+            ((LAM P P)
+             (((LAM LF (LAM P (P LF))) (DEF CAR))
+              (LAM X (LAM Y ((BUY X) Y))))))
+           (((LAM LF (LAM P (P LF))) MARY)
+            (LAM X (LAM P (LAM Y (((PROMISE (P Y)) X) Y))))))
+>     (JOHN)(PROMISED MARY TO BUY THE CAR) := S
+        : (((LAM LF (LAM P (P LF))) JOHN)
+           (((LAM LF (LAM P (P LF)))
+             ((LAM P P)
+              (((LAM LF (LAM P (P LF))) (DEF CAR))
+               (LAM X (LAM Y ((BUY X) Y))))))
+            (((LAM LF (LAM P (P LF))) MARY)
+             (LAM X (LAM P (LAM Y (((PROMISE (P Y)) X) Y)))))))
+
+Final LF, normal-order evaluated: 
+
+    (((PROMISE ((BUY (DEF CAR)) JOHN)) MARY) JOHN) =
+    (PROMISE (BUY (DEF CAR) JOHN) MARY JOHN)
+
+Derivation 2
+--------------
+LEX   (THE) := NP/*N
+        : DEF
+LEX   (CAR) := N
+        : CAR
+>     (THE)(CAR) := NP
+        : (DEF CAR)
+_MLU438 (JOHN) := S/(S\NP)
+        : ((LAM LF (LAM P (P LF))) JOHN)
+LEX   (PROMISED) := ((S\NP)/VP)/NP
+        : (LAM X (LAM P (LAM Y (((PROMISE (P Y)) X) Y))))
+_MLU448 (MARY) := ((S\NP)/VP)\(((S\NP)/VP)/NP)
+        : ((LAM LF (LAM P (P LF))) MARY)
+<     (PROMISED)(MARY) := (S\NP)/VP
+        : (((LAM LF (LAM P (P LF))) MARY)
+           (LAM X (LAM P (LAM Y (((PROMISE (P Y)) X) Y)))))
+LEX   (TO) := VP/IV
+        : (LAM P P)
+LEX   (BUY) := IV/NP
+        : (LAM X (LAM Y ((BUY X) Y)))
+>B    (TO)(BUY) := VP/NP
+        : (LAM X ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) X)))
+>B    (PROMISED MARY)(TO BUY) := (S\NP)/NP
+        : (LAM X
+           ((((LAM LF (LAM P (P LF))) MARY)
+             (LAM X (LAM P (LAM Y (((PROMISE (P Y)) X) Y)))))
+            ((LAM X ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) X))) X)))
+_TRC378 (THE CAR) := (S\NP)\((S\NP)/NP)
+        : ((LAM LF (LAM P (P LF))) (DEF CAR))
+<     (PROMISED MARY TO BUY)(THE CAR) := S\NP
+        : (((LAM LF (LAM P (P LF))) (DEF CAR))
+           (LAM X
+            ((((LAM LF (LAM P (P LF))) MARY)
+              (LAM X (LAM P (LAM Y (((PROMISE (P Y)) X) Y)))))
+             ((LAM X ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) X))) X))))
+>     (JOHN)(PROMISED MARY TO BUY THE CAR) := S
+        : (((LAM LF (LAM P (P LF))) JOHN)
+           (((LAM LF (LAM P (P LF))) (DEF CAR))
+            (LAM X
+             ((((LAM LF (LAM P (P LF))) MARY)
+               (LAM X (LAM P (LAM Y (((PROMISE (P Y)) X) Y)))))
+              ((LAM X ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) X))) X)))))
+
+Final LF, normal-order evaluated: 
+
+    (((PROMISE ((BUY (DEF CAR)) JOHN)) MARY) JOHN) =
+    (PROMISE (BUY (DEF CAR) JOHN) MARY JOHN)
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+Lowest types (NP VP PROPP S) will be eliminated
+
+Derivations of (3 (JOHN WANTED MARY TO BUY THE CAR)) onto S
+
+
+
+Derivation 1
+--------------
+LEX   (THE) := NP/*N
+        : DEF
+LEX   (CAR) := N
+        : CAR
+>     (THE)(CAR) := NP
+        : (DEF CAR)
+LEX   (TO) := VP/IV
+        : (LAM P P)
+LEX   (BUY) := IV/NP
+        : (LAM X (LAM Y ((BUY X) Y)))
+_MLU399 (THE CAR) := IV\(IV/NP)
+        : ((LAM LF (LAM P (P LF))) (DEF CAR))
+<     (BUY)(THE CAR) := IV
+        : (((LAM LF (LAM P (P LF))) (DEF CAR)) (LAM X (LAM Y ((BUY X) Y))))
+>     (TO)(BUY THE CAR) := VP
+        : ((LAM P P)
+           (((LAM LF (LAM P (P LF))) (DEF CAR)) (LAM X (LAM Y ((BUY X) Y)))))
+_MLU438 (JOHN) := S/(S\NP)
+        : ((LAM LF (LAM P (P LF))) JOHN)
+LEX   (WANTED) := ((S\NP)/VP)/NP
+        : (LAM X (LAM P (LAM Y ((WANT (P X)) Y))))
+_MLU448 (MARY) := ((S\NP)/VP)\(((S\NP)/VP)/NP)
+        : ((LAM LF (LAM P (P LF))) MARY)
+<     (WANTED)(MARY) := (S\NP)/VP
+        : (((LAM LF (LAM P (P LF))) MARY)
+           (LAM X (LAM P (LAM Y ((WANT (P X)) Y)))))
+_MLU446 (TO BUY THE CAR) := (S\NP)\((S\NP)/VP)
+        : ((LAM LF (LAM P (P LF)))
+           ((LAM P P)
+            (((LAM LF (LAM P (P LF))) (DEF CAR)) (LAM X (LAM Y ((BUY X) Y))))))
+<     (WANTED MARY)(TO BUY THE CAR) := S\NP
+        : (((LAM LF (LAM P (P LF)))
+            ((LAM P P)
+             (((LAM LF (LAM P (P LF))) (DEF CAR))
+              (LAM X (LAM Y ((BUY X) Y))))))
+           (((LAM LF (LAM P (P LF))) MARY)
+            (LAM X (LAM P (LAM Y ((WANT (P X)) Y))))))
+>     (JOHN)(WANTED MARY TO BUY THE CAR) := S
+        : (((LAM LF (LAM P (P LF))) JOHN)
+           (((LAM LF (LAM P (P LF)))
+             ((LAM P P)
+              (((LAM LF (LAM P (P LF))) (DEF CAR))
+               (LAM X (LAM Y ((BUY X) Y))))))
+            (((LAM LF (LAM P (P LF))) MARY)
+             (LAM X (LAM P (LAM Y ((WANT (P X)) Y)))))))
+
+Final LF, normal-order evaluated: 
+
+    ((WANT ((BUY (DEF CAR)) MARY)) JOHN) =
+    (WANT (BUY (DEF CAR) MARY) JOHN)
+
+Derivation 2
+--------------
+LEX   (THE) := NP/*N
+        : DEF
+LEX   (CAR) := N
+        : CAR
+>     (THE)(CAR) := NP
+        : (DEF CAR)
+_MLU438 (JOHN) := S/(S\NP)
+        : ((LAM LF (LAM P (P LF))) JOHN)
+LEX   (WANTED) := ((S\NP)/VP)/NP
+        : (LAM X (LAM P (LAM Y ((WANT (P X)) Y))))
+_MLU448 (MARY) := ((S\NP)/VP)\(((S\NP)/VP)/NP)
+        : ((LAM LF (LAM P (P LF))) MARY)
+<     (WANTED)(MARY) := (S\NP)/VP
+        : (((LAM LF (LAM P (P LF))) MARY)
+           (LAM X (LAM P (LAM Y ((WANT (P X)) Y)))))
+LEX   (TO) := VP/IV
+        : (LAM P P)
+LEX   (BUY) := IV/NP
+        : (LAM X (LAM Y ((BUY X) Y)))
+>B    (TO)(BUY) := VP/NP
+        : (LAM X ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) X)))
+>B    (WANTED MARY)(TO BUY) := (S\NP)/NP
+        : (LAM X
+           ((((LAM LF (LAM P (P LF))) MARY)
+             (LAM X (LAM P (LAM Y ((WANT (P X)) Y)))))
+            ((LAM X ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) X))) X)))
+_TRC378 (THE CAR) := (S\NP)\((S\NP)/NP)
+        : ((LAM LF (LAM P (P LF))) (DEF CAR))
+<     (WANTED MARY TO BUY)(THE CAR) := S\NP
+        : (((LAM LF (LAM P (P LF))) (DEF CAR))
+           (LAM X
+            ((((LAM LF (LAM P (P LF))) MARY)
+              (LAM X (LAM P (LAM Y ((WANT (P X)) Y)))))
+             ((LAM X ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) X))) X))))
+>     (JOHN)(WANTED MARY TO BUY THE CAR) := S
+        : (((LAM LF (LAM P (P LF))) JOHN)
+           (((LAM LF (LAM P (P LF))) (DEF CAR))
+            (LAM X
+             ((((LAM LF (LAM P (P LF))) MARY)
+               (LAM X (LAM P (LAM Y ((WANT (P X)) Y)))))
+              ((LAM X ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) X))) X)))))
+
+Final LF, normal-order evaluated: 
+
+    ((WANT ((BUY (DEF CAR)) MARY)) JOHN) =
+    (WANT (BUY (DEF CAR) MARY) JOHN)
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+Lowest types (NP VP PROPP S) will be eliminated
+
+Derivations of (4 (JOHN EXPECTED MARY TO BUY THE CAR)) onto S
+
+
+
+Derivation 1
+--------------
+LEX   (THE) := NP/*N
+        : DEF
+LEX   (CAR) := N
+        : CAR
+>     (THE)(CAR) := NP
+        : (DEF CAR)
+LEX   (TO) := VP/IV
+        : (LAM P P)
+LEX   (BUY) := IV/NP
+        : (LAM X (LAM Y ((BUY X) Y)))
+_MLU399 (THE CAR) := IV\(IV/NP)
+        : ((LAM LF (LAM P (P LF))) (DEF CAR))
+<     (BUY)(THE CAR) := IV
+        : (((LAM LF (LAM P (P LF))) (DEF CAR)) (LAM X (LAM Y ((BUY X) Y))))
+>     (TO)(BUY THE CAR) := VP
+        : ((LAM P P)
+           (((LAM LF (LAM P (P LF))) (DEF CAR)) (LAM X (LAM Y ((BUY X) Y)))))
+_MLU438 (JOHN) := S/(S\NP)
+        : ((LAM LF (LAM P (P LF))) JOHN)
+LEX   (EXPECTED) := ((S\NP)/VP)/NP
+        : (LAM X (LAM P (LAM Y ((EXPECT (P X)) Y))))
+_MLU448 (MARY) := ((S\NP)/VP)\(((S\NP)/VP)/NP)
+        : ((LAM LF (LAM P (P LF))) MARY)
+<     (EXPECTED)(MARY) := (S\NP)/VP
+        : (((LAM LF (LAM P (P LF))) MARY)
+           (LAM X (LAM P (LAM Y ((EXPECT (P X)) Y)))))
+_MLU446 (TO BUY THE CAR) := (S\NP)\((S\NP)/VP)
+        : ((LAM LF (LAM P (P LF)))
+           ((LAM P P)
+            (((LAM LF (LAM P (P LF))) (DEF CAR)) (LAM X (LAM Y ((BUY X) Y))))))
+<     (EXPECTED MARY)(TO BUY THE CAR) := S\NP
+        : (((LAM LF (LAM P (P LF)))
+            ((LAM P P)
+             (((LAM LF (LAM P (P LF))) (DEF CAR))
+              (LAM X (LAM Y ((BUY X) Y))))))
+           (((LAM LF (LAM P (P LF))) MARY)
+            (LAM X (LAM P (LAM Y ((EXPECT (P X)) Y))))))
+>     (JOHN)(EXPECTED MARY TO BUY THE CAR) := S
+        : (((LAM LF (LAM P (P LF))) JOHN)
+           (((LAM LF (LAM P (P LF)))
+             ((LAM P P)
+              (((LAM LF (LAM P (P LF))) (DEF CAR))
+               (LAM X (LAM Y ((BUY X) Y))))))
+            (((LAM LF (LAM P (P LF))) MARY)
+             (LAM X (LAM P (LAM Y ((EXPECT (P X)) Y)))))))
+
+Final LF, normal-order evaluated: 
+
+    ((EXPECT ((BUY (DEF CAR)) MARY)) JOHN) =
+    (EXPECT (BUY (DEF CAR) MARY) JOHN)
+
+Derivation 2
+--------------
+LEX   (THE) := NP/*N
+        : DEF
+LEX   (CAR) := N
+        : CAR
+>     (THE)(CAR) := NP
+        : (DEF CAR)
+_MLU438 (JOHN) := S/(S\NP)
+        : ((LAM LF (LAM P (P LF))) JOHN)
+LEX   (EXPECTED) := ((S\NP)/VP)/NP
+        : (LAM X (LAM P (LAM Y ((EXPECT (P X)) Y))))
+_MLU448 (MARY) := ((S\NP)/VP)\(((S\NP)/VP)/NP)
+        : ((LAM LF (LAM P (P LF))) MARY)
+<     (EXPECTED)(MARY) := (S\NP)/VP
+        : (((LAM LF (LAM P (P LF))) MARY)
+           (LAM X (LAM P (LAM Y ((EXPECT (P X)) Y)))))
+LEX   (TO) := VP/IV
+        : (LAM P P)
+LEX   (BUY) := IV/NP
+        : (LAM X (LAM Y ((BUY X) Y)))
+>B    (TO)(BUY) := VP/NP
+        : (LAM X ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) X)))
+>B    (EXPECTED MARY)(TO BUY) := (S\NP)/NP
+        : (LAM X
+           ((((LAM LF (LAM P (P LF))) MARY)
+             (LAM X (LAM P (LAM Y ((EXPECT (P X)) Y)))))
+            ((LAM X ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) X))) X)))
+_TRC378 (THE CAR) := (S\NP)\((S\NP)/NP)
+        : ((LAM LF (LAM P (P LF))) (DEF CAR))
+<     (EXPECTED MARY TO BUY)(THE CAR) := S\NP
+        : (((LAM LF (LAM P (P LF))) (DEF CAR))
+           (LAM X
+            ((((LAM LF (LAM P (P LF))) MARY)
+              (LAM X (LAM P (LAM Y ((EXPECT (P X)) Y)))))
+             ((LAM X ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) X))) X))))
+>     (JOHN)(EXPECTED MARY TO BUY THE CAR) := S
+        : (((LAM LF (LAM P (P LF))) JOHN)
+           (((LAM LF (LAM P (P LF))) (DEF CAR))
+            (LAM X
+             ((((LAM LF (LAM P (P LF))) MARY)
+               (LAM X (LAM P (LAM Y ((EXPECT (P X)) Y)))))
+              ((LAM X ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) X))) X)))))
+
+Final LF, normal-order evaluated: 
+
+    ((EXPECT ((BUY (DEF CAR)) MARY)) JOHN) =
+    (EXPECT (BUY (DEF CAR) MARY) JOHN)
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+Lowest types (NP VP PROPP S) will be eliminated
+
+Derivations of (5 (MARY CONSIDERED JOHN HANDSOME)) onto S
+
+
+
+Derivation 1
+--------------
+_MLU438 (MARY) := S/(S\NP)
+        : ((LAM LF (LAM P (P LF))) MARY)
+LEX   (CONSIDERED) := ((S\NP)/PROPP)/NP
+        : (LAM X (LAM P (LAM Y ((CONSIDER (P X)) Y))))
+_TRC386 (JOHN) := ((S\NP)/PROPP)\(((S\NP)/PROPP)/NP)
+        : ((LAM LF (LAM P (P LF))) JOHN)
+<     (CONSIDERED)(JOHN) := (S\NP)/PROPP
+        : (((LAM LF (LAM P (P LF))) JOHN)
+           (LAM X (LAM P (LAM Y ((CONSIDER (P X)) Y)))))
+_TRC385 (HANDSOME) := (S\NP)\((S\NP)/PROPP)
+        : ((LAM LF (LAM P (P LF))) (LAM X (HANDSOME X)))
+<     (CONSIDERED JOHN)(HANDSOME) := S\NP
+        : (((LAM LF (LAM P (P LF))) (LAM X (HANDSOME X)))
+           (((LAM LF (LAM P (P LF))) JOHN)
+            (LAM X (LAM P (LAM Y ((CONSIDER (P X)) Y))))))
+>     (MARY)(CONSIDERED JOHN HANDSOME) := S
+        : (((LAM LF (LAM P (P LF))) MARY)
+           (((LAM LF (LAM P (P LF))) (LAM X (HANDSOME X)))
+            (((LAM LF (LAM P (P LF))) JOHN)
+             (LAM X (LAM P (LAM Y ((CONSIDER (P X)) Y)))))))
+
+Final LF, normal-order evaluated: 
+
+    ((CONSIDER (HANDSOME JOHN)) MARY) =
+    (CONSIDER (HANDSOME JOHN) MARY)
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+Lowest types (NP VP PROPP S) will be eliminated
+
+Derivations of (6 (IT SEEMED JOHN BOUGHT THE CAR)) onto S
+
+
+
+Derivation 1
+--------------
+LEX   (THE) := NP/*N
+        : DEF
+LEX   (CAR) := N
+        : CAR
+>     (THE)(CAR) := NP
+        : (DEF CAR)
+_MLU438 (JOHN) := S/(S\NP)
+        : ((LAM LF (LAM P (P LF))) JOHN)
+LEX   (BOUGHT) := (S\NP)/NP
+        : (LAM X (LAM Y ((BUY X) Y)))
+_TRC378 (THE CAR) := (S\NP)\((S\NP)/NP)
+        : ((LAM LF (LAM P (P LF))) (DEF CAR))
+<     (BOUGHT)(THE CAR) := S\NP
+        : (((LAM LF (LAM P (P LF))) (DEF CAR)) (LAM X (LAM Y ((BUY X) Y))))
+>     (JOHN)(BOUGHT THE CAR) := S
+        : (((LAM LF (LAM P (P LF))) JOHN)
+           (((LAM LF (LAM P (P LF))) (DEF CAR)) (LAM X (LAM Y ((BUY X) Y)))))
+LEX   (IT) := XP
+        : IT
+LEX   (SEEMED) := (S\XP)/S
+        : (LAM P (LAM X (SEEM P)))
+_TRC383 (JOHN BOUGHT THE CAR) := (S\XP)\((S\XP)/S)
+        : ((LAM LF (LAM P (P LF)))
+           (((LAM LF (LAM P (P LF))) JOHN)
+            (((LAM LF (LAM P (P LF))) (DEF CAR)) (LAM X (LAM Y ((BUY X) Y))))))
+<     (SEEMED)(JOHN BOUGHT THE CAR) := S\XP
+        : (((LAM LF (LAM P (P LF)))
+            (((LAM LF (LAM P (P LF))) JOHN)
+             (((LAM LF (LAM P (P LF))) (DEF CAR))
+              (LAM X (LAM Y ((BUY X) Y))))))
+           (LAM P (LAM X (SEEM P))))
+<     (IT)(SEEMED JOHN BOUGHT THE CAR) := S
+        : ((((LAM LF (LAM P (P LF)))
+             (((LAM LF (LAM P (P LF))) JOHN)
+              (((LAM LF (LAM P (P LF))) (DEF CAR))
+               (LAM X (LAM Y ((BUY X) Y))))))
+            (LAM P (LAM X (SEEM P))))
+           IT)
+
+Final LF, normal-order evaluated: 
+
+    (SEEM ((BUY (DEF CAR)) JOHN)) =
+    (SEEM (BUY (DEF CAR) JOHN))
+
+Derivation 2
+--------------
+LEX   (THE) := NP/*N
+        : DEF
+LEX   (CAR) := N
+        : CAR
+>     (THE)(CAR) := NP
+        : (DEF CAR)
+_MLU438 (JOHN) := S/(S\NP)
+        : ((LAM LF (LAM P (P LF))) JOHN)
+LEX   (BOUGHT) := (S\NP)/NP
+        : (LAM X (LAM Y ((BUY X) Y)))
+_TRC378 (THE CAR) := (S\NP)\((S\NP)/NP)
+        : ((LAM LF (LAM P (P LF))) (DEF CAR))
+<     (BOUGHT)(THE CAR) := S\NP
+        : (((LAM LF (LAM P (P LF))) (DEF CAR)) (LAM X (LAM Y ((BUY X) Y))))
+>     (JOHN)(BOUGHT THE CAR) := S
+        : (((LAM LF (LAM P (P LF))) JOHN)
+           (((LAM LF (LAM P (P LF))) (DEF CAR)) (LAM X (LAM Y ((BUY X) Y)))))
+_TRC382 (IT) := S/(S\XP)
+        : ((LAM LF (LAM P (P LF))) IT)
+LEX   (SEEMED) := (S\XP)/S
+        : (LAM P (LAM X (SEEM P)))
+_TRC383 (JOHN BOUGHT THE CAR) := (S\XP)\((S\XP)/S)
+        : ((LAM LF (LAM P (P LF)))
+           (((LAM LF (LAM P (P LF))) JOHN)
+            (((LAM LF (LAM P (P LF))) (DEF CAR)) (LAM X (LAM Y ((BUY X) Y))))))
+<     (SEEMED)(JOHN BOUGHT THE CAR) := S\XP
+        : (((LAM LF (LAM P (P LF)))
+            (((LAM LF (LAM P (P LF))) JOHN)
+             (((LAM LF (LAM P (P LF))) (DEF CAR))
+              (LAM X (LAM Y ((BUY X) Y))))))
+           (LAM P (LAM X (SEEM P))))
+>     (IT)(SEEMED JOHN BOUGHT THE CAR) := S
+        : (((LAM LF (LAM P (P LF))) IT)
+           (((LAM LF (LAM P (P LF)))
+             (((LAM LF (LAM P (P LF))) JOHN)
+              (((LAM LF (LAM P (P LF))) (DEF CAR))
+               (LAM X (LAM Y ((BUY X) Y))))))
+            (LAM P (LAM X (SEEM P)))))
+
+Final LF, normal-order evaluated: 
+
+    (SEEM ((BUY (DEF CAR)) JOHN)) =
+    (SEEM (BUY (DEF CAR) JOHN))
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+Lowest types (NP VP PROPP S) will be eliminated
+
+Derivations of (7 (JOHN SEEMED TO HAVE BOUGHT THE CAR)) onto S
+
+
+
+Derivation 1
+--------------
+LEX   (THE) := NP/*N
+        : DEF
+LEX   (CAR) := N
+        : CAR
+>     (THE)(CAR) := NP
+        : (DEF CAR)
+LEX   (TO) := VP/IV
+        : (LAM P P)
+LEX   (HAVE) := IV/IV
+        : (LAM P P)
+LEX   (BOUGHT) := IV/NP
+        : (LAM X (LAM Y ((BUY X) Y)))
+_MLU399 (THE CAR) := IV\(IV/NP)
+        : ((LAM LF (LAM P (P LF))) (DEF CAR))
+<     (BOUGHT)(THE CAR) := IV
+        : (((LAM LF (LAM P (P LF))) (DEF CAR)) (LAM X (LAM Y ((BUY X) Y))))
+>     (HAVE)(BOUGHT THE CAR) := IV
+        : ((LAM P P)
+           (((LAM LF (LAM P (P LF))) (DEF CAR)) (LAM X (LAM Y ((BUY X) Y)))))
+>     (TO)(HAVE BOUGHT THE CAR) := VP
+        : ((LAM P P)
+           ((LAM P P)
+            (((LAM LF (LAM P (P LF))) (DEF CAR)) (LAM X (LAM Y ((BUY X) Y))))))
+_MLU438 (JOHN) := S/(S\NP)
+        : ((LAM LF (LAM P (P LF))) JOHN)
+LEX   (SEEMED) := (S\NP)/VP
+        : (LAM P (LAM X (SEEM (P X))))
+_MLU446 (TO HAVE BOUGHT THE CAR) := (S\NP)\((S\NP)/VP)
+        : ((LAM LF (LAM P (P LF)))
+           ((LAM P P)
+            ((LAM P P)
+             (((LAM LF (LAM P (P LF))) (DEF CAR))
+              (LAM X (LAM Y ((BUY X) Y)))))))
+<     (SEEMED)(TO HAVE BOUGHT THE CAR) := S\NP
+        : (((LAM LF (LAM P (P LF)))
+            ((LAM P P)
+             ((LAM P P)
+              (((LAM LF (LAM P (P LF))) (DEF CAR))
+               (LAM X (LAM Y ((BUY X) Y)))))))
+           (LAM P (LAM X (SEEM (P X)))))
+>     (JOHN)(SEEMED TO HAVE BOUGHT THE CAR) := S
+        : (((LAM LF (LAM P (P LF))) JOHN)
+           (((LAM LF (LAM P (P LF)))
+             ((LAM P P)
+              ((LAM P P)
+               (((LAM LF (LAM P (P LF))) (DEF CAR))
+                (LAM X (LAM Y ((BUY X) Y)))))))
+            (LAM P (LAM X (SEEM (P X))))))
+
+Final LF, normal-order evaluated: 
+
+    (SEEM ((BUY (DEF CAR)) JOHN)) =
+    (SEEM (BUY (DEF CAR) JOHN))
+
+Derivation 2
+--------------
+LEX   (THE) := NP/*N
+        : DEF
+LEX   (CAR) := N
+        : CAR
+>     (THE)(CAR) := NP
+        : (DEF CAR)
+LEX   (TO) := VP/IV
+        : (LAM P P)
+LEX   (HAVE) := IV/IV
+        : (LAM P P)
+LEX   (BOUGHT) := IV/NP
+        : (LAM X (LAM Y ((BUY X) Y)))
+>B    (HAVE)(BOUGHT) := IV/NP
+        : (LAM X ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) X)))
+_MLU399 (THE CAR) := IV\(IV/NP)
+        : ((LAM LF (LAM P (P LF))) (DEF CAR))
+<     (HAVE BOUGHT)(THE CAR) := IV
+        : (((LAM LF (LAM P (P LF))) (DEF CAR))
+           (LAM X ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) X))))
+>     (TO)(HAVE BOUGHT THE CAR) := VP
+        : ((LAM P P)
+           (((LAM LF (LAM P (P LF))) (DEF CAR))
+            (LAM X ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) X)))))
+_MLU438 (JOHN) := S/(S\NP)
+        : ((LAM LF (LAM P (P LF))) JOHN)
+LEX   (SEEMED) := (S\NP)/VP
+        : (LAM P (LAM X (SEEM (P X))))
+_MLU446 (TO HAVE BOUGHT THE CAR) := (S\NP)\((S\NP)/VP)
+        : ((LAM LF (LAM P (P LF)))
+           ((LAM P P)
+            (((LAM LF (LAM P (P LF))) (DEF CAR))
+             (LAM X ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) X))))))
+<     (SEEMED)(TO HAVE BOUGHT THE CAR) := S\NP
+        : (((LAM LF (LAM P (P LF)))
+            ((LAM P P)
+             (((LAM LF (LAM P (P LF))) (DEF CAR))
+              (LAM X ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) X))))))
+           (LAM P (LAM X (SEEM (P X)))))
+>     (JOHN)(SEEMED TO HAVE BOUGHT THE CAR) := S
+        : (((LAM LF (LAM P (P LF))) JOHN)
+           (((LAM LF (LAM P (P LF)))
+             ((LAM P P)
+              (((LAM LF (LAM P (P LF))) (DEF CAR))
+               (LAM X ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) X))))))
+            (LAM P (LAM X (SEEM (P X))))))
+
+Final LF, normal-order evaluated: 
+
+    (SEEM ((BUY (DEF CAR)) JOHN)) =
+    (SEEM (BUY (DEF CAR) JOHN))
+
+Derivation 3
+--------------
+LEX   (THE) := NP/*N
+        : DEF
+LEX   (CAR) := N
+        : CAR
+>     (THE)(CAR) := NP
+        : (DEF CAR)
+_MLU438 (JOHN) := S/(S\NP)
+        : ((LAM LF (LAM P (P LF))) JOHN)
+LEX   (SEEMED) := (S\NP)/VP
+        : (LAM P (LAM X (SEEM (P X))))
+LEX   (TO) := VP/IV
+        : (LAM P P)
+LEX   (HAVE) := IV/IV
+        : (LAM P P)
+LEX   (BOUGHT) := IV/NP
+        : (LAM X (LAM Y ((BUY X) Y)))
+>B    (HAVE)(BOUGHT) := IV/NP
+        : (LAM X ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) X)))
+>B    (TO)(HAVE BOUGHT) := VP/NP
+        : (LAM X
+           ((LAM P P) ((LAM X ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) X))) X)))
+>B    (SEEMED)(TO HAVE BOUGHT) := (S\NP)/NP
+        : (LAM X
+           ((LAM P (LAM X (SEEM (P X))))
+            ((LAM X
+              ((LAM P P)
+               ((LAM X ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) X))) X)))
+             X)))
+_TRC378 (THE CAR) := (S\NP)\((S\NP)/NP)
+        : ((LAM LF (LAM P (P LF))) (DEF CAR))
+<     (SEEMED TO HAVE BOUGHT)(THE CAR) := S\NP
+        : (((LAM LF (LAM P (P LF))) (DEF CAR))
+           (LAM X
+            ((LAM P (LAM X (SEEM (P X))))
+             ((LAM X
+               ((LAM P P)
+                ((LAM X ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) X))) X)))
+              X))))
+>     (JOHN)(SEEMED TO HAVE BOUGHT THE CAR) := S
+        : (((LAM LF (LAM P (P LF))) JOHN)
+           (((LAM LF (LAM P (P LF))) (DEF CAR))
+            (LAM X
+             ((LAM P (LAM X (SEEM (P X))))
+              ((LAM X
+                ((LAM P P)
+                 ((LAM X ((LAM P P) ((LAM X (LAM Y ((BUY X) Y))) X))) X)))
+               X)))))
+
+Final LF, normal-order evaluated: 
+
+    (SEEM ((BUY (DEF CAR)) JOHN)) =
+    (SEEM (BUY (DEF CAR) JOHN))
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+Lowest types (NP VP PROPP S) will be eliminated
+
+Derivations of (8BAD (THE CAR SEEMED JOHN TO HAVE BOUGHT)) onto S
+
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+NIL
+> (dribble)

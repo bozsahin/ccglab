@@ -1,0 +1,2 @@
+7000 4000 g1 t xp 1.2 1.0 train-basic-xp basic-ccg
+4000 2000 g1 t 10 0.5 1.0 train-10

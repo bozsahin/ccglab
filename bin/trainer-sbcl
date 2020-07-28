@@ -9,13 +9,13 @@
 #      make sure /proc/sys/vm/max_map_count can handle this.
 #      That is a system wide limit; not just for sbcl.
 # $2 : sbcl garbage-collect cycle size in megabytes (> 51 to rise above default)
-# $3 : grammar name (without .ind extension; that's the one located and used) 
+# $3 : grammar name (without .ccg.lisp extension; that's the one located and used) 
 # $4 : Must be nil if you DONT want to save the training, t otherwise
 # $5 : N (or xp)              first of 3 learning parameters (passes, learn rate, learn rate rate)
 # $6 : alpha0
 # $7 : c
 # $8 : log and save file prefix for the run (so that multi-thread runs dont override their results)
-#      This is also the reason why resulting .ind file has a long name, to identify
+#      This is also the reason why resulting .ccg.lisp file has a long name, to identify
 #      the experiment.
 # $9 : the function to call before training (none called if not supplied)
 #      This is useful for initializing switches etc.
@@ -31,7 +31,7 @@ echo "I am called as: $0 $@" >> $8.log
 echo "            at: `date`" >> $8.log
 echo "Log goes to   : $8.log" >> $8.log
 echo "I will call sbcl as: $CCGLAB_LISP" >> $8.log
-TRAINER="$TRAIN \"$3\" $2 $4 \"$3.$8.$5N.$6a.$7c.ind\" $N $6 $7"   # one less argument if $N is empty string
+TRAINER="$TRAIN \"$3\" $2 $4 \"$3.$8.$5N.$6a.$7c.ccg.lisp\" $N $6 $7"   # one less argument if $N is empty string
 echo "It will call $TRAIN in $CCGLAB_HOME/bin/init-sbcl.lisp as: ($TRAINER)" >> $8.log
 echo '=======          ============' >> $8.log
 $RLWRAP $CCGLAB_LISP --load $CCGLAB_HOME/bin/suppress-style-warnings.lisp --load $LALR_HOME/lalrparser.lisp --load $CCGLAB_HOME/bin/ccg.lisp --load $CCGLAB_HOME/bin/tr-compiler.lisp --load $CCGLAB_HOME/bin/init-sbcl.lisp --load $CCGLAB_HOME/bin/init-user.lisp --eval '(reset-globals)' --eval "($9)" --eval "($TRAINER)" --eval '(sb-ext:exit)' >> $8.log
