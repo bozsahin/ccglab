@@ -23,7 +23,7 @@ Design and development of CCGlab continues to be in SBCL, then checked with CCL.
 You need a linux system for CCGlab. There are three options for windows (I recommend the first one):
 
 <ol>
-           <li> For windows 10: Follow these <a href="docs/windows10-directions.md">directions</a>. No partitions, no virtualbox, no hassles. You now have linux as a W10 app with ccglab in it.
+           <li> For windows 10 onwards: Follow these <a href="docs/windows10-directions.md">directions</a>. No partitions, no virtualbox, no hassles. You now have linux as a W10 app with ccglab in it.
 <li> For windows earlier than W10: install a virtual box such as Oracle's: https://www.virtualbox.org/.
 
 Then follow one of the advices below for linuxes for ccglab install, depending on your virtual machine.
