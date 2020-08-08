@@ -34,7 +34,7 @@ If you use CCGLAB from a virtualbox, save your machine state rather than power o
 You won't have to do all of the above over and over.
 
 <li>For any windows: put a linux partition in your machine, and follow the instructions below
-depending on your linux. This one is for experienced users.
+depending on your linux. This one is for experienced users. This option is becoming easier too.
 </ol>
 
 <b>Preliminaries for MACOS</b>
