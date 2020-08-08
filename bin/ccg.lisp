@@ -674,7 +674,7 @@
 
 (defun flash-news (&optional (report t))
   (and report 
-       (format t "~%Gradient extrapolation available.~%Type-raising compiler available.~%.ded and .ind file types deprecated.~%Grammars/models compile to and load from .ccg.lisp file")))
+       (format t "~%Gradient extrapolation available.~%Type-raising compiler available.~%.ded and .ind file types deprecated.~%Grammars/models compile to/load from .ccg.lisp file")))
 
 (defun welcome (&optional (lispsys *lispsys*))
   (format t "~%=====================================================")
