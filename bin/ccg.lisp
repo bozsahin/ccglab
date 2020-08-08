@@ -657,7 +657,7 @@
   )
 
 (defun which-ccglab ()
-  "CCGlab, version 7.0")
+  "CCGlab, version 7.0.1")
 
 (defun set-lisp-system (lispsys)
   (case lispsys
