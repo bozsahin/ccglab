@@ -5,7 +5,7 @@ Install instructions are in this README, <a href="#install">here</a>. There are 
 on your OS, so please follow the install AFTER reading this README.
 
            
-<code>CCGlab</code> is Common Lisp code with some <code>bash</code> string processing. 
+<code>CCGlab</code> is Common Lisp code with some <code>bash</code> scripts form installing and run-time tokenization. 
 
 It needs a linux, a native one or one in macosphere or windowsphere. As hard as it is to believe, windowsphere is becoming easier and more native-like (thanks Tim!).
 
