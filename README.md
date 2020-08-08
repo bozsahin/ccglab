@@ -2,10 +2,12 @@
 Combinatory Categorial Grammar (CCG): CCG and probabilistic CCG, with all combinators and their powers.
 
 Install instructions are in this README, <a href="#install">here</a>. There are certain things you need to do depending
-on your OS, so please follow the install after reading through this README.
+on your OS, so please follow the install AFTER reading this README.
 
            
-This is Common Lisp code with some <code>bash</code> string processing. It needs a linux, a native one or one in macosphere or windowsphere.
+<code>CCGlab</code> is Common Lisp code with some <code>bash</code> string processing. 
+
+It needs a linux, a native one or one in macosphere or windowsphere. As hard as it is to believe, windowsphere is becoming easier and more native-like (thanks Tim!).
 
 SBCL and CCL Common Lisps are usable out of the box for CCGlab. The <code>install</code> script sets up SBCL for CCGlab if you haven't got one already. If you have an ANSI Common Lisp, it can work with it too.
 
