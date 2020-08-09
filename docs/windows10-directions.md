@@ -1,12 +1,10 @@
-<<<<<<< HEAD
 # CCGlab in Windows10 as a native linux app.
 
 This guide is prepared by Efecan Yilmaz. It gives you first a linux as W10 app, then ccglab. 
 =======
 This guide is prepared by Efecan Yilmaz. It gives you first a linux as W10 app, then <code>ccglab</code>. 
->>>>>>> 43e20a6745c719f6e85e2bd46bac30609865526c
-No partitions, no virtualbox.
-Thanks Efe.
+
+No partitions, no virtualbox. Thanks Efe.
 
 -----------------------------
 
@@ -16,7 +14,9 @@ To find out your Windows 10 build, use Windows Search at bottom-left for 'Settin
 
 Similarly, to locate <code>Powershell</code>, use Windows Search at bottom-left and search for 'Powershell'.
 
-This document is based on: https://docs.microsoft.com/en-us/windows/wsl/install-win10
+This document is based on: <a href="https://docs.microsoft.com/en-us/windows/wsl/install-win10">WSL</a> (windows subsystem for linux)
+
+You can try the newer and easier version of steps 1-2 at <a href="https://towardsdatascience.com/dual-boot-is-dead-windows-and-linux-are-now-one-27555902a128">WSL2</a>.
 
 1. Open a Powershell window *with administrator rights* and execute the following command:
 
