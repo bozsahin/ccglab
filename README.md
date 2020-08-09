@@ -2,10 +2,11 @@
 Combinatory Categorial Grammar (CCG): CCG and probabilistic CCG, with all combinators and their powers.
 
 Install instructions are in this README, <a href="#install">here</a>. There are certain things you need to do depending
-on your OS, so please follow the install after reading through this README.
+on your OS, so please follow the install AFTER reading this README.
 
-           
-This is Common Lisp code with some <code>bash</code> string processing. It needs a linux, a native one or one in macosphere or windowsphere.
+<code>CCGlab</code> is Common Lisp code with some <code>bash</code> scripts for install and run-time tokenization. 
+
+It needs a linux, a native one or one in macosphere or windowsphere. As hard as it is to believe, windowsphere is becoming easier and more native-like (thanks Tim!).
 
 SBCL and CCL Common Lisps are usable out of the box for CCGlab. The <code>install</code> script sets up SBCL for CCGlab if you haven't got one already. If you have an ANSI Common Lisp, it can work with it too.
 
@@ -22,7 +23,7 @@ Design and development of CCGlab continues to be in SBCL, then checked with CCL.
 You need a linux system for CCGlab. There are three options for windows (I recommend the first one):
 
 <ol>
-           <li> For windows 10: Follow these <a href="docs/windows10-directions.md">directions</a>. No partitions, no virtualbox, no hassles. You now have linux as a W10 app with ccglab in it.
+           <li> For windows 10 onwards: Follow these <a href="docs/windows10-directions.md">directions</a>. No partitions, no virtualbox, no hassles. You now have linux as a W10 app with ccglab in it.
 <li> For windows earlier than W10: install a virtual box such as Oracle's: https://www.virtualbox.org/.
 
 Then follow one of the advices below for linuxes for ccglab install, depending on your virtual machine.
@@ -33,7 +34,7 @@ If you use CCGLAB from a virtualbox, save your machine state rather than power o
 You won't have to do all of the above over and over.
 
 <li>For any windows: put a linux partition in your machine, and follow the instructions below
-depending on your linux. This one is for experienced users.
+depending on your linux. This one is for experienced users. This option is becoming easier too.
 </ol>
 
 <b>Preliminaries for MACOS</b>
