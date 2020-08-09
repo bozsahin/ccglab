@@ -1,8 +1,8 @@
-# CCGlab in Windows10 as a native linux app.
+# <code>CCGlab</code> in Windows10 as a native linux app.
 
 This guide is prepared by Efecan Yilmaz. It gives you first a linux as W10 app, then ccglab. 
 =======
-This guide is prepared by Efecan Yilmaz. It gives you first a linux as W10 app, then <code>ccglab</code>. 
+This guide was first prepared by Efecan Yilmaz. It gives you first a linux as W10 app, then <code>ccglab.</code> 
 
 No partitions, no virtualbox. Thanks Efe.
 
