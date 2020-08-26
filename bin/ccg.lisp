@@ -153,6 +153,9 @@
   "Returns the value of a list of (name value) pairs nvpl, where each pair's SECOND is the value"
   `(second (assoc ,key ,nvpl)))
 
+(defmacro get-val (key nvpl)
+  `(nv-list-val ,key ,nvpl))  ; short macros for long ones
+
 ;; macros for cky cell's key type (len pos analysis)
 (defmacro cell-len (cell)
   `(first ,cell))
@@ -657,7 +660,7 @@
   )
 
 (defun which-ccglab ()
-  "CCGlab, version 7.0.1")
+  "CCGlab, version 7.0.2")
 
 (defun set-lisp-system (lispsys)
   (case lispsys
