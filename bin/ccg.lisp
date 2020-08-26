@@ -153,7 +153,7 @@
   "Returns the value of a list of (name value) pairs nvpl, where each pair's SECOND is the value"
   `(second (assoc ,key ,nvpl)))
 
-(defmacro get-val (key nvpl)
+(defmacro nv-get-v (key nvpl)
   `(nv-list-val ,key ,nvpl))  ; short macros for long ones
 
 ;; macros for cky cell's key type (len pos analysis)
@@ -677,7 +677,7 @@
 
 (defun flash-news (&optional (report t))
   (and report 
-       (format t "~%Gradient extrapolation available.~%Type-raising compiler available.~%.ded and .ind file types deprecated.~%Grammars/models compile to/load from .ccg.lisp file")))
+       (format t "~%Gradient extrapolation available.~%Type-raising compiler available.~%.ded and .ind file types deprecated.~%All loadable grammars are .ccg.lisp")))
 
 (defun welcome (&optional (lispsys *lispsys*))
   (format t "~%=====================================================")
@@ -3508,6 +3508,20 @@
 	      (save-grammar fn)
 	      ))
 	  )))))
+
+(defun max-lf-span ()
+  "find the spanned elements of the currently loaded grammar, 
+  i.e. those with same LF but weaker one is string-covered by the stronger."
+  (let ((sp nil)
+	(g (copy-seq *ccg-grammar*)))  ; we will delete from g destructively 
+    (dolist (l1 g (values g (reverse sp)))
+      (dolist (l2 g)
+	(if (and (not (equal (nv-get-v 'KEY l1) (nv-get-v 'KEY l2)))
+		 (alpha-equivalent (nv-get-v 'SEM l1) (nv-get-v 'SEM l2))
+		 (search (string (nv-get-v 'PHON l2)) (string (nv-get-v 'PHON l1)))
+		 (<= (nv-get-v 'PARAM l2) (nv-get-v 'PARAM l1)))
+	  (progn (push l2 sp)
+		 (delete l2 g)))))))
 
 (defun z-score-grammar (&key (cutoff nil) (method '>=) (threshold 0.0))
   "calculates z values for each lexical form separately, because they are the ones 
