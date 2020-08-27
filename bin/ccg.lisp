@@ -676,8 +676,13 @@
       (format t "~%You may not be able to re-make .ccg.lisp or .sup files if this is wrong."))))
 
 (defun flash-news (&optional (report t))
-  (and report 
-       (format t "~%Gradient extrapolation available.~%Type-raising compiler available.~%.ded and .ind file types deprecated.~%All loadable grammars are .ccg.lisp")))
+  (cond (report 
+	  (format t "~%Gradient extrapolation available.")
+	  (format t "~%Type-raising compiler available.")
+	  (format t "~%.ded and .ind file types deprecated.")
+	  (format t "~%Just rename legacy .ded/ind files as .ccg.lisp")
+	  (format t "~%All loadable grammars are .ccg.lisp")
+	  )))
 
 (defun welcome (&optional (lispsys *lispsys*))
   (format t "~%=====================================================")
