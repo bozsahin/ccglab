@@ -3524,6 +3524,7 @@
 	(if (and (not (equal (nv-get-v 'KEY l1) (nv-get-v 'KEY l2)))
 		 (alpha-equivalent (nv-get-v 'SEM l1) (nv-get-v 'SEM l2))
 		 (search (string (nv-get-v 'PHON l2)) (string (nv-get-v 'PHON l1)))
+		 (< (length (string (nv-get-v 'PHON l2))) (length (nv-get-v 'PHON l1)))
 		 (<= (nv-get-v 'PARAM l2) (nv-get-v 'PARAM l1)))
 	  (progn (push l2 sp)
 		 (delete l2 g)))))))
