@@ -660,7 +660,7 @@
   )
 
 (defun which-ccglab ()
-  "CCGlab, version 7.0.2")
+  "CCGlab, version 7.0.2.1")
 
 (defun set-lisp-system (lispsys)
   (case lispsys
@@ -3534,6 +3534,7 @@
   in competition with each other in parsing and ranking. Assumes a loaded grammar.
   Assuming population mean & std deviation to avoid dbz check.
   Method must be a funcall-suitable CL comparator comparing parameter (1st arg) with threshold (2nd).
+  Method success means survival.
   Useful for avoiding over/underflow as your model develops."
   (if (< (length *ccg-grammar*) 2)
     (format t "~%Nothing to z-score!")
@@ -3576,11 +3577,25 @@
       (or cutoff (format t "~%Done. Use save-grammar to save the changes in a file"))
       (if cutoff
 	(let* ((fg nil) ; filtered grammar
-	       (fn (progn (format t "~%Enter a filename IN QUOTES for saving survivors: ") (read))))
+	       (fn (progn (format t "~%Enter a filename IN QUOTES for saving survivors:~%") (read))))
 	  (dolist (item *ccg-grammar*)
 	    (if (funcall method (nv-list-val 'PARAM item) threshold) (push item fg)))
 	  (setf *ccg-grammar* (reverse fg))
 	  (save-grammar fn))))))
+
+(defun merge-grammar (gname)
+  "merges grammar in file gname.ccg.lisp into currently loaded grammar without overriding the entries of current grammar.
+  It's best if you merge two grammars if their PARAMs are from same value space (eg. both z-scored etc.)"
+  (let* ((lg (copy-seq *ccg-grammar*)) ; will update currently loaded grammar
+	 (c 0))
+    (load-grammar gname)     ; resets *ccg-grammar* to grammar in gname
+    (dolist (l *ccg-grammar*) 
+      (if (not (reduce #'(lambda (x y)(or x y))  ; reduce will return true only if l is a member of lg
+		       (mapcar #'(lambda (z)(member (assoc 'KEY l) z :test #'equal))
+			       lg)))
+	(progn (push l lg)(incf c))))
+    (setf *ccg-grammar* lg)
+    (format t "~%Current grammar is merged with ~A adding ~A entries." gname c)))
 
 (defun mklist (obj)
   (if (listp obj) obj (list obj)))
