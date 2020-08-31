@@ -3529,6 +3529,16 @@
 	  (progn (push l2 sp)
 		 (delete l2 g)))))))
 
+(defmacro subset-principle-lf (fn)
+  "saves result of max-lf-span as current grammar. Call it if you want to see both survived and deleted entries"
+  `(progn 
+     (format t "~%Size of current grammar before update: ~A" (length *ccg-grammar*))
+     (multiple-value-bind (g d)
+       (max-lf-span) ; applies SP to currently loaded grammar wrt identical LFs
+       (format t "~%Size of updated grammar= ~A~%Size of deletion list (with overlaps)= ~A~%" (length g) (length d))
+       (setf *ccg-grammar* g))
+     (save-grammar ,fn))) ; then saves the updated current grammar
+
 (defun z-score-grammar (&key (cutoff nil) (method '>=) (threshold 0.0))
   "calculates z values for each lexical form separately, because they are the ones 
   in competition with each other in parsing and ranking. Assumes a loaded grammar.
