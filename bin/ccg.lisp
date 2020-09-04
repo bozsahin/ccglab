@@ -3450,10 +3450,10 @@
 	      (- (get-key-param-xp (nv-list-val 'KEY l)) (nv-list-val 'PARAM l)))))
   (format t "~%================================================"))
 
-(defun save-grammar (gname)
+(defun save-grammar (gname &key (force nil))
   "this save is baroque to make it lisp reload-able"
   (with-open-file (s (concatenate 'string (string gname) ".ccg.lisp") 
-		     :direction :output :if-exists :error)  ; we put the default extension
+		     :direction :output :if-exists (if force :supersede :error))  ; we put the default extension
     (format s "(defparameter *ccg-grammar*~%")
     (format s "'")
     (prin1 *ccg-grammar* s)
@@ -3530,7 +3530,7 @@
 (defun filter (&key (metod '>=) (threshold 0.0))
   "filters out grammar entries in current grammar by PARAM; metod is survival criteria"
   (let* ((fg nil) ; filtered grammar
-	 (fn (progn (format t "~%Enter a grammar name (without .ccg.lisp extension) for saving survivors:~%") (string (read)))))
+	 (fn (progn (format t "~%Enter a grammar name (without .ccg.lisp extension) for saving survivors~%put in double quotes to preserve case") (string (read)))))
     (dolist (item *ccg-grammar*)
       (if (funcall metod (nv-list-val 'PARAM item) threshold) (push item fg)))
     (setf *ccg-grammar* (reverse fg))
