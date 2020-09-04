@@ -31,7 +31,7 @@ echo "I am called as: $0 $@" >> $8.log
 echo "            at: `date`" >> $8.log
 echo "Log goes to   : $8.log" >> $8.log
 echo "I will call sbcl as: $CCGLAB_LISP" >> $8.log
-TRAINER="$TRAIN \"$3\" $2 $4 \"$8.$N.$6a.$7c.ccg.lisp\" $N $6 $7"   # passes one less argument if $N is empty string
+TRAINER="$TRAIN \"$3\" $2 $4 \"$8.$N.$6a.$7c\" $N $6 $7"   # passes one less argument if $N is empty string
 echo "It will call $TRAIN in $CCGLAB_HOME/bin/init-sbcl.lisp as: ($TRAINER)" >> $8.log
 echo '=======          ============' >> $8.log
 $RLWRAP $CCGLAB_LISP --load $CCGLAB_HOME/bin/suppress-style-warnings.lisp --load $LALR_HOME/lalrparser.lisp --load $CCGLAB_HOME/bin/ccg.lisp --load $CCGLAB_HOME/bin/tr-compiler.lisp --load $CCGLAB_HOME/bin/init-sbcl.lisp --load $CCGLAB_HOME/bin/init-user.lisp --eval '(reset-globals)' --eval "($9)" --eval "($TRAINER)" --eval '(sb-ext:exit)' >> $8.log

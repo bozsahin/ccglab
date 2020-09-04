@@ -660,7 +660,7 @@
   )
 
 (defun which-ccglab ()
-  "CCGlab, version 7.0.2.1")
+  "CCGlab, version 7.0.4")
 
 (defun set-lisp-system (lispsys)
   (case lispsys
@@ -682,6 +682,7 @@
 	  (format t "~%.ded and .ind file types deprecated.")
 	  (format t "~%Just rename legacy .ded/ind files as .ccg.lisp")
 	  (format t "~%All loadable grammars are .ccg.lisp")
+	  (format t "~%save-grammar needs no suffix.")
 	  )))
 
 (defun welcome (&optional (lispsys *lispsys*))
@@ -3449,37 +3450,35 @@
 	      (- (get-key-param-xp (nv-list-val 'KEY l)) (nv-list-val 'PARAM l)))))
   (format t "~%================================================"))
 
-(defun save-grammar (out)
+(defun save-grammar (gname)
   "this save is baroque to make it lisp reload-able"
-  (with-open-file (s out :direction :output :if-exists :supersede) 
+  (with-open-file (s (concatenate 'string (string gname) ".ccg.lisp") 
+		     :direction :output :if-exists :error)  ; we put the default extension
     (format s "(defparameter *ccg-grammar*~%")
     (format s "'")
     (prin1 *ccg-grammar* s)
     (format s ")~%")))
 
 (defun save-training (out)
-  (or out (format t "please specify an output file to avoid unintentional overrides") 
+  (or out (format t "please specify an output grammar name to avoid unintentional overrides") 
       (return-from save-training))
   (dolist (l *ccg-grammar*)
     (setf (nv-list-val 'PARAM l) (get-key-param (nv-list-val 'KEY l))))
   (save-grammar out))
 
 (defun save-training-xp (out)
-  (or out (format t "please specify an output file to avoid unintentional overrides") 
+  (or out (format t "please specify an output grammar name to avoid unintentional overrides") 
       (return-from save-training-xp))
   (dolist (l *ccg-grammar*)
     (setf (nv-list-val 'PARAM l) (get-key-param-xp (nv-list-val 'KEY l))))
   (save-grammar out))
 
-(defun z-score-grammar-legacy (&key (cutoff nil) (method '>=))
-  "Kept as legacy function. Assuming all entries to be from one distribution is dubious.
-  Use new version instead, which calculates z scores per lexical form in grammar. 
+(defun z-score-grammar ()
+  "This version assumes all entries to be from one distribution.
   turns current parameter values to z-scores with normal distribution N(0,1).
   Now all parameters are factors apart from population standard deviation with same variance as original sample.
-  Method must be a funcall-suitable CL comparator comparing parameter (1st arg) with threshold (2nd).
   Useful for avoiding over/underflow as your model develops.
-  Assuming population mean & std deviation to avoid dbz check.
-  If cutoff is not nil, it will ask in the end for a threshold to produce a filtered grammar."
+  Assuming population mean & std deviation to avoid dbz check."
   (if (< (length *ccg-grammar*) 2)
     (format t "~%Nothing to z-score!")
     (let ((sumsq 0.0) ; find standard deviation and mean in one pass
@@ -3501,18 +3500,7 @@
 	    (if (> (nv-list-val 'PARAM item) maxw) (setf maxw (nv-list-val 'PARAM item)))
 	    (if (< (nv-list-val 'PARAM item) minw) (setf minw (nv-list-val 'PARAM item))))
 	  (format t "~%Currently loaded grammar is z-scored.")
-	  (format t "~%Max z-score = ~A, Min z-score = ~A" maxw minw)
-	  (or cutoff (format t "~%Done. Use save-grammar to save the changes in a file"))
-	  (if cutoff 
-	    (let* ((fg nil) ; filtered grammar
-		  (threshold (progn (format t "~%Enter a threshold for cutoff: ") (read)))
-		  (fn (progn (format t "~%Enter a filename IN QUOTES for saving survivors: ") (read))))
-	      (dolist (item *ccg-grammar*)
-		(if (funcall method (nv-list-val 'PARAM item) threshold) (push item fg)))
-	      (setf *ccg-grammar* (reverse fg))
-	      (save-grammar fn)
-	      ))
-	  )))))
+	  (format t "~%Max z-score = ~A, Min z-score = ~A" maxw minw))))))
 
 (defun max-lf-span ()
   "find the spanned elements of the currently loaded grammar, 
@@ -3529,7 +3517,7 @@
 	  (progn (push l2 sp)
 		 (delete l2 g)))))))
 
-(defmacro subset-principle-lf (fn)
+(defmacro subset-principle-lf (gn)
   "saves result of max-lf-span as current grammar. Call it if you want to see both survived and deleted entries"
   `(progn 
      (format t "~%Size of current grammar before update: ~A" (length *ccg-grammar*))
@@ -3537,15 +3525,21 @@
        (max-lf-span) ; applies SP to currently loaded grammar wrt identical LFs
        (format t "~%Size of updated grammar= ~A~%Size of deletion list (with overlaps)= ~A~%" (length g) (length d))
        (setf *ccg-grammar* g))
-     (save-grammar ,fn))) ; then saves the updated current grammar
+     (save-grammar ,gn))) ; then saves the updated current grammar
 
-(defun z-score-grammar (&key (cutoff nil) (method '>=) (threshold 0.0))
+(defun filter (&key (metod '>=) (threshold 0.0))
+  "filters out grammar entries in current grammar by PARAM; metod is survival criteria"
+  (let* ((fg nil) ; filtered grammar
+	 (fn (progn (format t "~%Enter a grammar name (without .ccg.lisp extension) for saving survivors:~%") (string (read)))))
+    (dolist (item *ccg-grammar*)
+      (if (funcall metod (nv-list-val 'PARAM item) threshold) (push item fg)))
+    (setf *ccg-grammar* (reverse fg))
+    (save-grammar fn)))
+
+(defun z-score-grammar-per-form ()
   "calculates z values for each lexical form separately, because they are the ones 
   in competition with each other in parsing and ranking. Assumes a loaded grammar.
-  Assuming population mean & std deviation to avoid dbz check.
-  Method must be a funcall-suitable CL comparator comparing parameter (1st arg) with threshold (2nd).
-  Method success means survival.
-  Useful for avoiding over/underflow as your model develops."
+  Assuming population mean & std deviation to avoid dbz check."
   (if (< (length *ccg-grammar*) 2)
     (format t "~%Nothing to z-score!")
     (let* ((n (length *ccg-grammar*))
@@ -3571,9 +3565,9 @@
 			   (list 
 			     (list 'MEAN (/ (nv-list-val 'SUM v) (nv-list-val 'N v)))
 			     (list 'STD (mysqrt (- (/ (nv-list-val 'SUMSQ v) (nv-list-val 'N v))
-						 (expt (/ (nv-list-val 'SUM v) 
-							  (nv-list-val 'N v)) 2)))))))
-						  
+						   (expt (/ (nv-list-val 'SUM v) 
+							    (nv-list-val 'N v)) 2)))))))
+
 		 ht)
 	(dolist (item *ccg-grammar*) ; now update parameters per form in currently loaded grammar
 	  (setf (nv-list-val 'PARAM item) 
@@ -3583,19 +3577,11 @@
 			      (nv-list-val 'MEAN (machash (nv-list-val 'PHON item) ht2)))		      
 			   (nv-list-val 'STD (machash (nv-list-val 'PHON item) ht2)))
 			0.0)))))
-      (format t "~%Currently loaded grammar is z-scored PER FORM.")
-      (or cutoff (format t "~%Done. Use save-grammar to save the changes in a file"))
-      (if cutoff
-	(let* ((fg nil) ; filtered grammar
-	       (fn (progn (format t "~%Enter a filename IN QUOTES for saving survivors:~%") (read))))
-	  (dolist (item *ccg-grammar*)
-	    (if (funcall method (nv-list-val 'PARAM item) threshold) (push item fg)))
-	  (setf *ccg-grammar* (reverse fg))
-	  (save-grammar fn))))))
+      (format t "~%Currently loaded grammar is z-scored PER FORM."))))
 
 (defun merge-grammar (gname)
   "merges grammar in file gname.ccg.lisp into currently loaded grammar without overriding the entries of current grammar.
-  It's best if you merge two grammars if their PARAMs are from same value space (eg. both z-scored etc.)"
+  It's best if you merge two grammars if their PARAMs are from same value space (eg. both z-scored or none, etc.)"
   (let* ((lg (copy-seq *ccg-grammar*)) ; will update currently loaded grammar
 	 (c 0))
     (load-grammar gname)     ; resets *ccg-grammar* to grammar in gname
