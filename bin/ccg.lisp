@@ -630,6 +630,19 @@
           *f2-comp* *b2-comp* *fx2-comp* *bx2-comp* *f2-sub* *b2-sub* *fx2-sub* *bx2-sub* *f2-subcomp* *f3-comp* *b3-comp* 
 	  *fx3-comp* *bx3-comp*))
 
+(defmacro sort-grammar (&optional (order #'>))
+  "sort current grammar by order, default descending. report quartiles"
+  `(let* ((g (copy-seq *ccg-grammar*))   ; sort is destructive
+	  (gs (sort g ,order :key #'(lambda (x)(nv-get-v 'PARAM x))))
+	  (n (length gs)))
+     (values gs
+	     (nv-get-v 'PARAM (first gs))                      ;highest
+	     (nv-get-v 'PARAM (nth (truncate (* n 0.25)) gs))  ;q1
+	     (nv-get-v 'PARAM (nth (truncate (* n 0.5)) gs))   ;q2
+	     (nv-get-v 'PARAM (nth (truncate (* n 0.75)) gs))  ;q3
+	     (nv-get-v 'PARAM (car (last gs)))                 ;lowest
+	     )))
+
 (defun pack-cky-lf-hashtable ()
   (let ((lf-list nil))
     (maphash #'(lambda (key val)(push (list key (first val) (rest val)) lf-list))
