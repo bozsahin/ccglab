@@ -3530,7 +3530,9 @@
 (defun filter (&key (metod '>=) (threshold 0.0))
   "filters out grammar entries in current grammar by PARAM; metod is survival criteria"
   (let* ((fg nil) ; filtered grammar
-	 (fn (progn (format t "~%Enter a grammar name (without .ccg.lisp extension) for saving survivors~%put in double quotes to preserve case") (string (read)))))
+	 (fn (progn (format t "~%Enter a grammar name (without .ccg.lisp extension) for saving survivors")
+		    (format t "~%put in double quotes if you want to preserve case~%") 
+		    (string (read)))))
     (dolist (item *ccg-grammar*)
       (if (funcall metod (nv-list-val 'PARAM item) threshold) (push item fg)))
     (setf *ccg-grammar* (reverse fg))
