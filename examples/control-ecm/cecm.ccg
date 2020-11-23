@@ -9,6 +9,7 @@
 it         n := xp             : !it;
 john       n := np             : !john;
 mary       n := np             : !mary;
+study     inf := iv : \x.!study x;
 persuaded  v := (s\np)/vp/np   : \x\p\y.!persuade (p x) x y;
 promised   v := (s\np)/vp/np   : \x\p\y.!promise  (p y) x y;
 wanted     v := (s\np)/vp/np   : \x\p\y.!want (p x) y;
