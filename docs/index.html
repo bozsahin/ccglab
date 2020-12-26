@@ -22,7 +22,7 @@ It is designed with linguists, cognitive scientists, and computational linguists
 in mind. 
 It can be used for quick check of analyses, or for large-scale development
 of grammars and models.
-<p> <big><code>CCGlab</code></big> grammars are written much like in CCG papers,The output is almost in papers format (well, almost).  
+<p> <big><code>CCGlab</code></big> grammars are written much like in CCG papers. The output is almost in papers format (well, almost).  
 
 <p> 
 It implements all established combinators of CCG, also, experimental ones, in all variants and powers.
@@ -46,9 +46,10 @@ for the string. Both are based on the same CKY parse engine and the same grammar
 <li> By default standard combinators are available all the time, in their powers (linear, quadratic, cubic). 
  They all have on/off switches for experimentation.
 <li> Type-raising is not built-in, because it does not combine. Facilities are provided for it, such as 
-lexical rules and morpholexical generalizations. There is a compiler for it.
-<li> We can do deduction on a statistically-trained grammar, and induction on a linguistically-motivated grammar, because the grammar 
-format is the same, and feature counts are always calculated by CKY independent of mode of use. The first one is helpful in fine-tuning a model. The second one is helpful in prioritizing the lexical assumptions.
+unary rules and morpholexical generalizations. There is a compiler for it.
+<li> Deduction is possible in a statistically-trained grammar, and induction on a linguistically-motivated grammar.
+The grammar 
+format is the same, and feature counts are always calculated by CKY independent of mode of use. The first one is helpful in fine-tuning a model. The second one might be helpful in prioritizing lexical assumptions.
 </ul>
 
 <hr>
@@ -66,18 +67,6 @@ format is the same, and feature counts are always calculated by CKY independent 
 <td> <a href="tips.html">Tips</a></td>
 <td>Practical information about writing <code>.ccg </code> grammars, working with projects, updates, etc.</td></tr>
 </table>
-<hr>
-<<<<<<< HEAD
-<p>disclaimer: We're not related to any real lab, and we don't experiment with animals, except kitties as lexical items 
- in demos. We dwell
-in cyberspace, which is currently github.
-<p> And, ehm, yes, please read the manual before calling the fire department.
-=======
-<p>disclaimer: We're not related to any real lab, and we don't experiment with animals, except with kitties as lexical items 
- in demos. We dwell
-in cyberspace, which is currently github.
-<p> And, ehm, please read the manual before calling the fire department.
->>>>>>> 43e20a6745c719f6e85e2bd46bac30609865526c
 <hr>
 </font>
 </body>
