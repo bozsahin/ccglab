@@ -33,8 +33,9 @@ Parameter estimation and update are provided with or without extrapolation.
 Therefore model training is possible.
 Models and grammars use the same format.
 
-<p> In deduction mode, <code>CCGlab</code> gives you all parses of a string, along with logical forms.
-In induction mode, it gives you the most likely LF for a string, its most likely derivation, and the most likely derivation for any LF
+<p> In `deduction' mode, <code>CCGlab</code> 
+delivers all logical forms that are derivable for the given string.
+In `induction' mode, it gives the most likely logical form for a string, given training from data so far, its most likely derivation, and the most likely derivation for any LF
 for the string. Both are based on the same CKY parse engine and the same grammar format.
 
 <p> The main features of <code>CCGlab</code> which distinguish it from other publicly available CCG code:
