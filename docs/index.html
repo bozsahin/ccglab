@@ -36,7 +36,8 @@ Models and grammars use the same format.
 <p> In `deduction' mode, <code>CCGlab</code> 
 delivers all logical forms that are derivable for the given string.
 In `induction' mode, it gives the most likely logical form for a string, given training from data so far, its most likely derivation, and the most likely derivation for any LF
-for the string. Both are based on the same CKY parse engine and the same grammar format.
+for the string. Lower-ranking parsers are available too, if demanded.
+Both modes are based on the same CKY parse engine and the same grammar format.
 
 <p> The main features of <code>CCGlab</code> which distinguish it from other publicly available CCG code:
 <ul>
