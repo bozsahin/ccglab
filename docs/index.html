@@ -1,7 +1,7 @@
 <html>
 <head>
 <link rel="shortcut icon" href="ccglab2.ico" />
-<title>CCGlab: Lisp for CCG</title>
+<title>CCGlab: CCG in Common Lisp</title>
 <meta name="keywords" content="categorial grammar,grammar,cognitive science,linguistics"> 
 </head>
 
@@ -10,8 +10,6 @@
 <br>
 <hr>
 <font face="Times New Roman">
-Lisp code for the masses, for something not so massive.
-<hr>
 
 <p>
 <big><code>CCGlab</code></big> is a tool to experiment with  Combinatory Categorial Grammar (CCG).
@@ -22,7 +20,7 @@ It is designed with linguists, cognitive scientists, and computational linguists
 in mind. 
 It can be used for quick check of analyses, or for large-scale development
 of grammars and models.
-<p> <big><code>CCGlab</code></big> grammars are written much like in CCG papers,The output is almost in papers format (well, almost).  
+<p> <big><code>CCGlab</code></big> grammars are written much like in CCG papers. The output is almost in papers format (well, almost).  
 
 <p> 
 It implements all established combinators of CCG, also, experimental ones, in all variants and powers.
@@ -30,14 +28,16 @@ Unary rules, slash modalities,
 and meta-categories such as (X\X)/X have been implemented. The manual
 describes the range of possible <big><code>CCGlab</code></big> grammars.
 
-<p>It also implements probabilistic CCG, aka. PCCG. In the plain vanilla version, only lexical features are used, which you can amend.
+<p>It also implements probabilistic CCG, aka. pCCG. In the plain vanilla version, only lexical features are used, which you can amend.
 Parameter estimation and update are provided with or without extrapolation.
 Therefore model training is possible.
 Models and grammars use the same format.
 
-<p> In deduction mode, <code>CCGlab</code> gives you all parses of a string, along with logical forms.
-In induction mode, it gives you the most likely LF for a string, its most likely derivation, and the most likely derivation for any LF
-for the string. Both are based on the same CKY parse engine and the same grammar format.
+<p> In `deduction' mode, <code>CCGlab</code> 
+delivers all logical forms that are derivable for the given string.
+In `induction' mode, it gives the most likely logical form for a string, given training from data so far, its most likely derivation, and the most likely derivation for any LF
+for the string. Lower-ranking parsers are available too, if demanded.
+Both modes are based on the same CKY parse engine and the same grammar format.
 
 <p> The main features of <code>CCGlab</code> which distinguish it from other publicly available CCG code:
 <ul>
@@ -46,9 +46,12 @@ for the string. Both are based on the same CKY parse engine and the same grammar
 <li> By default standard combinators are available all the time, in their powers (linear, quadratic, cubic). 
  They all have on/off switches for experimentation.
 <li> Type-raising is not built-in, because it does not combine. Facilities are provided for it, such as 
-lexical rules and morpholexical generalizations. There is a compiler for it.
-<li> We can do deduction on a statistically-trained grammar, and induction on a linguistically-motivated grammar, because the grammar 
-format is the same, and feature counts are always calculated by CKY independent of mode of use. The first one is helpful in fine-tuning a model. The second one is helpful in prioritizing the lexical assumptions.
+unary rules and morpholexical generalizations. There is a compiler for it.
+<li> Deduction is possible in a statistically-trained grammar, and induction on a linguistically-motivated grammar.
+The grammar 
+format is the same, and feature counts are always calculated by CKY independent of mode of use. 
+<br>
+The first use is helpful in fine-tuning a model. The second use might be helpful in prioritizing lexical assumptions.
 </ul>
 
 <hr>
@@ -67,17 +70,6 @@ format is the same, and feature counts are always calculated by CKY independent 
 <td>Practical information about writing <code>.ccg </code> grammars, working with projects, updates, etc.</td></tr>
 </table>
 <hr>
-<<<<<<< HEAD
-<p>disclaimer: We're not related to any real lab, and we don't experiment with animals, except kitties as lexical items 
- in demos. We dwell
-in cyberspace, which is currently github.
-<p> And, ehm, yes, please read the manual before calling the fire department.
-=======
-<p>disclaimer: We're not related to any real lab, and we don't experiment with animals, except with kitties as lexical items 
- in demos. We dwell
-in cyberspace, which is currently github.
-<p> And, ehm, please read the manual before calling the fire department.
->>>>>>> 43e20a6745c719f6e85e2bd46bac30609865526c
 <hr>
 </font>
 </body>
