@@ -1,0 +1,140 @@
+(
+
+
+
+
+i n  |:=|  np |[| agr |=| 1s |]|   |:|  !i |;| 
+think en  |:=|   |(| s |\\| np |[| agr |=| 1s |]|  |)|  |/|  |^| s  |:|   |\\| p |\\| x |.| !think p x |;| 
+john n  |:=|  np |[| agr |=| 3s |]|   |:|  !john |;| 
+likes en  |:=|   |(| s |\\| np |[| agr |=| 3s |]|  |)|  |/| np  |:|   |\\| x |\\| y |.| !like x y |;| 
+and co  |:=|   |(| @X |\\| @X |)|  |/| @X  |:|   |\\| p |\\| q |\\| x |.| !and |(| p x |)|  |(| q x |)|  |;| 
+you n  |:=|  np |[| agr |=| 2s |]|   |:|  !you |;| 
+believe en  |:=|   |(| s |\\| np |[| agr |=| 2s |]|  |)|  |/|  |^| s  |:|   |\\| p |\\| x |.| !believe p x |;| 
+mary n  |:=|  np |[| agr |=| 3s |]|   |:|  !mary |;| 
+hates en  |:=|   |(| s |\\| np |[| agr |=| 3s |]|  |)|  |/|  |^| np  |:|   |\\| x |\\| y |.| !hate x y |;| 
+cats n  |:=|  np |[| agr |=| 3p |]|   |:|  !cats |;| 
+the  d  |:=|  np |[| head |=| ?h |]|  |/|  |^| n |[| head |=| ?h |]|  |:|   |\\| x |.| !def x |;| 
+book n  |:=|  n  |:|  !book |;| 
+"this book" n  |:=|  s |/|  |(| s |/| np |[| top |=| p |]|  |)|  |:|   |\\| p |.| !and  |(| p !book |)|   |(| !topic !book |)|  |;| 
+like en  |:=|   |(| s |\\| np |[| agr |=| 1s |]|  |)|  |/|  |^| np  |:|   |\\| x |\\| y |.| !like x y |;| 
+picked en  |:=|   |(| s |\\| np |)|  |/| "up" |/|  |^| np |[| heavy |=| m |]|   |:|   |\\| y |\\| x |\\| z |.| !cause |(| !init  |(| !hold _  |(| !reach x |)|  y z |)|  |)|  z |;| 
+picked en  |:=|   |(|  |(| s |\\| np |)|  |/|  |^| np |[| lexc |=| p |]|  |)|  |/| "up"  |:|   |\\| x |\\| y |\\| z |.| !pick _ x y z |;| 
+thinks en  |:=|   |(| s |\\| np |[| agr |=| 3s |]|  |)|  |/|  |^| sp  |:|   |\\| p |\\| x |.| !think p x |;| 
+she n  |:=|  np |[| agr |=| 3s |]|   |:|  !she |;| 
+harry np  |:=|  np |[| agr |=| 3s |]|  |:|  !harry |;| 
+barry np  |:=|  np |[| agr |=| 3s |]|  |:|  !barry |;| 
+mary np  |:=|  np |[| agr |=| 3s |]|  |:|  !mary |;| 
+up p  |:=|   |(|  |(| s |\\| np |)|  |\\|  |(| s |\\| np |)|  |)|  |/| np  |:|   |\\| x |\\| p |.| !up  |(| p x |)|  |;| 
+beans n  |:=|  n |[| head |=| beans |]|   |:|  !beans |;| 
+that rel  |:=|   |(| n |[| head |=| ?h |]|  |\\| n |[| head |=| ?h |]|  |)|  |/|  |(| s |[| head |=| ?h |]|  |/| np |[| head |=| ?h |]|  |)|   |:|   |\\| p |\\| q |\\| x |.| !and  |(| p x |)|  |(| q x |)|  |;| 
+spilled en  |:=|   |(| s |[| head |=| beans |]|  |\\| np |)|  |/|  |^| np |[| head |=| beans |]|   |:|   |\\| x |\\| y |.| !divulge _  |(| !public x |)|  !secret y |;| 
+caused en  |:=|   |(| s |\\| np |)|  |/|  |^| np  |:|   |\\| x |\\| y |.| !cause x y |;| 
+"quite a stir" n  |:=|  np  |:|  !stir |;| 
+
+
+Taroo-wa n  |:=|  np |[| top |=| p |]|   |:|  !taroo |;| 
+Hanako-ni n  |:=|  predp |[| case |=| dat |]|  |/|  |(| cing |\\| np |\\| np |)|   |:|   |\\| p |\\| x |.| p x !hanako |;| 
+Hanako-ni n  |:=|  np |[| case |=| dat |]|   |:|  !hanako |;| 
+huku-o n  |:=|  predp |[| case |=| acc |]|  |\\|  |(| cing |\\| np |\\| np |)|   |:|   |\\| p |.| p !clothes |;| 
+huku-o n  |:=|  np |[| case |=| acc |]|   |:|  !clothes |;| 
+kiteiru jp  |:=|  cing |\\| np |\\| np  |:|   |\\| x |\\| y |.| !wearing x y |;| 
+kiteiru jp  |:=|  s |\\| np |\\| np  |:|   |\\| x |\\| y |.| !wear x y |;| 
+yogos-are-ta jp  |:=|  s |\\| np |[| case |=| top |]|  |\\| np |[| case |=| dat |]|  |\\| predp |[| case |=| acc |]|   |:|   |\\| x |\\| y |\\| z |.| !let  |(| !dirty  |(| x z |)| y |)|  y z |;| 
+yogos-are-ta jp  |:=|  s |\\| np |[| case |=| top |]|  |\\| predp |[| case |=| dat |]|  |\\| np |[| case |=| acc |]|   |:|   |\\| x |\\| y |\\| z |.| !let  |(| !dirty  |(| x y |)| y |)|  y z |;| 
+
+
+zhangsan n  |:=|  np |:|  !z |;| 
+xihuan ch  |:=|   |(| s |\\| np |)|  |/| np  |:|   |\\| x |\\| y |.| !like x y |;| 
+xihuan ch  |:=|  s |/| np  |:|   |\\| x |.| !like x !top |;|    
+danshi co  |:=|   |(| @X |\\| @X |)|  |/| @X  |:|   |\\| p |\\| q |\\| x |.| !but  |(| p x |)|  |(| q x |)|  |;| 
+e2r co  |:=|   |(| @X |\\| @X |)|  |/| @X  |:|   |\\| p |\\| q |\\| x |.| !and  |(| p x |)|  |(| q x |)|  |;|    
+lisi n  |:=|  np |:|  !lisi |;| 
+bu neg  |:=|   |(| s |\\| np |)|  |/|  |(| s |\\| np |)|  |:|   |\\| p |\\| x |.| !neg  |(| p x |)|  |;| 
+"zhe-ben shu" n  |:=|  np |:|  !def !book |;| 
+ta n  |:=|  np  |:|  !heshe |;| 
+digei ch  |:=|   |(| s |\\| np |)|  |/| np |/| np  |:|   |\\| x |\\| y |\\| z |.| !give x y z |;| 
+gege n  |:=|  np  |:|  !brother |;| 
+"yi-hu jiu" n  |:=|  np  |:|  !one !wine |;| 
+jiejie n  |:=|  np  |:|  !sister |;| 
+"yi-pan cai" n  |:=|  np  |:| !one !dish |;| 
+zhangsan n  |:=|  s |/|  |(| s |/| np |[| top |=| p |,| pro |=| p |,| pers |=| 3s |]|  |)|   |:|   |\\| p |.| !and  |(| p z |)|  |(| !topic z |)|  |;|  
+wo n  |:=|  np |[| pers |=| 1s |]|   |:|  !i |;| 
+qidai ch  |:=|   |(| s |\\| np |)|  |/| vp |/| np |:|   |\\| x |\\| p |\\| y |.| !foresee  |(| p x |)| y |;|  
+quan ch  |:=|   |(| s |\\| np |)|  |/| vp |/| np |:|   |\\| x |\\| p |\\| y |.| !persuade  |(| p x |)|  x y |;|  
+daying ch  |:=|   |(| s |\\| np |)|  |/| vp |/| np |:|   |\\| x |\\| p |\\| y |.| !promise  |(| p y |)|  x y |;|  
+ta pro  |:=|   |(|  |(| s |\\| np |)|  |/| vp |/| np |[| pro |=| p |,| pers |=| 3s |]|  |)|  |\\|  |(|  |(| s |\\| np |)|  |/| vp |/| np |)|   |:|   |\\| p |.| !res p |;|  
+"yao lai" ch  |:=|  vp  |:|   |\\| x |.| !willcome x |;|   
+
+
+ben-im n  |:=|  s |[| agr |=| 1s |]|  |/| iv |[| agr |=| 1s |]|   |:|   |\\| p |.| p !i |;|   
+adam-in n  |:=|  np |[| agr |=| 3s |]|   |:|  !man |;|               
+oku tr  |:=|  iv |\\| np |[| case |=| acc |]|   |:|   |\\| x |\\| y |.| !read x y |;|   
+okudu tr  |:=|   |(| s |\\| np |[| case |=| nom |,| agr |=| 3s |]|  |)|  |\\| np |[| case |=| acc |]|   |:|   |\\| x |\\| y |.|  !read x y |;|  
+-dugu comp  |:=|   |(| s |[| agr |=| ?a |]|  |\\| np |[| agr |=| ?a |]|  |)|  |\\|  |^| iv |[| agr |=| ?a |]|   |:|   |\\| p |\\| x |.| p x |;| 
+-nu case   |:=|  s |[| case |=| acc |]|  |\\|  |^| s |[| agr |=| 3s |]|   |:|   |\\| p |.| p  |;| 
+bil tr  |:=|  iv |\\| s |[| case |=| acc |]|   |:|   |\\| p |\\| x |.| !know p x |;|  
+-digim rel  |:=|   |(| np |/| np |)|  |\\|  |^|  |(| s |[| agr |=| 1s |]|  |\\| np |)|   |:|   |\\| p |\\| q |\\| x |.| !and  |(| p x |)|  |(| q x |)|  |;|  
+kitap n  |:=|  np |\\|  |(| np |/| np |)|   |:|   |\\| p |.| p !book |;|   
+
+
+"O Paulo" n  |:=|  np |[| agr |=| 3s |]|  |:|  !paul |;| 
+nao neg  |:=|   |(| s |\\| np |[| agr |=| ?a |]|  |)|  |/|  |(| s |[| fop |=| p |]|  |\\| np |[| agr |=| ?a |]|  |)|   |:|   |\\| p |\\| x |.| !neg  |(| p x |)|  |;| 
+os pro  |:=|   |(| s |[| fop |=| p |]|  |\\| np |[| agr |=| ?a |]|  |)|  |/|  |(|  |(| s |\\| np |[| agr |=| ?a |]|  |)|  |/| np |[| typ |=| pro |,| kind |=| plu |]|  |)|   |:|   |\\| p |.| p !them |;| 
+viu pt  |:=|   |(| s |[| tense |=| past |]|  |\\| np |[| agr |=| 3s |]|  |)|  |/| np  |:|   |\\| x |\\| y |.| !see x y |;| 
+
+
+Hankwuk-ey n  |:=|  np  |:|  !korea |;| 
+Sewul-i n  |:=|   |(| s |/|  |(| s |\\| np |[| case |=| ?c |]|  |)|  |)|  |/|  |(| s |/|  |(| s |\\| np |[| case |=| ?c |]|  |)|  |)|   |:|   |\\| p |.| !seul p |;|   
+namtaymun-sicang-i n  |:=|  np |[| case |=| nom |]|   |:|  !market |;| 
+pul-i n  |:=|  np |[| case |=| nom |]|   |:|  !fire |;| 
+na-ass-ta ko  |:=|   |(| s |\\| np |[| case |=| ?c1 |]|  |)|  |\\| np |[| case |=| ?c2 |]|  |\\| np |[| case |=| nom |]|  |:|   |\\| x |\\| y |\\| z |.| !and  |(| !breakout z x !one |)|   |(| !at y z |)|  |;| 
+
+
+"bayi yara" n  |:=|  np |[| case |=| abs |]|   |:|  !man |;| 
+numa-ngu n  |:=|  np |[| acse |=| erg |]|   |:|  !father |;| 
+giga-n dy  |:=|   |(|  |(| s |\\| np |[| case |=| abs |]|  |)|  |\\| np |[| case |=| erg |]|  |)|  |/| vp  |:|   |\\| p |\\| y |\\| x |.| !tell  |(| p x |)| x y |;| 
+gubi-ngu n  |:=|  np |[| case |=| erg |]|   |:|  !gubi |;| 
+mawa-li dy  |:=|  vp |\\| np |[| case |=| erg |]|   |:|   |\\| x |\\| y |.| !examine y x |;|   
+banaga-nyu dy  |:=|  vp |:|   |\\| x |.| !return x |;| 
+bagul cl  |:=|  np |[| case |=| dat |]|  |/| n |[| case |=| dat |]|  |:|   |\\| x |.| !class1 x |;| 
+wanal-gu n  |:=|  n |[| case |=| dat |]|   |:|  !boomerang |;| 
+banul-din-gu n  |:=|   |(| np |[| poss |=| gen |,| case |=| dat |]|  |\\| np |[| poss |=| gen |,| case |=| dat |]|  |)|  |/| n |[| poss |=| gen |,| case |=| dat |]|   |:|   |\\| x |\\| y |.| !of x y |;| 
+yara-nu-n-din-gu n  |:=|  n |[| poss |=| gen |,| case |=| dat |]|   |:|  !man |;| 
+"bagul wanal-gu" dy  |:=|  np |\\| np |[| case |=| dat |]|   |:|   |\\| x |.| !boomerang x |;|    
+
+
+
+m33ka55 n  |:=|  np  |:|  !muga |;| 
+m33ko44 n  |:=|  np  |:|  !mugo |;| 
+ndu21 nu  |:=|  s |[| typ |=| e |]|  |\\| np |\\| np  |:|   |\\| x |\\| y |.| !beat y x |;| 
+ndu21 nu  |:=|  s |[| typ |=| a |]|  |\\| np |\\| np  |:|   |\\| x |\\| y |.| !beat x y |;| 
+
+
+natex-kan-ke sh  |:=|   |(| s |\\| np |[| case |=| erg |,| agr |=| plu |]|  |)|  |\\| np |[| case |=| abs |]|   |:|   |\\| x |\\| y |.| !bite x y |;| 
+natex sh      |:=|   |(| s |\\| np |[| case |=| erg |,| agr |=| sing |]|  |)|  |\\| np |[| case |=| abs |]|   |:|   |\\| x |\\| y |.| !bite x y |;| 
+mawa-kan-ke sh   |:=|  s |\\| np |[| case |=| abs |,| agr |=| plu |]|   |:|   |\\| x |.| !die x |;| 
+ochiti-baon-ra n  |:=|  np |[| case |=| erg |,| agr |=| plu |,| mod |=| prt |]|   |:|  !dogs |;| 
+bake n  |:=|  np |[| case |=| abs |,| num |=| sing |]|   |:|  !child |;| 
+joni-bo-ra n  |:=|  np |[| case |=| abs |,| agr |=| plu |,| mod |=| prt |]|   |:|  !persons |;| 
+bake-bo n  |:=|  np |[| case |=| abs |,| num |=| plu |]|   |:|  !children |;| 
+ochiti-nin-ra n  |:=|  np |[| case |=| erg |,| agr |=| sing |,| mod |=| prt |]|   |:|  !dog |;| 
+
+
+"Dass sie kommt" c  |:=|  s |/|  |(| s |/| s |[| top |=| p |]|  |)|   |:|   |\\| p |.| p  |(| !comes !she |)|  |;| 
+glaubt de  |:=|   |(| s |\\| np |)|  |/| s  |:|   |\\| p |\\| x |.| !believe p x |;| 
+er pro  |:=|  s |\\|  |(| s |\\| np |)|   |:|   |\\| p |.| p !he |;| 
+nicht f  |:=|  s |\\|  |^| s  |:|   |\\| p |.| !neg p |;| 
+"Die Diplomarbeit" n  |:=|  np |:|  !the-ma |;| 
+zu c  |:=|   |(| s |\\| np |)|  |\\|  |(| s |\\| np |)|   |:|   |\\| p |.| p |;| 
+schreiben de  |:=|   |(| s |\\| np |)|  |\\| np |:|   |\\| x |\\| y |.| !write x y |;| 
+hat f  |:=|   |(| s |\\| np |)|  |\\|  |(| s |\\| np |)|  |:|   |\\| p |.| p |;| 
+"die Studentin" n  |:=| s |\\|  |(| s |\\| np |)|  |:|  |\\| p |.| p  !student |;|  
+gelanweilt de  |:=| s |\\| s  |:|   |\\| p |.| !bore p |;| 
+
+
+janos n  |:=|  np |[| agr |=| 3s |]|   |:|  !john |;| 
+lat-t-a hu  |:=|   |(| s |\\| np |[| agr |=| 3s |]|  |)|  |/| np |[| agr |=| 3s |]|   |:|   |\\| x |\\| y |.| !see x y |;| 
+ot n  |:=|  np |[| agr |=| 3s |,| typ |=| pro |]|   |:|  !him |;| 
+lat-ott hu  |:=|   |(| s |\\| np |[| agr |=| 3s |]|  |)|  |/| np |[| agr |=| 1s |]|   |:|   |\\| x |\\| y |.| !see x y |;|  
+lat-ott hu  |:=|   |(| s |\\| np |[| agr |=| 3s |]|  |)|  |/| np |[| agr |=| 2s |]|   |:|   |\\| x |\\| y |.| !see x y |;|  
+engem n  |:=|  np |[| agr |=| 1s |]|   |:|  !me |;| )

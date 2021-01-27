@@ -7,8 +7,8 @@
 	directory, otherwise you will lose them in the next <code>git pull</code>.
 	The script <code>ccglab</code> is accessible from anywhere.
 
-<li> It is best to create a separate directory for every project. Around 7-8 files will be created
-	for a full project (source grammar, translations to Lisp code, models, their translations, supervision files
+<li> It is best to create a separate directory for every project. Many files might be created
+	for a full project depending on your need (source grammar, translations to Lisp code, models, their translations, supervision files
 	and their translation).
 
 
@@ -23,9 +23,9 @@ look no further: exclaim them. Write <code>"life-prime"</code> as <code>!life-pr
 It is internally converted to a string by a reader macro.
 
 <li> If there is a syntax error in your <code>.ccg</code> file, you will find
-out about it when you try to load the grammar. It will fail. Check the <code>.ded</code>
-file; it shows you the place at which the first error occured, as reported by the LALR parser.
-Fix that and try e.g.<code>(load-grammar :maker 'sbcl)</code> to remake the <code>.ded</code> file.
+out about it when you try to load the grammar. It will fail. Check the <code>.ccg.lisp</code>
+	file; it shows you the place at which <b>the first error</b> occured, as reported by the LALR parser.
+Fix that and run <code>(make-and-load-grammar)</code> to remake the <code>.ccg.lisp</code> file.
 	
 <li> The same is true of <code>.supervision</code> files. If there is an error in the file,
 	check out the <code>.sup</code> file it is supposed to generate to find out the FIRST error.
@@ -42,5 +42,4 @@ installation of <code>CCGlab</code> if you've done multiple installs. A new inst
 appends <code>$CCGLAB_HOME/bin</code> at the very beginning of <code>PATH</code>
 to override earlier installs.
 To see your PATH variable's value, do `<code>echo $PATH</code>'. 
-<li> And, ehm, yes, please read the manual.
 </ol>

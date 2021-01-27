@@ -1,5 +1,5 @@
 ;;;; =========================================================================== 
-;;;; == CCGlab  -Cem Bozsahin, 2015-2019, Lisboa, Ankara                      ==
+;;;; == CCGlab  -Cem Bozsahin, 2015-2020  Lisboa, Ankara, Datca               ==
 ;;;; ===========================================================================
 ;;;; 
 ;;;; GNU GPL license applies.
@@ -21,11 +21,11 @@
 ;;;;     3) an inductive component for PCCG for parse ranking.
 ;;;;     4) A modeling component to help set/train your parameters for the inductive component.
 ;;;;
-;;;; Some CS-ey notes:
+;;;; Some CS notes:
 ;;;; - It represents offline grammars serially, as lisp lists, and parse objects as hashtables, for speed.
 ;;;; - CCGlab uses only one Lisp tool: LALR parser of Mark Johnson. Thanks for that. The rest is standard Common Lisp
 ;;;;    without libraries.
-;;;; - After seeing the LALR component, you might think CCGlab is a deterministic parser.
+;;;; - After seeing the LALR component, you might think that CCGlab is a deterministic parser. It is not.
 ;;;;     The LALR subcomponent is used to parse text descriptions of lexical items and rules to Lisp structures,
 ;;;;     which are deterministic (and probably not SLR, so thanks to MJ again).
 ;;;;
@@ -40,16 +40,16 @@
 (defparameter *ccglab-switches* nil) ; to keep track of all on/off switches
                                     ; i seem to want to define more and more and lose track
 
-(defmacro defccglab (nam val)
+(defmacro defccglab (nam val &optional (msg nil))
   (if (member nam *ccglab-globals*)
-    (format t "~%defccglab warning! the name is RE-defined: ~A" nam)
+    (and msg (format t "~%defccglab warning! the name is RE-defined: ~A" nam))
     (push nam *ccglab-globals*))
   `(defparameter ,nam ,val))  ; do the def in any case 
                               ; no defvars in this dynamic env!
 
-(defmacro defswitch (nam val)
+(defmacro defswitch (nam val &optional (msg nil))
   (if (member nam *ccglab-switches*)
-    (format t "~%defswitch warning! the name is RE-defined: ~A" nam)
+    (and msg (format t "~%defswitch warning! the name is RE-defined: ~A" nam))
     (push nam *ccglab-switches*)) ; do the def in any case 
   `(defparameter ,nam ,val))      ; no defvars in this dynamic env!
 
@@ -95,6 +95,9 @@
 	       collect (list key value))))
 
 ;; some common utilities
+
+(defmacro mysqrt (num)
+  `(if (> ,num 0.0) (sqrt ,num) 0.0))
 
 (defun mpe (x1 x2 x3 x4)
   "computes the Cabay & Jackson '76 limit for minimum polynomial extrapolation (MPE) from 4 stages of the gradient."
@@ -149,6 +152,9 @@
 (defmacro nv-list-val (key nvpl)
   "Returns the value of a list of (name value) pairs nvpl, where each pair's SECOND is the value"
   `(second (assoc ,key ,nvpl)))
+
+(defmacro nv-get-v (key nvpl)
+  `(nv-list-val ,key ,nvpl))  ; short macros for long ones
 
 ;; macros for cky cell's key type (len pos analysis)
 (defmacro cell-len (cell)
@@ -234,7 +240,7 @@
   The only hashtable that has potential clash is the basic cat table because only there we have
   user features.
   Called during parsing .ccg to lisp code"
-  `(if (member ,feat *ccglab-reserved*) (format t "~%*** CCGlab warning ** Your feature name clashes with built-in features; please rename : ~A" ,feat)))
+  `(if (member ,feat *ccglab-reserved*) (format t "~%*** CCGlab warning *** Your feature name clashes with built-in features; please rename : ~A" ,feat)))
 
 (defun make-lex-hashtable ()
   "keys are: index key param sem syn morph phon tag. Tag is NF tag"
@@ -316,6 +322,7 @@
 ;;; globals
 ;;; =======
 
+(defccglab *ccg-tokenizer* "tokens") ; call this sed script for all CCG tokenization
 (defswitch *type-raised-p* nil) ; is the grammar compiled out for type raising (nil/t)?
 (defccglab *type-raise-targets* nil) ; the list of basic cats to type raise (i.e. argument cats list)
 (defccglab *ccglab-reserved* '(tag phon morph syn sem param insyn insem outsyn outsem bcat dir feats modal
@@ -369,7 +376,7 @@
 (defswitch *oovp* nil) ; set it to t to avoid out of vocabulary errors---two entries with uknown LFs will be created 
                           ;  to get partial parses as much as possible in a knowledge-poor way.
 
-;; rule switches
+;; rule switches and default values
 (defccglab *f-apply* t)   ;application
 (defccglab *b-apply* t)
 (defccglab *f-comp* t  )  ;composition
@@ -418,76 +425,171 @@
 (defmacro set-nf-tag (ht tag)
   `(and *nf-parse* (setf (machash 'TAG ,ht) ,tag)))
 
-;; rule switch wholesale control
-(defun basic-ccg (&optional (ok t))
-  (case ok
-    ((on t) (setf 
-	      *f-apply* t   ;application
-	      *b-apply* t
-	      *f-comp* t    ;composition
-	      *b-comp* t
-	      *fx-comp* t
-	      *bx-comp* t
-	      *f-sub* t     ;substitution
-	      *b-sub* t
-	      *fx-sub* t
-	      *bx-sub* t
-	      *f-subbar* nil  ;substitution bar (aka lost combinator)
-	      *b-subbar* nil
-	      *fx-subbar* nil
-	      *bx-subbar* nil
-	      *f-subcomp* nil ;subcomposition (i.e. D)
-	      *f2-subcomp* nil ; D^2
-	      *b-subcomp* nil
-	      *fx-subcomp* nil
-	      *bx-subcomp* nil
-	      *f2-comp* t   ;B^2
-	      *b2-comp* t
-	      *fx2-comp* t
-	      *bx2-comp* t
-	      *f2-sub* t    ;S'' (not S^2 of Curry)
-	      *b2-sub* t
-	      *fx2-sub* t
-	      *bx2-sub* t
-	      *f3-comp* t   ;B^3
-	      *b3-comp* t
-	      *fx3-comp* t
-	      *bx3-comp* t))
-    ((off nil) (format t "~%All rules set. Rule set to be controlled by user.~%")
-	       (setf 
-		 *f-apply* t   ;application
-		 *b-apply* t
-		 *f-comp* t    ;composition
-		 *b-comp* t
-		 *fx-comp* t
-		 *bx-comp* t
-		 *f-sub* t     ;substitution
-		 *b-sub* t
-		 *fx-sub* t
-		 *bx-sub* t
-		 *f-subbar* t  ;substitution bar (aka lost combinator)
-		 *b-subbar* t
-		 *fx-subbar* t
-		 *bx-subbar* t
-		 *f-subcomp* t ;subcomposition (i.e. D)
-		 *f2-subcomp* t ; D^2
-		 *b-subcomp* t
-		 *fx-subcomp* t
-		 *bx-subcomp* t
-		 *f2-comp* t   ;B^2
-		 *b2-comp* t
-		 *fx2-comp* t
-		 *bx2-comp* t
-		 *f2-sub* t    ;S'' (not S^2 of Curry)
-		 *b2-sub* t
-		 *fx2-sub* t
-		 *bx2-sub* t
-		 *f3-comp* t   ;B^3
-		 *b3-comp* t
-		 *fx3-comp* t
-		 *bx3-comp* t))
-    (otherwise (format t "~%Error: expected a value on/off/t/nil~%Continuing with current values"))))
+;; ------------------------------
+;; rule switch wholesale controls
+;; ------------------------------
 
+(defun basic-ccg (&key (nf-parse t) (lf t) (beam nil) (oov nil) (type-raise nil))
+  "experimental rules are turned off"
+  (nf-parse nf-parse)
+  (lf lf)
+  (beam beam)
+  (oov oov)
+  (type-raise type-raise)
+  (setf 
+    *f-apply* t   ;application
+    *b-apply* t
+    *f-comp* t    ;composition
+    *b-comp* t
+    *fx-comp* t
+    *bx-comp* t
+    *f-sub* t     ;substitution
+    *b-sub* t
+    *fx-sub* t
+    *bx-sub* t
+    *f-subbar* nil  ;substitution bar (aka lost combinator)
+    *b-subbar* nil
+    *fx-subbar* nil
+    *bx-subbar* nil
+    *f-subcomp* nil ;subcomposition (i.e. D)
+    *f2-subcomp* nil ; D^2
+    *b-subcomp* nil
+    *fx-subcomp* nil
+    *bx-subcomp* nil
+    *f2-comp* t   ;B^2
+    *b2-comp* t
+    *fx2-comp* t
+    *bx2-comp* t
+    *f2-sub* t    ;S'' (not S^2 of Curry)
+    *b2-sub* t
+    *fx2-sub* t
+    *bx2-sub* t
+    *f3-comp* t   ;B^3
+    *b3-comp* t
+    *fx3-comp* t
+    *bx3-comp* t))
+
+(defun simple-ccg (&key (nf-parse t) (lf t) (beam nil) (oov nil) (type-raise nil))
+  "only application, harmonic composition and its powers are turned on"
+  (nf-parse nf-parse)
+  (lf lf)
+  (beam beam)
+  (oov oov)
+  (type-raise type-raise)
+  (setf 
+    *f-apply* t   ;application
+    *b-apply* t
+    *f-comp* t    ;composition
+    *b-comp* t
+    *fx-comp* nil
+    *bx-comp* nil
+    *f-sub* nil     ;substitution
+    *b-sub* nil
+    *fx-sub* nil
+    *bx-sub* nil
+    *f-subbar* nil  ;substitution bar (aka lost combinator)
+    *b-subbar* nil
+    *fx-subbar* nil
+    *bx-subbar* nil
+    *f-subcomp* nil ;subcomposition (i.e. D)
+    *f2-subcomp* nil ; D^2
+    *b-subcomp* nil
+    *fx-subcomp* nil
+    *bx-subcomp* nil
+    *f2-comp* t   ;B^2
+    *b2-comp* t
+    *fx2-comp* nil
+    *bx2-comp* nil
+    *f2-sub* nil    ;S'' (not S^2 of Curry)
+    *b2-sub* nil
+    *fx2-sub* nil
+    *bx2-sub* nil
+    *f3-comp* t   ;B^3
+    *b3-comp* t
+    *fx3-comp* nil
+    *bx3-comp* nil))
+
+(defun app-ccg (&key (nf-parse t) (lf t) (beam nil) (oov nil) (type-raise nil))
+  "only application is turned on. This is the Bar-Hillel fragment."
+  (nf-parse nf-parse)
+  (lf lf)
+  (beam beam)
+  (oov oov)
+  (type-raise type-raise)
+  (setf 
+    *f-apply* t   ;application
+    *b-apply* t
+    *f-comp* nil    ;composition
+    *b-comp* nil
+    *fx-comp* nil
+    *bx-comp* nil
+    *f-sub* nil     ;substitution
+    *b-sub* nil
+    *fx-sub* nil
+    *bx-sub* nil
+    *f-subbar* nil  ;substitution bar (aka lost combinator)
+    *b-subbar* nil
+    *fx-subbar* nil
+    *bx-subbar* nil
+    *f-subcomp* nil ;subcomposition (i.e. D)
+    *f2-subcomp* nil ; D^2
+    *b-subcomp* nil
+    *fx-subcomp* nil
+    *bx-subcomp* nil
+    *f2-comp* nil   ;B^2
+    *b2-comp* nil
+    *fx2-comp* nil
+    *bx2-comp* nil
+    *f2-sub* nil    ;S'' (not S^2 of Curry)
+    *b2-sub* nil
+    *fx2-sub* nil
+    *bx2-sub* nil
+    *f3-comp* nil   ;B^3
+    *b3-comp* nil
+    *fx3-comp* nil
+    *bx3-comp* nil))
+
+(defun exp-ccg (&key (nf-parse t) (lf t) (beam nil) (oov nil) (type-raise nil))
+  "experimental rules are turned on too"
+  (nf-parse nf-parse)
+  (lf lf)
+  (beam beam)
+  (oov oov)
+  (type-raise type-raise)
+  (setf 
+    *f-apply* t   ;application
+    *b-apply* t
+    *f-comp* t    ;composition
+    *b-comp* t
+    *fx-comp* t
+    *bx-comp* t
+    *f-sub* t     ;substitution
+    *b-sub* t
+    *fx-sub* t
+    *bx-sub* t
+    *f-subbar* t  ;substitution bar (aka lost combinator)
+    *b-subbar* t
+    *fx-subbar* t
+    *bx-subbar* t
+    *f-subcomp* t ;subcomposition (i.e. D)
+    *f2-subcomp* t ; D^2
+    *b-subcomp* t
+    *fx-subcomp* t
+    *bx-subcomp* t
+    *f2-comp* t   ;B^2
+    *b2-comp* t
+    *fx2-comp* t
+    *bx2-comp* t
+    *f2-sub* t    ;S'' (not S^2 of Curry)
+    *b2-sub* t
+    *fx2-sub* t
+    *bx2-sub* t
+    *f3-comp* t   ;B^3
+    *b3-comp* t
+    *fx3-comp* t
+    *bx3-comp* t))
+;
+; -----------------
 
 (defun rules ()
   (format t  "To change a switch, use (setf <switchname> <value>)
@@ -528,6 +630,19 @@
           *f2-comp* *b2-comp* *fx2-comp* *bx2-comp* *f2-sub* *b2-sub* *fx2-sub* *bx2-sub* *f2-subcomp* *f3-comp* *b3-comp* 
 	  *fx3-comp* *bx3-comp*))
 
+(defmacro sort-grammar (&optional (order #'>))
+  "sort current grammar by order, default descending. report quartiles"
+  `(let* ((g (copy-seq *ccg-grammar*))   ; sort is destructive
+	  (gs (sort g ,order :key #'(lambda (x)(nv-get-v 'PARAM x))))
+	  (n (length gs)))
+     (values gs
+	     (nv-get-v 'PARAM (first gs))                      ;highest
+	     (nv-get-v 'PARAM (nth (truncate (* n 0.25)) gs))  ;q1
+	     (nv-get-v 'PARAM (nth (truncate (* n 0.5)) gs))   ;q2
+	     (nv-get-v 'PARAM (nth (truncate (* n 0.75)) gs))  ;q3
+	     (nv-get-v 'PARAM (car (last gs)))                 ;lowest
+	     )))
+
 (defun pack-cky-lf-hashtable ()
   (let ((lf-list nil))
     (maphash #'(lambda (key val)(push (list key (first val) (rest val)) lf-list))
@@ -558,7 +673,7 @@
   )
 
 (defun which-ccglab ()
-  "CCGlab, version 6.0.1")
+  "CCGlab, version 7.0.4")
 
 (defun set-lisp-system (lispsys)
   (case lispsys
@@ -571,21 +686,26 @@
     (progn 
       (setf *lispsys* 'sbcl)
       (format t "~%I am using run-program API as ~A does." *lispsys*)
-      (format t "~%You may not be able to re-make .ded or .sup files if this is wrong."))))
+      (format t "~%You may not be able to re-make .ccg.lisp or .sup files if this is wrong."))))
 
 (defun flash-news (&optional (report t))
-  (and report 
-       (format t "~%Gradient extrapolation now available.~%Type-raise compiling now available.")))
+  (cond (report 
+	  (format t "~%Gradient extrapolation available.")
+	  (format t "~%Type-raising compiler available.")
+	  (format t "~%.ded and .ind file types deprecated.")
+	  (format t "~%Just rename legacy .ded/ind files as .ccg.lisp")
+	  (format t "~%All loadable grammars are .ccg.lisp")
+	  (format t "~%save-grammar needs no suffix.")
+	  )))
 
 (defun welcome (&optional (lispsys *lispsys*))
-  (format t "~2%If you've got WARNINGS during loading,~%   you can ignore them.")
-  (format t "~%====================================================")
+  (format t "~%=====================================================")
   (format t "~%Welcome to ~A" (which-ccglab))
-  (format t "~%----------------------------------------------------")
+  (format t "~%-----------------------------------------------------")
   (set-lisp-system lispsys)
   (flash-news)
   (format t "~%Ready.")
-  (format t "~%====================================================~%"))
+  (format t "~%=====================================================~%"))
 
 (defun beam-value ()
   (format t "~%*Beamp* = ~A  *Beam-exp* = ~A~%" *beamp* *beam-exp*))
@@ -1162,14 +1282,14 @@
 
 (defun lispify-project (pname maker)
    "reads paper-style tokenized specs for the project pname, and feeds that into 
-  parse/1 to generate pname.ded"
-   (let ((ofilename (concatenate 'string pname ".ded"))
+  parse/1 to generate compiled pname file"
+   (let ((ofilename (concatenate 'string pname ".ccg.lisp"))
 	 (sfilename (concatenate 'string pname ".ccg"))
 	 (infilename (concatenate 'string pname ".lisptokens")))
      (case maker ;; one of these will generate .lisptokens
-       (sbcl (run-program "tokens" (list pname) :search t :wait t))
-       (ccl  (run-program "tokens" (list pname) :wait t))
-       (alisp  (run-shell-command (concatenate 'string "tokens " pname) :wait t))
+       (sbcl (run-program *ccg-tokenizer* (list sfilename infilename) :search t :wait t))
+       (ccl  (run-program *ccg-tokenizer* (list sfilename infilename) :wait t))
+       (alisp  (run-shell-command (concatenate 'string *ccg-tokenizer* " " sfilename infilename) :wait t))
        (otherwise (format t "~%Reading from off-line generated ~A" infilename)))
      (with-open-file (strm infilename :direction :input :if-does-not-exist nil)
        (if (streamp strm)
@@ -1180,83 +1300,82 @@
 	 (progn (format t "~%**ERROR in load: ~A or ~A or ~A." sfilename infilename ofilename)
 		(return-from lispify-project))))
      (and (> *singletons* 0) 
-	  (format t "~%=============================================================================~%** CCGlab warning ** There are ~A string-constant categories in your grammar, make sure NONE are void" *singletons*))
-     (format t "~2%=========================== p r e p a r i n g ===============================~%")
-     (format t "~%Project name: ~A~%  Input : ~A ~%  Output: ~A ~%Check to see if output contains any spec errors.~%Fix and re-run if it does." pname infilename ofilename)
-     (format t "~%You can also re/create ~A by running 'tokens ~A' sed script offline." infilename pname)))
+	  (format t "~%=============================================================================~%*** CCGlab warning *** There are ~A string-constant categories in your grammar~% make sure NONE are void" *singletons*))
+     (format t "~2%======================= c o m p i l i n g ===================================~%")
+     (format t "~%Project name: ~A~%  Input : (~A, ~A)~%  Output: ~A ~%** Check ~A for THE FIRST ERROR in ~A IF load fails." pname sfilename infilename ofilename ofilename sfilename)))
 
-(defun lispify-supervision (pname maker)
-   "reads semicolon-terminated supervision pairs and forms the token file pname.suptokens"
-   (let ((ofilename (concatenate 'string pname ".sup"))
-	 (infilename (concatenate 'string pname ".suptokens")))
-     (case maker ;; one of these will generate .suptokens
-       (sbcl (run-program "suptokens"  (list pname) :search t :wait t))
-       (ccl  (run-program "suptokens" (list pname) :wait t))
-       (alisp  (run-shell-command (concatenate 'string "suptokens " pname) :wait t))
-       (otherwise (format t "~%Reading from off-line generated ~A" infilename)))
-     (with-open-file (strm infilename :direction :input :if-does-not-exist nil)
-       (if (streamp strm)
-	 (with-open-file (s ofilename  :direction :output :if-exists :supersede)
-	   (format s "~A" (parse/2 (read strm)))) ; this is the interface to LALR transformer's parse
-	 (progn (format t "~%**ERROR in loading ~A" infilename)
-		(return-from lispify-supervision))))
-     (format t "~%=========================== p r e p a r i n g ===============================~%")
-     (format t "~%Project name: ~A~%  Input : ~A ~%  Output: ~A ~%Check to see if output contains any spec errors.~%Fix and re-run if it does." pname infilename ofilename)
-     (format t "~%You can also re/create ~A by running 'suptokens ~A' sed script offline." infilename pname)))
+(defun lispify-supervision (pname ofilename sourcefile infilename maker)
+  (case maker ;; one of these will generate .suptokens
+    (sbcl (run-program *ccg-tokenizer*  (list sourcefile infilename) :search t :wait t))
+    (ccl  (run-program *ccg-tokenizer* (list sourcefile infilename) :wait t))
+    (alisp  (run-shell-command (concatenate 'string *ccg-tokenizer* " " sourcefile infilename) :wait t))
+    (otherwise (format t "~%Reading from off-line generated ~A" infilename)))
+  (with-open-file (strm infilename :direction :input :if-does-not-exist nil)
+    (if (streamp strm)
+      (with-open-file (s ofilename  :direction :output :if-exists :supersede)
+	(format s "~A" (parse/2 (read strm)))) ; this is the interface to LALR transformer's parse
+      (progn (format t "~%**ERROR in loading ~A" infilename)
+	     (return-from lispify-supervision))))
+  (format t "~%Project name: ~A~%  Input : (~A, ~A) ~%  Output: ~A ~%Check ~A for errors and retry if load of ~A fails." 
+	  pname sourcefile infilename ofilename sourcefile ofilename)
+  (load-supervision pname))
 
-(defun load-project (pname pfile)
+(defun load-project (pname)
   (let* ((sname (concatenate 'string pname ".ccg"))
 	 (tname (concatenate 'string pname ".lisptokens"))
-	 (gname (concatenate 'string pname ".ded"))
-	 (mname (concatenate 'string pname ".ind"))
-	 (cname (concatenate 'string pname ".lisp"))
+	 (gname (concatenate 'string pname ".ccg.lisp"))
 	 (suname (concatenate 'string pname ".sup"))
-	 (lfile (if (eq pfile 'model) mname gname)))
+	 (sulname (concatenate 'string pname ".supervision"))
+	 (sfile (probe-file sname))
+	 (tfile (probe-file tname))
+	 (gfile (probe-file gname))
+	 (sufile (probe-file suname))
+	 (sulfile (probe-file sulname)))
     (format t "~%======================= l o a d i n g =======================================~%")
     (setf *error* nil)
-    (safely-load lfile)             ; this will set the *ccg-grammar* list 
+    (safely-load gname)             ; this will set the *ccg-grammar* variable
     (cond ((not *error*)
 	   (setf *lex-rules-table* nil)
-	   (setf *loaded-grammar* lfile)
+	   (setf *loaded-grammar* gname)
 	   (dolist (l *ccg-grammar*)(and (not (lexp l)) (push-t (hash-lexrule l) *lex-rules-table*))) ; we get reversed list of rules
 	   (setf *lex-rules-table* (reverse *lex-rules-table*)) ; it is important that the rules apply in the order specified
-	   (format t "~%Project [~A] is assumed to consist of" pname)
+	   (format t "~%Project ~A files" pname)
            (format t "~%-----------------------------------------------------------------------------")
-	   (format t "~%  CCG grammar source : ~A $" sname)
-	   (format t "~%    Its token form   : ~A $" tname)
-	   (format t "~%  Deduction grammar  : ~A $ (derived from ~A)" gname tname)
-	   (format t "~%  Induction grammar  : ~A #" mname)
-	   (format t "~%  Supervision source : ~A ^" suname)
-	   (format t "~%  Model-specific code: ~A ^" cname)
-	   (format t "~%   and other model-specific files you may create.")
-	   (format t "~%       *CCG-GRAMMAR* : set from ~A" lfile)
-	   (format t "~%  *LEX-RULES-TABLE*  : set from ~A" lfile)
-	   (format t "~%Expected files       : $ for deduction, # for induction, ^ for model development")
+	   (and sfile   (format t "~%  CCG grammar source       : ~A" sname))
+	   (and tfile   (format t "~%          token form       : ~A" tname))
+	   (and gfile   (format t "~%  Compiled/loaded grammar  : ~A" gname))
+	   (and sufile  (format t "~%  Supervision native source: ~A" suname))
+	   (and sulfile (format t "~%  Supervision text source  : ~A" sulname))
+	                (format t "~%       *CCG-GRAMMAR*       : ~A entries" (length *ccg-grammar*))
+	                (format t "~%   *LEX-RULES-TABLE*       : ~A entries" (length *lex-rules-table*))
 	   (format t "~%=============================================================================~%")
 	   t)
-	  (t (if (eq pfile 'model)
-	       (format t "~%ERROR loading the model file ~A" mname)
-	       (progn
-		 (format t "~%**ERROR loading the project ~A.~%  A required ~A file does not exist or ~A has syntax error." pname pname sname)
-		 (format t "~%  Have a look at ~A to see if there is error in ~A." gname sname)))
+	  (t (format t "~%**ERROR in loading ~A." gfile)
+	     (and sfile (format t "~%  Have a look at ~A to see THE FIRST ERROR in ~A" gname sname))
+	     (or sfile  (format t "~%  ~A does not exist" sname))
+	     (or gfile  (format t "~%  ~A does not exist" gname))
 	     (format t "~%Project ~A cannot be loaded:" pname)
 	     (format t "~%  *ccg-grammar* is unchanged.")
 	     (format t "~%  *lex-rules-table* is unchanged.~%")
 	     nil))))
 
-(defun load-model (pname)
-  (load-project pname 'model))
+(defmacro load-model (pname)
+  "kept as legacy code"
+  `(load-project ,pname))
 
-
-(defun load-grammar (pname &key (maker nil) (make (if maker t nil)))
+(defun load-grammar (pname &key (maker nil) (make (if maker t nil)) (sure nil))
   "Prepares and loads a Lisp-translated CCG grammar, and prepares the lexical rule hashtable for the project.
   Maker is a legacy argument; I kept it for people who have scripts with e.g. (load-grammar .. :maker 'sbcl)."
-  (and make (lispify-project pname *lispsys*)) ; generates the .ded file and/or .lisptokens file 
-  (load-project pname 'grammar))
+  (if (and make (not sure))
+    (progn (format t "You may be about to override a modified ~A file.~%If you are sure, use make-and-load-grammar (aka mlg)" 
+		   (concatenate 'string pname ".ccg.lisp"))
+	   (return-from load-grammar)))
+  (and make (lispify-project pname *lispsys*)) ; generates the .ccg.lisp file and/or .lisptokens file 
+  (load-project pname))
 
 (defmacro make-and-load-grammar (pname)
-  "simple macro for make and load"
-  `(load-grammar ,pname :make t))        
+  "simple macro for make and load, assuming you know what you are doing"
+  `(load-grammar ,pname :make t :sure t))        
 
 (defun get-ht (phon ht-list)
   "returns the hashtable in ht-list that has PHON feature same as phon.
@@ -1435,10 +1554,14 @@
   (compile (eval (make-parser grammar lexforms *ENDMARKER*)))) 
 
 (defun make-transformer/ccg ()
-  (terpri) ; to clean up Lisp warnings
-  (load-transformer/ccg)
-  (terpri)
-  (make-lalrparser))
+  "using Nikodemus Siivola message suppression"
+  (let* ((nada (make-broadcast-stream))
+	 (*standard-output* nada)
+	 (*error-output* nada))
+    (load-transformer/ccg)
+    (make-lalrparser))
+  t)
+
 
 (make-transformer/ccg)
 
@@ -1517,10 +1640,13 @@
   )
 
 (defun make-transformer/sup ()
-  (terpri)  ; to clean up Lisp warnings
-  (load-transformer/sup)
-  (terpri)
-  (make-lalrparser))
+  "using Nikodemus Siivola message suppression"
+  (let* ((nada (make-broadcast-stream))
+	 (*standard-output* nada)
+	 (*error-output* nada))
+    (load-transformer/sup)
+    (make-lalrparser))
+  t)
 
 (defun make-supervision (pname &key (maker t))
   "Makes a lisp-ready pname.sup file from pname.supervision and pname.suptokens.
@@ -1529,11 +1655,8 @@
 	(sourcefile (concatenate 'string pname ".supervision"))
 	(infilename (concatenate 'string pname ".suptokens")))
     (make-transformer/sup)
-    (and maker (lispify-supervision pname *lispsys*))
-    (make-transformer/ccg) ; reset to CCG input parsing because there can be one LALR grammar at any time
-    (format t "~%=========================== p r e p a r i n g ===============================~%")
-    (format t "~%Project name: ~A~%  Input : ~A and ~A~%  Output: ~A ~%Check to see if output contains any spec errors.~%Fix and re-run if it does." pname sourcefile infilename ofilename)
-    (format t "~%You can also re/create ~A by running 'suptokens ~A' sed script offline." infilename pname)))
+    (and maker (lispify-supervision pname ofilename sourcefile infilename *lispsys*))
+    (make-transformer/ccg))) ; reset to CCG input parsing because there can be one LALR grammar at any time
 
 ;;;; =============================================================================
 ;;;; == Part 2: The CKY parser for CCG -- the deductive component               ==
@@ -3060,7 +3183,6 @@
   "runs over every parameter trained 4 times---input val is a 4-item dotted lists of (param . derivative), 
   and extrapolates a limit in the fifth column."
   (maphash #'(lambda (key val)
-	       (declare (ignore key))
 	       (let ((p1 (first val))
 		     (p2 (second val))
 		     (p3 (third val))
@@ -3341,34 +3463,38 @@
 	      (- (get-key-param-xp (nv-list-val 'KEY l)) (nv-list-val 'PARAM l)))))
   (format t "~%================================================"))
 
-(defun save-grammar (out)
+(defun save-grammar (gname &key (force nil))
   "this save is baroque to make it lisp reload-able"
-  (with-open-file (s out :direction :output :if-exists :supersede) 
+  (with-open-file (s (concatenate 'string (string gname) ".ccg.lisp") 
+		     :direction :output :if-exists (if force :supersede :error))  ; we put the default extension
     (format s "(defparameter *ccg-grammar*~%")
     (format s "'")
     (prin1 *ccg-grammar* s)
     (format s ")~%")))
 
 (defun save-training (out)
-  (or out (format t "please specify an output file to avoid unintentional overrides") 
+  (or out (format t "please specify an output grammar name to avoid unintentional overrides") 
       (return-from save-training))
   (dolist (l *ccg-grammar*)
     (setf (nv-list-val 'PARAM l) (get-key-param (nv-list-val 'KEY l))))
   (save-grammar out))
 
 (defun save-training-xp (out)
-  (or out (format t "please specify an output file to avoid unintentional overrides") 
+  (or out (format t "please specify an output grammar name to avoid unintentional overrides") 
       (return-from save-training-xp))
   (dolist (l *ccg-grammar*)
     (setf (nv-list-val 'PARAM l) (get-key-param-xp (nv-list-val 'KEY l))))
   (save-grammar out))
 
 (defun z-score-grammar ()
-  "turns current parameter values to z-scores with normal distribution N(0,1).
-  Now all parameters are factors apart from population standard deviation with same variance as original sample."
+  "This version assumes all entries to be from one distribution.
+  turns current parameter values to z-scores with normal distribution N(0,1).
+  Now all parameters are factors apart from population standard deviation with same variance as original sample.
+  Useful for avoiding over/underflow as your model develops.
+  Assuming population mean & std deviation to avoid dbz check."
   (if (< (length *ccg-grammar*) 2)
-    (format t "Nothing to z-score!")
-    (let ((sumsq 0.0) ; find standard deviation and mean in one pass, from Guttman/Wilks/Hunter 
+    (format t "~%Nothing to z-score!")
+    (let ((sumsq 0.0) ; find standard deviation and mean in one pass
 	  (sum  0.0)
 	  (std  0.0)
 	  (mean 0.0)
@@ -3376,9 +3502,9 @@
       (dolist (item *ccg-grammar*)
 	(setf sumsq (+ sumsq (expt (nv-list-val 'PARAM item) 2)))
 	(setf sum (+ sum (nv-list-val 'PARAM item))))
-      (setf std (sqrt (/ (- sumsq (/ (expt sum 2) n)) (- n 1))))
+      (setf std (mysqrt (- (/ sumsq n)  (expt (/ sum n) 2))))
       (if (< std least-positive-short-float) 
-	(format t "No variation, no change")
+	(format t "~%No variation, no change")
 	(let ((minw most-positive-single-float)
 	      (maxw most-negative-single-float))
 	  (setf mean (/ sum n))
@@ -3386,9 +3512,101 @@
 	    (setf (nv-list-val 'PARAM item) (/ (- (nv-list-val 'PARAM item) mean) std))
 	    (if (> (nv-list-val 'PARAM item) maxw) (setf maxw (nv-list-val 'PARAM item)))
 	    (if (< (nv-list-val 'PARAM item) minw) (setf minw (nv-list-val 'PARAM item))))
-	  (format t "Max z-score = ~A, Min z-score = ~A~%" maxw minw)
-	  (format t "Done. Use save-grammar to save the changes in a file"))))))
+	  (format t "~%Currently loaded grammar is z-scored.")
+	  (format t "~%Max z-score = ~A, Min z-score = ~A" maxw minw))))))
 
+(defun max-lf-span ()
+  "find the spanned elements of the currently loaded grammar, 
+  i.e. those with same LF but weaker one is string-covered by the stronger."
+  (let ((sp nil)
+	(g (copy-seq *ccg-grammar*)))  ; we will delete from g destructively 
+    (dolist (l1 g (values g (reverse sp)))
+      (dolist (l2 g)
+	(if (and (not (equal (nv-get-v 'KEY l1) (nv-get-v 'KEY l2)))
+		 (alpha-equivalent (nv-get-v 'SEM l1) (nv-get-v 'SEM l2))
+		 (search (string (nv-get-v 'PHON l2)) (string (nv-get-v 'PHON l1)))
+		 (< (length (string (nv-get-v 'PHON l2))) (length (string (nv-get-v 'PHON l1))))
+		 (<= (nv-get-v 'PARAM l2) (nv-get-v 'PARAM l1)))
+	  (progn (push l2 sp)
+		 (delete l2 g)))))))
+
+(defmacro subset-principle-lf (gn)
+  "saves result of max-lf-span as current grammar. Call it if you want to see both survived and deleted entries"
+  `(progn 
+     (format t "~%Size of current grammar before update: ~A" (length *ccg-grammar*))
+     (multiple-value-bind (g d)
+       (max-lf-span) ; applies SP to currently loaded grammar wrt identical LFs
+       (format t "~%Size of updated grammar= ~A~%Size of deletion list (with overlaps)= ~A~%" (length g) (length d))
+       (setf *ccg-grammar* g))
+     (save-grammar ,gn))) ; then saves the updated current grammar
+
+(defun filter (&key (metod '>=) (threshold 0.0))
+  "filters out grammar entries in current grammar by PARAM; metod is survival criteria"
+  (let* ((fg nil) ; filtered grammar
+	 (fn (progn (format t "~%Enter a grammar name (without .ccg.lisp extension) for saving survivors")
+		    (format t "~%put in double quotes if you want to preserve case~%") 
+		    (string (read)))))
+    (dolist (item *ccg-grammar*)
+      (if (funcall metod (nv-list-val 'PARAM item) threshold) (push item fg)))
+    (setf *ccg-grammar* (reverse fg))
+    (save-grammar fn)))
+
+(defun z-score-grammar-per-form ()
+  "calculates z values for each lexical form separately, because they are the ones 
+  in competition with each other in parsing and ranking. Assumes a loaded grammar.
+  Assuming population mean & std deviation to avoid dbz check."
+  (if (< (length *ccg-grammar*) 2)
+    (format t "~%Nothing to z-score!")
+    (let* ((n (length *ccg-grammar*))
+	   (ht (make-hash-table :test #'equal :size n)))
+      (dolist (item *ccg-grammar*)  ; initialize sums per form --collisions override same form
+	(setf (machash (nv-list-val 'PHON item) ht) '((SUMSQ 0.0)
+						      (SUM 0.0)
+						      (N 0))))
+      (dolist (item *ccg-grammar*)  ; another pass to fill in data
+	(setf (machash (nv-list-val 'PHON item) ht)
+	      (list
+		(list 'SUMSQ 
+		      (+ (nv-list-val 'SUMSQ (machash (nv-list-val 'PHON item) ht))
+			 (expt (nv-list-val 'PARAM item) 2)))
+		(list 'SUM 
+		      (+ (nv-list-val 'SUM (machash (nv-list-val 'PHON item) ht))
+			 (nv-list-val 'PARAM item)))
+		(list 'N 
+		      (+ (nv-list-val 'N (machash (nv-list-val 'PHON item) ht)) 1)))))
+      (let ((ht2 (make-hash-table :test #'equal :size (hash-table-count ht))))
+	(maphash #'(lambda (k v)  ; fix mean and  std deviation over unique forms
+		     (setf (machash k ht2)
+			   (list 
+			     (list 'MEAN (/ (nv-list-val 'SUM v) (nv-list-val 'N v)))
+			     (list 'STD (mysqrt (- (/ (nv-list-val 'SUMSQ v) (nv-list-val 'N v))
+						   (expt (/ (nv-list-val 'SUM v) 
+							    (nv-list-val 'N v)) 2)))))))
+
+		 ht)
+	(dolist (item *ccg-grammar*) ; now update parameters per form in currently loaded grammar
+	  (setf (nv-list-val 'PARAM item) 
+		(setf (nv-list-val 'PARAM item) 
+		      (if (/= (nv-list-val 'STD (machash (nv-list-val 'PHON item) ht2)) 0.0)
+			(/ (- (nv-list-val 'PARAM item)
+			      (nv-list-val 'MEAN (machash (nv-list-val 'PHON item) ht2)))		      
+			   (nv-list-val 'STD (machash (nv-list-val 'PHON item) ht2)))
+			0.0)))))
+      (format t "~%Currently loaded grammar is z-scored PER FORM."))))
+
+(defun merge-grammar (gname)
+  "merges grammar in file gname.ccg.lisp into currently loaded grammar without overriding the entries of current grammar.
+  It's best if you merge two grammars if their PARAMs are from same value space (eg. both z-scored or none, etc.)"
+  (let* ((lg (copy-seq *ccg-grammar*)) ; will update currently loaded grammar
+	 (c 0))
+    (load-grammar gname)     ; resets *ccg-grammar* to grammar in gname
+    (dolist (l *ccg-grammar*) 
+      (if (not (reduce #'(lambda (x y)(or x y))  ; reduce will return true only if l is a member of lg
+		       (mapcar #'(lambda (z)(member (assoc 'KEY l) z :test #'equal))
+			       lg)))
+	(progn (push l lg)(incf c))))
+    (setf *ccg-grammar* lg)
+    (format t "~%Current grammar is merged with ~A adding ~A entries." gname c)))
 
 (defun mklist (obj)
   (if (listp obj) obj (list obj)))
@@ -3409,11 +3627,8 @@
   (setf *loaded-grammar* "")
   (setf *ccg-grammar*  nil)
   (setf *ccg-grammar-keys*  0)
-  (nf-parse t)
-  (lf t)
-  (beam nil)
-  (oov nil)
-  (basic-ccg)) ; turn experimental rules off by default
+  (basic-ccg :nf-parse t :lf t :beam nil 
+	     :oov nil :type-raise nil)) ; turn experimental rules off by default
 
 (defun almost-eq (x y)
   (<= (abs (- x y)) *epsilon*))
@@ -3425,6 +3640,15 @@
 (defun write1 (fn obj)
   "writes one lisp object to file fn in one fell swoop"
   (with-open-file (s fn :direction :output :if-exists :error) (format  s "~A~%" obj)))
+
+(defun write1f (fn obj)
+  "force writes one lisp object to file fn in one fell swoop"
+  (with-open-file (s fn :direction :output :if-exists :supersede) (pprint-linear s obj)))
+
+(defun write1fperline (fn obj)
+  "force writes the list in obj one element per line"
+  (with-open-file (s fn :direction :output :if-exists :supersede)
+    (format s "(~%~{~A~%~})" obj)))
 
 (defun gradient-profile (&rest models)
   "lists pairwise gradient difference in a sequence of models in files. 
@@ -3461,7 +3685,7 @@
   "let here is not really necessary; i use it to show destructive
   effects of sort. without copy-seq the last reference to np gives error."
   (let ((np (group names 2)))
-    (setf *abv* (sort (copy-seq np) #'string< :key #'car)) ; beware: sort is destructive
+    (setf *abv* (sort (append (copy-seq np) *abv*) #'string< :key #'car)) ; beware: sort is destructive
     `(progn 
        ,@(mapcar #'(lambda (pair) `(abbrev ,@pair))
 	       np))))
@@ -3473,10 +3697,7 @@
 
 (abbrevs lg load-grammar 
 	 mlg make-and-load-grammar
-	 tr compile-and-subsume-tr
-	 trc compile-tr
 	 loads safely-load
-	 trt type-raise-targets
          savetr save-subsumption
 	 lm load-model
 	 cd ccg-deduce

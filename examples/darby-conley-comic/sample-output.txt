@@ -1,0 +1,171 @@
+
+> (mlg "bucky")
+
+
+======================= c o m p i l i n g ===================================
+
+Project name: bucky
+  Input : (bucky.ccg, bucky.lisptokens)
+  Output: bucky.ccg.lisp 
+** Check bucky.ccg.lisp for THE FIRST ERROR in bucky.ccg if load fails.
+======================= l o a d i n g =======================================
+
+Project bucky files
+-----------------------------------------------------------------------------
+  CCG grammar source       : bucky.ccg
+          token form       : bucky.lisptokens
+  Compiled/loaded grammar  : bucky.ccg.lisp
+       *CCG-GRAMMAR*       : 13 entries
+   *LEX-RULES-TABLE*       : 2 entries
+=============================================================================
+T
+> (p '(you can food anything if you just eat it))
+
+T
+> (ders)
+
+
+Derivation 1
+--------------
+LEX   (JUST) := IV/*IV
+        : (LAM P (JUST P))
+LEX   (EAT) := IV/NP
+        : (LAM X (LAM Y ((EAT X) Y)))
+LEX   (IT) := NP
+        : IT
+>     (EAT)(IT) := IV
+        : ((LAM X (LAM Y ((EAT X) Y))) IT)
+>     (JUST)(EAT IT) := IV
+        : ((LAM P (JUST P)) ((LAM X (LAM Y ((EAT X) Y))) IT))
+LEX   (YOU) := NP
+        : YOU
+LEX   (CAN) := (S\NP)/IV
+        : (LAM P (LAM X (CAN (P X))))
+VERB-IT (FOOD) := IV/NP
+        : ((LAM LF (LAM X (LAM Y ((LF X) Y)))) FOOD)
+LEX   (ANYTHING) := NP
+        : ANYTHING
+>     (FOOD)(ANYTHING) := IV
+        : (((LAM LF (LAM X (LAM Y ((LF X) Y)))) FOOD) ANYTHING)
+>     (CAN)(FOOD ANYTHING) := S\NP
+        : ((LAM P (LAM X (CAN (P X))))
+           (((LAM LF (LAM X (LAM Y ((LF X) Y)))) FOOD) ANYTHING))
+<     (YOU)(CAN FOOD ANYTHING) := S
+        : (((LAM P (LAM X (CAN (P X))))
+            (((LAM LF (LAM X (LAM Y ((LF X) Y)))) FOOD) ANYTHING))
+           YOU)
+LEX   (IF) := (S\*S)/*S
+        : (LAM P (LAM Q ((IF P) Q)))
+LEX   (YOU) := NP
+        : YOU
+FIN   (JUST EAT IT) := S\NP
+        : ((LAM LF (LAM Y (FIN (LF Y))))
+           ((LAM P (JUST P)) ((LAM X (LAM Y ((EAT X) Y))) IT)))
+<     (YOU)(JUST EAT IT) := S
+        : (((LAM LF (LAM Y (FIN (LF Y))))
+            ((LAM P (JUST P)) ((LAM X (LAM Y ((EAT X) Y))) IT)))
+           YOU)
+>     (IF)(YOU JUST EAT IT) := S\*S
+        : ((LAM P (LAM Q ((IF P) Q)))
+           (((LAM LF (LAM Y (FIN (LF Y))))
+             ((LAM P (JUST P)) ((LAM X (LAM Y ((EAT X) Y))) IT)))
+            YOU))
+<     (YOU CAN FOOD ANYTHING)(IF YOU
+    JUST
+    EAT
+    IT) := S
+        : (((LAM P (LAM Q ((IF P) Q)))
+            (((LAM LF (LAM Y (FIN (LF Y))))
+              ((LAM P (JUST P)) ((LAM X (LAM Y ((EAT X) Y))) IT)))
+             YOU))
+           (((LAM P (LAM X (CAN (P X))))
+             (((LAM LF (LAM X (LAM Y ((LF X) Y)))) FOOD) ANYTHING))
+            YOU))
+
+Final LF, normal-order evaluated: 
+
+    ((IF (FIN ((JUST (LAM Y ((EAT IT) Y))) YOU))) (CAN ((FOOD ANYTHING) YOU))) =
+    (IF (FIN (JUST (\ Y . EAT IT Y) YOU)) (CAN (FOOD ANYTHING YOU)))
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+NIL
+> (p '(you can wordify anything if you just verb it))
+No lex entry for WORDIFY! Exiting without parse.
+NIL
+> (p '(you can word -ify anything if you just verb it))
+
+T
+> (ders)
+
+
+Derivation 1
+--------------
+LEX   (JUST) := IV/*IV
+        : (LAM P (JUST P))
+LEX   (VERB) := IV/NP
+        : (LAM X (LAM Y ((VERB X) Y)))
+LEX   (IT) := NP
+        : IT
+>     (VERB)(IT) := IV
+        : ((LAM X (LAM Y ((VERB X) Y))) IT)
+>     (JUST)(VERB IT) := IV
+        : ((LAM P (JUST P)) ((LAM X (LAM Y ((VERB X) Y))) IT))
+LEX   (YOU) := NP
+        : YOU
+LEX   (CAN) := (S\NP)/IV
+        : (LAM P (LAM X (CAN (P X))))
+LEX   (WORD) := PNP
+        : WORD
+LEX   (-IFY) := (IV/NP)\\PNP
+        : (LAM X (LAM Y (LAM Z ((X Y) Z))))
+<     (WORD)(-IFY) := IV/NP
+        : ((LAM X (LAM Y (LAM Z ((X Y) Z)))) WORD)
+LEX   (ANYTHING) := NP
+        : ANYTHING
+>     (WORD -IFY)(ANYTHING) := IV
+        : (((LAM X (LAM Y (LAM Z ((X Y) Z)))) WORD) ANYTHING)
+>     (CAN)(WORD -IFY ANYTHING) := S\NP
+        : ((LAM P (LAM X (CAN (P X))))
+           (((LAM X (LAM Y (LAM Z ((X Y) Z)))) WORD) ANYTHING))
+<     (YOU)(CAN WORD -IFY ANYTHING) := S
+        : (((LAM P (LAM X (CAN (P X))))
+            (((LAM X (LAM Y (LAM Z ((X Y) Z)))) WORD) ANYTHING))
+           YOU)
+LEX   (IF) := (S\*S)/*S
+        : (LAM P (LAM Q ((IF P) Q)))
+LEX   (YOU) := NP
+        : YOU
+FIN   (JUST VERB IT) := S\NP
+        : ((LAM LF (LAM Y (FIN (LF Y))))
+           ((LAM P (JUST P)) ((LAM X (LAM Y ((VERB X) Y))) IT)))
+<     (YOU)(JUST VERB IT) := S
+        : (((LAM LF (LAM Y (FIN (LF Y))))
+            ((LAM P (JUST P)) ((LAM X (LAM Y ((VERB X) Y))) IT)))
+           YOU)
+>     (IF)(YOU JUST VERB IT) := S\*S
+        : ((LAM P (LAM Q ((IF P) Q)))
+           (((LAM LF (LAM Y (FIN (LF Y))))
+             ((LAM P (JUST P)) ((LAM X (LAM Y ((VERB X) Y))) IT)))
+            YOU))
+<     (YOU CAN WORD -IFY ANYTHING)(IF YOU
+    JUST
+    VERB
+    IT) := S
+        : (((LAM P (LAM Q ((IF P) Q)))
+            (((LAM LF (LAM Y (FIN (LF Y))))
+              ((LAM P (JUST P)) ((LAM X (LAM Y ((VERB X) Y))) IT)))
+             YOU))
+           (((LAM P (LAM X (CAN (P X))))
+             (((LAM X (LAM Y (LAM Z ((X Y) Z)))) WORD) ANYTHING))
+            YOU))
+
+Final LF, normal-order evaluated: 
+
+    ((IF (FIN ((JUST (LAM Y ((VERB IT) Y))) YOU))) (CAN ((WORD ANYTHING) YOU))) =
+    (IF (FIN (JUST (\ Y . VERB IT Y) YOU)) (CAN (WORD ANYTHING YOU)))
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+NIL
+> (dribble)

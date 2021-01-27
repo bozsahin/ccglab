@@ -1,0 +1,16 @@
+% a mini-grammar for cats and mats 
+sat v   := s\np: \z.!sat z;
+on  p   := ((s\np)\(s\np))/np: \x\p\y.!and (p y)(!on x y) ;
+every  det := (s/(s\np))/*n : \p\q\x.!every (p x)(q x); % generalized quant 
+the det := np/*n : \x.!def x;   % no value-raising
+cat n   := n : \y.!cat y;
+mat n   := n : \y.!mat y;
+
+% mini-workflow for mini-grammar: at command line do ($ is the prompt)
+$ ccglab
+% (make-and-load-grammar "hw")
+% (p '(every cat sat on the mat))
+% (ders)
+% (p '(every mat sat on the cat))
+% (ders)
+% check the logical forms to see if cats can defy logic
