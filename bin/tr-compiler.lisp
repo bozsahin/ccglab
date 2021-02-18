@@ -1,12 +1,6 @@
 ;;; ------------------------------------------
 ;;; A compiler for type-raising
-;;; credits:
-;;;  compile-tr
-;;;    design : Cem Bozsahin 
-;;;    code   : Oguzhan Demir and Cem Bozsahin
-;;;  subsume-tr
-;;;    design : Cem Bozsahin
-;;;    code   : Cem Bozsahin
+;;;  -- Cem Bozsahin
 ;;; ------------------------------------------
 
 (defccglab *ht-tr* nil) ; hash table for derived tr rules--for subsumption check after compile
@@ -26,6 +20,7 @@
 (defccglab *ARGS* NIL)
 (defccglab *RAISED-LEX-RULES* NIL)
 (defccglab *RAISED-LEX-ITEMS* NIL)
+
 ;--------get methods----------;
 
 (defun get-morph (v)
@@ -110,7 +105,7 @@
 	
 
 (defun find-type-raise (cat)
-	"type raising operation on the given category"
+	"we do not iterate over every argument of a lexical function in cat"
 		(if (not (is-complex-cat cat)) 
 			(return-from find-type-raise))
 		(let ((dir-of-cat (get-dir cat))
@@ -119,17 +114,8 @@
 				(push (append (wrap (car cat)) (wrap '(DIR FS)) (wrap modal-of-dir) (wrap cat)) *SYNS*) 
 				(push (append (wrap (car cat)) (wrap '(DIR BS)) (wrap modal-of-dir) (wrap cat)) *SYNS*))
 			 (push (car (reverse cat)) *ARGS*) 
-			 (find-type-raise (car cat))))
+			 ))
 
-(defun write-to-file (path file)
-	"Writes the 'file' to a specified 'path'"
-	(with-open-file (stream path
-                     :direction :output
-                     :if-exists :supersede
-                     :if-does-not-exist :create)
-  (format stream (write-to-string file))
-  (format t "File created at ~A~%" path)
-  (format t "The rules also set to the global variable *RAISED-LEX-RULES*~%")))
 
 (defun add-tr-to-grammar ()
   "add rules to the currently loaded grammar"
@@ -219,24 +205,23 @@
 ;------------to create lex-rule entries-------------------------
 ;---------------------------------------------------------------
 
-(defun compile-tr (pname morphs) 
+(defun g2 (pname morphs) 
+  "identify lexical functions from morphs tag and generate 2nd order case function for their outermost argument"
   (setf *RAISED-LEX-RULES* NIL) ;set to default
   (setf *VERBS-IN-GRAMMAR* NIL)
   (load-grammar pname)  
   (if *error* (progn (format t "~%aborting compile; currently loaded grammar is unchanged")
-		     (return-from compile-tr)))
+		     (return-from g2)))
   (find-morph-v *ccg-grammar* morphs)
   (get-last-key-id *ccg-grammar*)
   (dolist (v-entry *VERBS-IN-GRAMMAR*)
-    (find-type-raise (second (assoc 'SYN v-entry)))
-    ;(format t "~%args:~A ~2%syns:~A" *ARGS* *SYNS*)
-    (loop while *SYNS*
-	do (let ((temp (copy-alist *lex-rule-TEMPLATE*)))
-	     (set-insyn temp (pop *ARGS*))   ; CB note: a loop exhausts *SYNS* and *ARGS* later--no need to reinitialise
-	     (set-outsyn temp (pop *SYNS*))
-	     (set-key temp (get-next-key-id))
-	     (set-index temp (gensym "_TRC"))   ; TRC : TR compiler generates the rule
-	     (push temp *RAISED-LEX-RULES*))))
+    (find-type-raise (second (assoc 'SYN v-entry)))  ; sets *SYNS* and *ARGS* --now just one entry in each
+    do (let ((temp (copy-alist *lex-rule-TEMPLATE*)))
+	 (set-insyn temp (pop *ARGS*))   
+	 (set-outsyn temp (pop *SYNS*))
+	 (set-key temp (get-next-key-id))
+	 (set-index temp (gensym "_G2"))   ; TRC : TR compiler generates the rule
+	 (push temp *RAISED-LEX-RULES*)))
   t)
 
 (defun hash-tr ()
@@ -245,7 +230,7 @@
   (dolist (lexr (reverse *RAISED-LEX-RULES*))
     (setf (machash (nv-list-val 'KEY lexr) *ht-tr*) (hash-lexrule lexr))))
 
-(defun subsume-tr ()
+(defun p2 ()
   "v1 and v2 are hash values. INSYN and OUTSYN are hash-valued SYNs due to hash-tr; cat-match needs this."
   (let ((nochange nil))
     (loop  until nochange
@@ -268,7 +253,7 @@
 					     ((newht (make-lrule-hashtable))
 					      (key (get-next-key-id)))  ; keeping keys numeral to be consistent with ccglab
 					     (setf (machash 'KEY newht) key)
-					     (setf (machash 'INDEX newht) (gensym "_MLU"))  ; subsumer generates the rule
+					     (setf (machash 'INDEX newht) (gensym "_P2"))  ; subsumer generates the rule
 					     (setf (machash 'PARAM newht) 1.0)  ; uniform prior for inferred rules
 					     (setf (machash 'INSEM newht) 'LF)  ; always the same input abstraction by convention 
 					     (setf (machash 'OUTSEM newht) '(LAM LF (LAM P (P LF)))) ; this is universal
@@ -281,14 +266,10 @@
 		   *ht-tr*))
 	     *ht-tr*))))
 
-(defun compile-and-subsume-tr (gname vmorphs)
+(defun g2p2 (gname vmorphs)
   "first finds all rules from grammar file with list of verbal POS in vmrophs, 
   then reduces the rule set to MGUs of pairs iteratively.
   We use hashtables to be compatible with MGU function cat-match---and for efficieny."
-  (compile-tr gname vmorphs) ; result in *RAISED-LEX-RULES* in reverse order of find
+  (g2 gname vmorphs) ; result in *RAISED-LEX-RULES* in reverse order of find
   (hash-tr)
-  (subsume-tr))
-
-(abbrevs tr compile-and-subsume-tr) ;; add these to *abv* list
-(abbrevs trc compile-tr)
-(abbrevs trt type-raise-targets)
+  (p2))
