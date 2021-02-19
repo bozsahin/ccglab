@@ -3665,14 +3665,18 @@
 	 lm load-model
 	 cd ccg-deduce
 	 ci ccg-induce
-	 p  ccg-deduce
+	 s0  ccg-deduce
 	 pp ccg-induce
 	 rank ccg-induce
 	 switches onoff
 	 ders cky-show-deduction
+	 derivs cky-show-deduction
+	 derivations cky-show-deduction
+	 derivation cky-show-deduction
 	 csd cky-show-deduction
 	 csi cky-show-induction
 	 probs cky-show-induction
+	 ranks cky-show-induction
 	 csle cky-show-lf-eqv 
 	 um update-model
 	 umxp update-model-xp

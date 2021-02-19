@@ -220,7 +220,7 @@
 	 (set-insyn temp (pop *ARGS*))   
 	 (set-outsyn temp (pop *SYNS*))
 	 (set-key temp (get-next-key-id))
-	 (set-index temp (gensym "_G2"))   ; TRC : TR compiler generates the rule
+	 (set-index temp (gensym "_G2_"))   ; the rule is as derived by G2
 	 (push temp *RAISED-LEX-RULES*)))
   t)
 
@@ -254,7 +254,7 @@
 					     ((newht (make-lrule-hashtable))
 					      (key (get-next-key-id)))  ; keeping keys numeral to be consistent with ccglab
 					     (setf (machash 'KEY newht) key)
-					     (setf (machash 'INDEX newht) (gensym "_P2"))  ; subsumer generates the rule
+					     (setf (machash 'INDEX newht) (gensym "_P2_"))  ; P2 derived the rule
 					     (setf (machash 'PARAM newht) 1.0)  ; uniform prior for inferred rules
 					     (setf (machash 'INSEM newht) 'LF)  ; always the same input abstraction by convention 
 					     (setf (machash 'OUTSEM newht) '(LAM LF (LAM P (P LF)))) ; this is universal
@@ -278,8 +278,8 @@
   (format t "~%Number of lexical functions considered       : ~A" (length *VERBS-IN-GRAMMAR*))
   (format t "~%Number of second-order functions generated   : ~A" (length *RAISED-LEX-RULES*))
   (format t "~%Number of paradigmatic functions out of them : ~A" (hash-table-count *ht-tr*))
-  (format t "2~%Use (savetr <file>) to merge and save rules with current grammar")
+  (format t "~%Use (mergesave-tr <pn>) to merge and save rules~% with current grammar to <pn>.ccg.lisp")
   )
 
-(abbrevs savetr save-subsumption) ; add these to help list
+(abbrevs mergesave-tr save-subsumption) ; add these to help list
 (abbrevs tr g2p2)
