@@ -103,19 +103,19 @@
     	(format t "We caught a condition.~&")
     	(values NIL c))))
 	
-
-(defun find-type-raise (cat)
-	"we do not iterate over every argument of a lexical function in cat"
-		(if (not (is-complex-cat cat)) 
-			(return-from find-type-raise))
-		(let ((dir-of-cat (get-dir cat))
-			 (modal-of-dir (get-modal-of-dir cat)))
-			 (if (equal '(DIR BS) dir-of-cat)
-				(push (append (wrap (car cat)) (wrap '(DIR FS)) (wrap modal-of-dir) (wrap cat)) *SYNS*) 
-				(push (append (wrap (car cat)) (wrap '(DIR BS)) (wrap modal-of-dir) (wrap cat)) *SYNS*))
-			 (push (car (reverse cat)) *ARGS*) 
-			 ))
-
+(defun lexical-function (cat)
+  "Isolate domain and range of the lexical function for input and output
+  of a unary rule for TR, as resp. *ARGS* and *SYNS*.
+  We do not iterate over every argument of a lexical function in cat"
+  (if (not (is-complex-cat cat)) 
+    (return-from lexical-function))
+  (let ((dir-of-cat (get-dir cat))
+	(modal-of-dir (get-modal-of-dir cat)))
+    (if (equal '(DIR BS) dir-of-cat)
+      (push (append (wrap (car cat)) (wrap '(DIR FS)) (wrap modal-of-dir) (wrap cat)) *SYNS*) 
+      (push (append (wrap (car cat)) (wrap '(DIR BS)) (wrap modal-of-dir) (wrap cat)) *SYNS*))
+    (push (car (reverse cat)) *ARGS*) 
+    ))
 
 (defun add-tr-to-grammar ()
   "add rules to the currently loaded grammar"
@@ -215,7 +215,7 @@
   (find-morph-v *ccg-grammar* morphs)
   (get-last-key-id *ccg-grammar*)
   (dolist (v-entry *VERBS-IN-GRAMMAR*)
-    (find-type-raise (second (assoc 'SYN v-entry)))  ; sets *SYNS* and *ARGS* --now just one entry in each
+    (lexical-function (second (assoc 'SYN v-entry)))  ; sets *SYNS* and *ARGS* --now just one entry in each
     do (let ((temp (copy-alist *lex-rule-TEMPLATE*)))
 	 (set-insyn temp (pop *ARGS*))   
 	 (set-outsyn temp (pop *SYNS*))
@@ -231,7 +231,8 @@
     (setf (machash (nv-list-val 'KEY lexr) *ht-tr*) (hash-lexrule lexr))))
 
 (defun p2 ()
-  "v1 and v2 are hash values. INSYN and OUTSYN are hash-valued SYNs due to hash-tr; cat-match needs this."
+  "It uses a hash-table of rules as input, so don't call it standalone.
+   v1 and v2 are hash values. INSYN and OUTSYN are hash-valued SYNs due to hash-tr; cat-match needs this."
   (let ((nochange nil))
     (loop  until nochange
 	   do
@@ -271,5 +272,14 @@
   then reduces the rule set to MGUs of pairs iteratively.
   We use hashtables to be compatible with MGU function cat-match---and for efficieny."
   (g2 gname vmorphs) ; result in *RAISED-LEX-RULES* in reverse order of find
-  (hash-tr)
-  (p2))
+  (hash-tr)         
+  (p2)
+  (format t "~%Number of lexical entries                    : ~A" (length *CCG-GRAMMAR*))
+  (format t "~%Number of lexical functions considered       : ~A" (length *VERBS-IN-GRAMMAR*))
+  (format t "~%Number of second-order functions generated   : ~A" (length *RAISED-LEX-RULES*))
+  (format t "~%Number of paradigmatic functions out of them : ~A" (hash-table-count *ht-tr*))
+  (format t "2~%Use (savetr <file>) to merge and save rules with current grammar")
+  )
+
+(abbrevs savetr save-subsumption) ; add these to help list
+(abbrevs tr g2p2)

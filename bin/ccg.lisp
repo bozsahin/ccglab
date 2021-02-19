@@ -685,10 +685,9 @@
 
 (defun flash-news (&optional (report t))
   (cond (report 
-	  (format t "~%Type-raising algorithms G2 and P2 available.")
-	  (format t "~%   S0 is unary rule application.")
-	  (format t "~%All loadable grammars are .ccg.lisp")
-	  (format t "~%save-grammar needs no suffix.")
+	  (format t "~%Type-raising algorithms G2 and P2 available as G2P2.")
+	  (format t "~%  S0 available as unary rule application on G2P2'd grammar.")
+	  (format t "~%Grammar source code suffix: .ccg~%Interpretable grammar suffix: .ccg.lisp")
 	  )))
 
 (defun welcome (&optional (lispsys *lispsys*))
@@ -3663,7 +3662,6 @@
 (abbrevs lg load-grammar 
 	 mlg make-and-load-grammar
 	 loads safely-load
-         savetr save-subsumption
 	 lm load-model
 	 cd ccg-deduce
 	 ci ccg-induce
