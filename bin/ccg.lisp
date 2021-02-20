@@ -1310,7 +1310,7 @@
 	   (setf *loaded-grammar* gname)
 	   (dolist (l *ccg-grammar*)(and (not (lexp l)) (push-t (hash-lexrule l) *lex-rules-table*))) ; we get reversed list of rules
 	   (setf *lex-rules-table* (reverse *lex-rules-table*)) ; it is important that the rules apply in the order specified
-	   (format t "~%Project ~A files" pname)
+	   (format t "~%Project ~A file system (some optional, some system-generated)" pname)
            (format t "~%-----------------------------------------------------------------------------")
 	   (and sfile   (format t "~%  CCG grammar source       : ~A" sname))
 	   (and tfile   (format t "~%          token form       : ~A" tname))
@@ -3171,13 +3171,13 @@
 	 (sum-inner-product resultcell))
   t)
 
-(defun plugin-count-more-substructure (resultcell)
+(defun plugin-count-more-substructure (&optional resultcell)
   "Override this definition if you want to count more substructure in a derivational
   history recorded in the result CKY cell <resultcell>. It must return non-nil.
   Currently it does nothing.
-  Suggestion: do the override by defining function of same name in your project p's p.lisp code.
+  Suggestion: do the override by defining function of same name in your lisp code.
   Suggestion 2: make it additive so that you dont lose lexical weighted counts in resultcell."
-  resultcell t)
+  t)
 
 (defun count-feature (key cell &optional (sum 0.0) (flag nil) (lc 0))
   "if the feature/lex item with key is used, return the total count in the derivation, dynamic programming style.
@@ -3559,7 +3559,7 @@
       (format t "~%Currently loaded grammar is z-scored PER FORM."))))
 
 (defun merge-grammar (gname)
-  "merges grammar in file gname.ccg.lisp into currently loaded grammar without overriding the entries of current grammar.
+  "merges grammar gname into currently loaded grammar without overriding the entries of current grammar.
   It's best if you merge two grammars if their PARAMs are from same value space (eg. both z-scored or none, etc.)"
   (let* ((lg (copy-seq *ccg-grammar*)) ; will update currently loaded grammar
 	 (c 0))
@@ -3688,6 +3688,7 @@
 	 savet save-training
 	 savetxp save-training-xp
 	 z z-score-grammar
+	 z2 z-score-grammar-per-form
 	 beta beta-normalize-outer
 	 ms make-supervision
 	 help ab
