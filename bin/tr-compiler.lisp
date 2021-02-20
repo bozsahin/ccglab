@@ -216,12 +216,13 @@
   (get-last-key-id *ccg-grammar*)
   (dolist (v-entry *VERBS-IN-GRAMMAR*)
     (lexical-function (second (assoc 'SYN v-entry)))  ; sets *SYNS* and *ARGS* --now just one entry in each
-    do (let ((temp (copy-alist *lex-rule-TEMPLATE*)))
-	 (set-insyn temp (pop *ARGS*))   
-	 (set-outsyn temp (pop *SYNS*))
-	 (set-key temp (get-next-key-id))
-	 (set-index temp (gensym "_G2_"))   ; the rule is as derived by G2
-	 (push temp *RAISED-LEX-RULES*)))
+    (if (and *ARGS* *SYNS*)
+      (let ((temp (copy-alist *lex-rule-TEMPLATE*)))
+	(set-insyn temp (pop *ARGS*))   
+	(set-outsyn temp (pop *SYNS*))
+	(set-key temp (get-next-key-id))
+	(set-index temp (gensym "_G2_"))   ; the rule is as derived by G2
+	(push temp *RAISED-LEX-RULES*))))
   t)
 
 (defun hash-tr ()
@@ -274,11 +275,12 @@
   (g2 gname vmorphs) ; result in *RAISED-LEX-RULES* in reverse order of find
   (hash-tr)         
   (p2)
-  (format t "~%Number of lexical entries                    : ~A" (length *CCG-GRAMMAR*))
-  (format t "~%Number of lexical functions considered       : ~A" (length *VERBS-IN-GRAMMAR*))
-  (format t "~%Number of second-order functions generated   : ~A" (length *RAISED-LEX-RULES*))
-  (format t "~%Number of paradigmatic functions out of them : ~A" (hash-table-count *ht-tr*))
-  (format t "~%Use (mergesave-tr <pn>) to merge and save rules~% with current grammar to <pn>.ccg.lisp")
+  (format t "~%Summary of compiling type-raising for ~A.ccg.lisp" gname)
+  (format t "~%Number of lexical entries                       : ~A" (length *CCG-GRAMMAR*))
+  (format t "~%Number of lexical functions considered          : ~A" (length *VERBS-IN-GRAMMAR*))
+  (format t "~%Number of second-order case functions generated : ~A" (length *RAISED-LEX-RULES*))
+  (format t "~%Number of paradigmatic functions out of them    : ~A" (hash-table-count *ht-tr*))
+  (format t "~%Use (mergesave-tr <pn>) to merge and save the rules~% with current grammar to <pn>.ccg.lisp")
   )
 
 (abbrevs mergesave-tr save-subsumption) ; add these to help list
