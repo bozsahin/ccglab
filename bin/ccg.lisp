@@ -686,7 +686,7 @@
 (defun flash-news (&optional (report t))
   (cond (report 
 	  (format t "~%Type-raising algorithms G2 and P2 available as G2P2.")
-	  (format t "~%  S0 available as unary rule application on G2P2'd grammar.")
+	  (format t "~%  S0 is essentially use of a G2P2'd grammar.")
 	  (format t "~%Grammar source code suffix: .ccg~%Interpretable grammar suffix: .ccg.lisp")
 	  )))
 
@@ -3665,7 +3665,6 @@
 	 lm load-model
 	 cd ccg-deduce
 	 ci ccg-induce
-	 s0  ccg-deduce
 	 pp ccg-induce
 	 rank ccg-induce
 	 switches onoff

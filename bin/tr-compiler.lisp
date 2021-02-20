@@ -283,3 +283,4 @@
 
 (abbrevs mergesave-tr save-subsumption) ; add these to help list
 (abbrevs tr g2p2)
+(abbrevs s0  ccg-deduce)
