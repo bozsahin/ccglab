@@ -1272,7 +1272,7 @@
      (and (> *singletons* 0) 
 	  (format t "~%=============================================================================~%*** CCGlab warning *** There are ~A string-constant categories in your grammar~% make sure NONE are void" *singletons*))
      (format t "~2%======================= c o m p i l i n g ===================================~%")
-     (format t "~%Project name: ~A~%  Input : (~A, ~A)~%  Output: ~A ~%** Check ~A for THE FIRST ERROR in ~A IF load fails." pname sfilename infilename ofilename ofilename sfilename)))
+     (format t "~%Project name: ~A~%  Input : (~A, ~A)~%  Output: ~A ~%** IF load fails, check ~A for THE FIRST ERROR in ~A." pname sfilename infilename ofilename ofilename sfilename)))
 
 (defun lispify-supervision (pname ofilename sourcefile infilename maker)
   (case maker ;; one of these will generate .suptokens

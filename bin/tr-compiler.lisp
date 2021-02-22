@@ -123,7 +123,7 @@
 
 (defun save-compile (fn &optional (msg ""))
   (add-tr-to-grammar)
-  (save-grammar fn)
+  (save-grammar fn :force t)
   (format t "~%compiled~A and saved." msg))
 
 (defun save-subsumption (fn)
@@ -189,7 +189,7 @@
 	  (push (list 'WARNING 'COMPLEX-ARG 'KEY (nv-get-v 'KEY v-entry)) *tr-error-log*))
 	(push (mk-tr-rule (get-next-key-id) (gensym "_G2_") 
 			  *DOMAIN* *TR-RANGE*) *RAISED-LEX-RULES*))
-      (push (list 'ERROR 'LEX-FUNCTION 'KEY (nv-get-v 'KEY v-entry)) *tr-error-log*)))
+      (push (list 'WARNING 'NO-OUTERMOST-ARG 'KEY (nv-get-v 'KEY v-entry)) *tr-error-log*)))
   (if *tr-error-log* (write1f *tr-error-file* *tr-error-log*))
   t)
 
