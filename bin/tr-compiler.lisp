@@ -6,115 +6,80 @@
 (defccglab *ht-tr* nil) ; hash table for derived tr rules--for subsumption check after compile
                         ; key : lex rule key value: lex rule including key as hashtable
 (defccglab *VERBS-IN-GRAMMAR* NIL)
-(defccglab *lex-item-TEMPLATE* `((KEY nil) (PHON nil) (MORPH nil)
-		      (SYN nil)
-		      (SEM (LAM P (P X))) (PARAM 1.0)
-		      (TAG nil)))
-(defccglab *lex-rule-TEMPLATE* `((KEY nil) (INSYN NIL)(INSEM LF)
-					(OUTSYN NIL)
-					(OUTSEM (LAM LF (LAM P (P LF))))  ; all auto-generated tr rules use these var names--no need for semantic unification
-					(INDEX NIL)
-					(PARAM 1.0)))  ;; may be different from other parameters if grammar is trained --hhcb
-(defccglab *SYNS* NIL)
+
+(defmacro mk-tr-rule (key index insyn outsyn)
+  "semantics is fixed, rest is varying, parameter is just initialized"
+  `(list (list 'KEY ,key) (list 'INSYN ,insyn) (list 'INSEM 'LF)
+	 (list 'OUTSYN ,outsyn)
+	 (list 'OUTSEM '(LAM LF (LAM P (P LF))))  
+	 (list 'INDEX ,index)
+	 (list 'PARAM 1.0)))  
+
+(defccglab *TR-RANGE* NIL)
+(defccglab *DOMAIN* NIL)
 (defccglab *LAST-KEY-ID* NIL)
-(defccglab *ARGS* NIL)
+(defccglab *tr-error-file* "")  ; filename for error log 
+(defccglab *tr-error-log* nil)  ; list of errors/warnings
 (defccglab *RAISED-LEX-RULES* NIL)
 (defccglab *RAISED-LEX-ITEMS* NIL)
 
 ;--------get methods----------;
 
 (defun get-morph (v)
-  (second (assoc 'MORPH v)))
+  (nv-get-v 'MORPH v))
 
 (defun get-phon (v)
-  (second (assoc 'PHON v)))
+  (nv-get-v 'PHON v))
 
 (defun get-modal-of-dir (l)
-	"if it is a complex cat, return the direction's modal if there is any"
-	(assoc 'MODAL l))
+  "if it is a complex cat, return the direction's modal if there is any"
+  (assoc 'MODAL l))
 
 (defun get-dir (l)
-	"get the direction if it is a complex cat"
-	(assoc 'DIR l))
+  "get the direction if it is a complex cat"
+  (assoc 'DIR l))
 
 (defun get-last-key-id (l)
-	"latest key id in the structure---no guarantee that the grammarfile is ordered by key; find the max"
-	(setf *LAST-KEY-ID* -1) ; no negatives in translation from .ccg to .ccg.lisp  
-	(dolist (e l)
-		(if (< *LAST-KEY-ID* (second (assoc 'KEY e)))
-		  (setf *LAST-KEY-ID* (second (assoc 'KEY e))))))
+  "latest key id in the structure---no guarantee that the grammarfile is ordered by key; find the max"
+  (setf *LAST-KEY-ID* -1) ; no negatives in translation from .ccg to .ccg.lisp  
+  (dolist (e l)
+    (if (< *LAST-KEY-ID* (nv-get-v 'KEY e))
+      (setf *LAST-KEY-ID* (nv-get-v 'KEY e)))))
 
 (defun get-next-key-id ()
-	"increment the last id in the structure and return it"
-	(setf *LAST-KEY-ID* (+ 1 *LAST-KEY-ID*)))
+  "increment the last id in the structure and return it"
+  (setf *LAST-KEY-ID* (+ 1 *LAST-KEY-ID*))
+  *LAST-KEY-ID*)
 	
-;---------end of get methods-----------------------;
-
-;-------------set methods-------------;
-(defun set-syn (l X)
-	"replaces the X in the structure (SYN X)"
-	(rplacd (assoc 'syn l) (wrap X)))
-
-(defun set-key (l X)
-	"replaces the X in the structure (KEY X)"
-	(rplacd (assoc 'key l) (wrap X)))
-
-(defun set-phon (l X)
-	"replaces the X in the structure (PHON X)"
-	(rplacd (assoc 'phon l) (wrap X)))
-
-(defun set-morph (l X)
-	"replaces the X in the structure (MORPH X)"
-	(rplacd (assoc 'morph l) (wrap X)))
-
-(defun set-sem (l X)
-	"replaces the X in the structure (SEM (LAMP P (P X)))"
-	(rplacd (car (reverse (second (assoc 'sem l)))) (wrap X)))
-
-(defun set-index (l X)
-	"replaces the X in the structure (INDEX X)"
-	(rplacd (assoc 'index l) (wrap X)))
-
-(defun set-insyn (l X)
-	"replaces the X in the structure (INSYN X)"
-	(rplacd (assoc 'insyn l) (wrap X)))
-
-(defun set-outsyn (l X)
-	"replaces the X in the structure (OUTSYN X)"
-	(rplacd (assoc 'outsyn l) (wrap X)))
-;------------end of set methods-----------------;
-
 (defun find-morph-v (ccg-grammar morphs)
-	"find verb morphemes"
-	(dolist (entry ccg-grammar)
-		(dolist (morph morphs)
-			(if (equal morph (get-morph entry))
-				(push entry *VERBS-IN-GRAMMAR*)))))
-
+  "find verb morphemes"
+  (dolist (entry ccg-grammar)
+    (dolist (morph morphs)
+      (if (equal morph (get-morph entry))
+	(push entry *VERBS-IN-GRAMMAR*)))))
 
 (defun wrap (x)
   "wrap code in parentheses"
   (list x))
 
 (defun is-complex-cat (cat)
-	"decide if it's a complex cat"
-	(handler-case (assoc 'DIR cat)
-		(error (c)
-    	(format t "We caught a condition.~&")
-    	(values NIL c))))
+  "decide if it's a complex cat"
+  (assoc 'DIR cat))
 	
-(defun lexical-function (cat)
+(defun tr-from-lexical-function (cat)
   "Isolate domain and range of the lexical function for input and output
-  of a unary rule for TR, as resp. *ARGS* and *SYNS*.
+  of a unary rule for TR, as resp. *DOMAIN* and *TR-RANGE*.
   We do not iterate over every argument of a lexical function in cat"
+  (setf *DOMAIN* nil)
+  (setf *TR-RANGE* nil)
   (if (not (is-complex-cat cat)) 
-    (return-from lexical-function))
+    (return-from tr-from-lexical-function))
   (let ((dir-of-cat (get-dir cat))
 	(modal-of-dir (get-modal-of-dir cat)))
-    (if (equal '(DIR BS) dir-of-cat)
-      (push (append (wrap (car cat)) (wrap '(DIR FS)) (wrap modal-of-dir) (wrap cat)) *SYNS*) 
-      (push (append (wrap (car cat)) (wrap '(DIR BS)) (wrap modal-of-dir) (wrap cat)) *SYNS*))
-    (push (car (reverse cat)) *ARGS*) 
+    (if (equal '(DIR BS) dir-of-cat) ;; assumes double slashed functions are not raised
+      (setf *TR-RANGE* (append (wrap (car cat)) (wrap '(DIR FS)) (wrap modal-of-dir) (wrap cat))) 
+      (setf *TR-RANGE* (append (wrap (car cat)) (wrap '(DIR BS)) (wrap modal-of-dir) (wrap cat))))
+    (setf *DOMAIN* (car (reverse cat))) 
     ))
 
 (defun add-tr-to-grammar ()
@@ -172,7 +137,7 @@
   (save-compile fn ", subsumed"))
 	   
 ;;; ------------------------
-;;; MLU for rule subsumption, adopted from ccglab's unification without -mlu suffix
+;;; Most local unifier (MLU) for subsumption
 ;;; in rule subsumption, unlike in projection, we must pass on all local (i.e. basic cat-specific) unifiable features, rather than just check them.
 ;;; This means in projection we compute MGU, in rule subsumption we compute Most Local Unifier (MLU) to avoid
 ;;;   global variable generation and general unification.
@@ -205,24 +170,27 @@
 ;------------to create lex-rule entries-------------------------
 ;---------------------------------------------------------------
 
-(defun g2 (pname morphs) 
+(defun g2 (pname morphs &optional (e-log "tr-error.log")) 
   "identify lexical functions from morphs tag and generate 2nd order case function for their outermost argument"
-  (setf *RAISED-LEX-RULES* NIL) ;set to default
-  (setf *VERBS-IN-GRAMMAR* NIL)
   (load-grammar pname)  
   (if *error* (progn (format t "~%aborting compile; currently loaded grammar is unchanged")
 		     (return-from g2)))
+  (setf *RAISED-LEX-RULES* NIL) ;set to default
+  (setf *VERBS-IN-GRAMMAR* NIL)
+  (setf *tr-error-file* e-log)
+  (setf *tr-error-log* nil)
   (find-morph-v *ccg-grammar* morphs)
   (get-last-key-id *ccg-grammar*)
   (dolist (v-entry *VERBS-IN-GRAMMAR*)
-    (lexical-function (second (assoc 'SYN v-entry)))  ; sets *SYNS* and *ARGS* --now just one entry in each
-    (if (and *ARGS* *SYNS*)
-      (let ((temp (copy-alist *lex-rule-TEMPLATE*)))
-	(set-insyn temp (pop *ARGS*))   
-	(set-outsyn temp (pop *SYNS*))
-	(set-key temp (get-next-key-id))
-	(set-index temp (gensym "_G2_"))   ; the rule is as derived by G2
-	(push temp *RAISED-LEX-RULES*))))
+    (tr-from-lexical-function (nv-get-v 'SYN v-entry))  ; sets *TR-RANGE* and *DOMAIN* 
+    (if (and *DOMAIN* *TR-RANGE*)
+      (progn
+	(if  (is-complex-cat *DOMAIN*)
+	  (push (list 'WARNING 'COMPLEX-ARG 'KEY (nv-get-v 'KEY v-entry)) *tr-error-log*))
+	(push (mk-tr-rule (get-next-key-id) (gensym "_G2_") 
+			  *DOMAIN* *TR-RANGE*) *RAISED-LEX-RULES*))
+      (push (list 'ERROR 'LEX-FUNCTION 'KEY (nv-get-v 'KEY v-entry)) *tr-error-log*)))
+  (if *tr-error-log* (write1f *tr-error-file* *tr-error-log*))
   t)
 
 (defun hash-tr ()
@@ -268,14 +236,18 @@
 		   *ht-tr*))
 	     *ht-tr*))))
 
-(defun g2p2 (gname vmorphs)
+(defun g2p2 (gname vmorphs &optional (e-log "tr-error.log"))
   "first finds all rules from grammar file with list of verbal POS in vmrophs, 
   then reduces the rule set to MGUs of pairs iteratively.
   We use hashtables to be compatible with MGU function cat-match---and for efficieny."
-  (g2 gname vmorphs) ; result in *RAISED-LEX-RULES* in reverse order of find
+  (g2 gname vmorphs e-log) ; result in *RAISED-LEX-RULES* in reverse order of find
   (hash-tr)         
   (p2)
-  (format t "~%Summary of compiling type-raising for ~A.ccg.lisp" gname)
+  (format t "~%Summary of compiling type-raising for grammar   : ~A.ccg.lisp" gname)
+  (if *tr-error-log*
+    (format t "~%Log of warnings and errors                      : ~A (~A entries) " 
+	    *tr-error-file* (length *tr-error-log*))
+    (format t "~%There were NO errors/warnings in deriving second order functions"))
   (format t "~%Number of lexical entries                       : ~A" (length *CCG-GRAMMAR*))
   (format t "~%Number of lexical functions considered          : ~A" (length *VERBS-IN-GRAMMAR*))
   (format t "~%Number of second-order case functions generated : ~A" (length *RAISED-LEX-RULES*))
@@ -284,6 +256,7 @@
   )
 
 (abbrevs mergesave-tr save-subsumption) ; add these to help list
-(abbrevs save-tr save-subsumption) ; add these to help list
+(abbrevs save-tr save-subsumption) 
 (abbrevs tr g2p2)
+(abbrevs compile-tr g2p2)
 (abbrevs s0  ccg-deduce)

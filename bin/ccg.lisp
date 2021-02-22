@@ -687,7 +687,6 @@
   (cond (report 
 	  (format t "~%Type-raising algorithms G2 and P2 available as G2P2.")
 	  (format t "~%  S0 is essentially use of a G2P2'd grammar.")
-	  (format t "~%Grammar source code suffix: .ccg~%Interpretable grammar suffix: .ccg.lisp")
 	  )))
 
 (defun welcome (&optional (lispsys *lispsys*))
@@ -3664,6 +3663,7 @@
 	 loads safely-load
 	 lm load-model
 	 cd ccg-deduce
+	 p  ccg-deduce
 	 ci ccg-induce
 	 pp ccg-induce
 	 rank ccg-induce
