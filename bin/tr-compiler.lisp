@@ -256,7 +256,6 @@
   )
 
 (abbrevs mergesave-tr save-subsumption) ; add these to help list
-(abbrevs save-tr save-subsumption) 
 (abbrevs tr g2p2)
 (abbrevs compile-tr g2p2)
 (abbrevs s0  ccg-deduce)
