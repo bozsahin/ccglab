@@ -1,0 +1,128 @@
+
+> (mlg "wall")
+
+
+======================= c o m p i l i n g ===================================
+
+Project name: wall
+  Input : (wall.ccg, wall.lisptokens)
+  Output: wall.ccg.lisp 
+** IF load fails, check wall.ccg.lisp for THE FIRST ERROR in wall.ccg.
+======================= l o a d i n g =======================================
+
+Project wall file system (some optional, some system-generated)
+-----------------------------------------------------------------------------
+  CCG grammar source       : wall.ccg
+          token form       : wall.lisptokens
+  Compiled/loaded grammar  : wall.ccg.lisp
+       *CCG-GRAMMAR*       : 5 entries
+   *LEX-RULES-TABLE*       : 0 entries
+=============================================================================
+T
+> (p '(balb us mur um aedificat))
+
+T
+> (ders)
+
+
+Derivation 1
+--------------
+LEX   (BALB) := N
+        : BALB
+LEX   (US) := (S/(S\NP))\N
+        : (LAM X (LAM P (P X)))
+<     (BALB)(US) := S/(S\NP)
+        : ((LAM X (LAM P (P X))) BALB)
+LEX   (MUR) := N
+        : WALL
+LEX   (UM) := ((S\NP)/((S\NP)\NP))\N
+        : (LAM X (LAM P (P X)))
+<     (MUR)(UM) := (S\NP)/((S\NP)\NP)
+        : ((LAM X (LAM P (P X))) WALL)
+LEX   (AEDIFICAT) := (S\NP)\NP
+        : (LAM X (LAM Y ((BUILD X) Y)))
+>     (MUR UM)(AEDIFICAT) := S\NP
+        : (((LAM X (LAM P (P X))) WALL) (LAM X (LAM Y ((BUILD X) Y))))
+>     (BALB US)(MUR UM AEDIFICAT) := S
+        : (((LAM X (LAM P (P X))) BALB)
+           (((LAM X (LAM P (P X))) WALL) (LAM X (LAM Y ((BUILD X) Y)))))
+
+Final LF, normal-order evaluated: 
+
+    ((BUILD WALL) BALB) =
+    (BUILD WALL BALB)
+
+Try (cky-pprint) to see the details including the features and slash modalities.
+    (cky-reveal-cell <cell>) to pretty-print the parse in <cell>.
+NIL
+> (rank '(balb us mur um aedificat))
+
+T
+> (probs)
+
+Most likely LF for the input: (BALB US MUR UM AEDIFICAT)
+
+  ((BUILD WALL) BALB) =
+  (BUILD WALL BALB)
+
+Cumulative weight:  17.0
+
+Most probable derivation for it: (5 1 1)
+--------------------------------
+LEX      1.0  (BALB) := N
+        : BALB
+LEX      1.0  (US) := (S/(S\NP))\N
+        : (LAM X (LAM P (P X)))
+<        2.0  (BALB)(US) := S/(S\NP)
+        : ((LAM X (LAM P (P X))) BALB)
+LEX      1.0  (MUR) := N
+        : WALL
+LEX      1.0  (UM) := ((S\NP)/((S\NP)\NP))\N
+        : (LAM X (LAM P (P X)))
+<        2.0  (MUR)(UM) := (S\NP)/((S\NP)\NP)
+        : ((LAM X (LAM P (P X))) WALL)
+LEX      1.0  (AEDIFICAT) := (S\NP)\NP
+        : (LAM X (LAM Y ((BUILD X) Y)))
+>        3.0  (MUR UM)(AEDIFICAT) := S\NP
+        : (((LAM X (LAM P (P X))) WALL) (LAM X (LAM Y ((BUILD X) Y))))
+>       17.0  (BALB US)(MUR UM AEDIFICAT) := S
+        : (((LAM X (LAM P (P X))) BALB)
+           (((LAM X (LAM P (P X))) WALL) (LAM X (LAM Y ((BUILD X) Y)))))
+
+Final LF, normal-order evaluated: 
+
+    ((BUILD WALL) BALB) =
+    (BUILD WALL BALB)
+
+
+Most weighted derivation : (5 1 1)
+--------------------------
+LEX      1.0  (BALB) := N
+        : BALB
+LEX      1.0  (US) := (S/(S\NP))\N
+        : (LAM X (LAM P (P X)))
+<        2.0  (BALB)(US) := S/(S\NP)
+        : ((LAM X (LAM P (P X))) BALB)
+LEX      1.0  (MUR) := N
+        : WALL
+LEX      1.0  (UM) := ((S\NP)/((S\NP)\NP))\N
+        : (LAM X (LAM P (P X)))
+<        2.0  (MUR)(UM) := (S\NP)/((S\NP)\NP)
+        : ((LAM X (LAM P (P X))) WALL)
+LEX      1.0  (AEDIFICAT) := (S\NP)\NP
+        : (LAM X (LAM Y ((BUILD X) Y)))
+>        3.0  (MUR UM)(AEDIFICAT) := S\NP
+        : (((LAM X (LAM P (P X))) WALL) (LAM X (LAM Y ((BUILD X) Y))))
+>       17.0  (BALB US)(MUR UM AEDIFICAT) := S
+        : (((LAM X (LAM P (P X))) BALB)
+           (((LAM X (LAM P (P X))) WALL) (LAM X (LAM Y ((BUILD X) Y)))))
+
+Final LF, normal-order evaluated: 
+
+    ((BUILD WALL) BALB) =
+    (BUILD WALL BALB)
+
+Try (cky-pprint) to see all the parses, including the features,
+    (cky-pprint-probs <cell>) to pretty-print the parse in <cell>.
+NIL
+> (dribble)

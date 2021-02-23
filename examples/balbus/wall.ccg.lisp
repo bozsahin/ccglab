@@ -1,0 +1,28 @@
+(DEFPARAMETER *CCG-GRAMMAR*
+  '(((KEY 1) (PHON MUR) (MORPH N) (SYN ((BCAT N) (FEATS NIL))) (SEM "WALL")
+     (PARAM 1.0))
+    ((KEY 2) (PHON UM) (MORPH AFF)
+     (SYN
+      (((((BCAT S) (FEATS NIL)) (DIR BS) (MODAL ALL)
+         ((BCAT NP) (FEATS ((CASE NOM)))))
+        (DIR FS) (MODAL ALL)
+        ((((BCAT S) (FEATS NIL)) (DIR BS) (MODAL ALL)
+          ((BCAT NP) (FEATS ((CASE NOM)))))
+         (DIR BS) (MODAL ALL) ((BCAT NP) (FEATS ((CASE ACC))))))
+       (DIR BS) (MODAL ALL) ((BCAT N) (FEATS NIL))))
+     (SEM (LAM X (LAM P (P X)))) (PARAM 1.0))
+    ((KEY 3) (PHON BALB) (MORPH N) (SYN ((BCAT N) (FEATS NIL))) (SEM "BALB")
+     (PARAM 1.0))
+    ((KEY 4) (PHON US) (MORPH AFF)
+     (SYN
+      ((((BCAT S) (FEATS NIL)) (DIR FS) (MODAL ALL)
+        (((BCAT S) (FEATS NIL)) (DIR BS) (MODAL ALL)
+         ((BCAT NP) (FEATS ((CASE NOM))))))
+       (DIR BS) (MODAL ALL) ((BCAT N) (FEATS NIL))))
+     (SEM (LAM X (LAM P (P X)))) (PARAM 1.0))
+    ((KEY 5) (PHON AEDIFICAT) (MORPH V)
+     (SYN
+      ((((BCAT S) (FEATS NIL)) (DIR BS) (MODAL ALL)
+        ((BCAT NP) (FEATS ((CASE NOM)))))
+       (DIR BS) (MODAL ALL) ((BCAT NP) (FEATS ((CASE ACC))))))
+     (SEM (LAM X (LAM Y (("BUILD" X) Y)))) (PARAM 1.0))))

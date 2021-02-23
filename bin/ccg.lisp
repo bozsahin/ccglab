@@ -1,25 +1,26 @@
 ;;;; =========================================================================== 
-;;;; == CCGlab  -Cem Bozsahin, 2015-2020  Lisboa, Ankara, Datca               ==
+;;;; == CCGlab  -Cem Bozsahin, 2015-2021  Lisboa, Ankara, Datca               ==
 ;;;; ===========================================================================
 ;;;; 
-;;;; GNU GPL license applies.
+;;;; GNU GPL license applies. (i.e. you can share & run, but you cant hide or copyright it)
 ;;;;
 ;;;; CCGlab implements all universal rules of CCG and some experimental ones, covering all directional variants of 
-;;;;     combination: application, composition, substitution, subcomposition, powers of B, S and D and L, 
-;;;;     namely B, B^2, B^3 and S^2, and D^2. Type-raising can be implemented as a lexical rule, which 
-;;;;     is provided as a mechanism. Meta-categories e.g. those in (X\X)/X of coordination, are assumed to be
-;;;;     lexically headed, and allow for application only (because there is no unification, and
+;;;;     combination, and powers.  
+;;;;     Type-raising can be implemented as a lexical rule, or by the compiler provided.
+;;;;     Meta-categories e.g. those in (X\X)/X of coordination use application only 
+;;;;     (because there is no unification, and
 ;;;;     we make maximal computational use of CCG's procedural neutrality, by which any two adjacent category
 ;;;;     can only combine one way, if we avoid meta-unifiable cats.)
 ;;;;
 ;;;; It also implements probabilistic CCG's (PCCG), including parse ranking and model training, 
 ;;;;     given the lexicon and its parameters.
 ;;;;
-;;;; - It has four components:
+;;;; - It has five components:
 ;;;;     1) a transformer to turn paper-style CCG categories to lisp objects,
 ;;;;     2) a deductive component to CKY-parse a string, 
 ;;;;     3) an inductive component for PCCG for parse ranking.
 ;;;;     4) A modeling component to help set/train your parameters for the inductive component.
+;;;;     5) a type-raising compiler (separate code)
 ;;;;
 ;;;; Some CS notes:
 ;;;; - It represents offline grammars serially, as lisp lists, and parse objects as hashtables, for speed.
@@ -323,8 +324,6 @@
 ;;; =======
 
 (defccglab *ccg-tokenizer* "tokens") ; call this sed script for all CCG tokenization
-(defswitch *type-raised-p* nil) ; is the grammar compiled out for type raising (nil/t)?
-(defccglab *type-raise-targets* nil) ; the list of basic cats to type raise (i.e. argument cats list)
 (defccglab *ccglab-reserved* '(tag phon morph syn sem param insyn insem outsyn outsem bcat dir feats modal
 				  left right solution result arg index lex bconst key id)) ; reserved words
 (defccglab *lispsys* nil)   ; the lisp system you are using; detected automatically by ccglab script
@@ -429,13 +428,12 @@
 ;; rule switch wholesale controls
 ;; ------------------------------
 
-(defun basic-ccg (&key (nf-parse t) (lf t) (beam nil) (oov nil) (type-raise nil))
+(defun basic-ccg (&key (nf-parse t) (lf t) (beam nil) (oov nil))
   "experimental rules are turned off"
   (nf-parse nf-parse)
   (lf lf)
   (beam beam)
   (oov oov)
-  (type-raise type-raise)
   (setf 
     *f-apply* t   ;application
     *b-apply* t
@@ -469,13 +467,12 @@
     *fx3-comp* t
     *bx3-comp* t))
 
-(defun simple-ccg (&key (nf-parse t) (lf t) (beam nil) (oov nil) (type-raise nil))
+(defun simple-ccg (&key (nf-parse t) (lf t) (beam nil) (oov nil))
   "only application, harmonic composition and its powers are turned on"
   (nf-parse nf-parse)
   (lf lf)
   (beam beam)
   (oov oov)
-  (type-raise type-raise)
   (setf 
     *f-apply* t   ;application
     *b-apply* t
@@ -509,13 +506,12 @@
     *fx3-comp* nil
     *bx3-comp* nil))
 
-(defun app-ccg (&key (nf-parse t) (lf t) (beam nil) (oov nil) (type-raise nil))
+(defun app-ccg (&key (nf-parse t) (lf t) (beam nil) (oov nil) )
   "only application is turned on. This is the Bar-Hillel fragment."
   (nf-parse nf-parse)
   (lf lf)
   (beam beam)
   (oov oov)
-  (type-raise type-raise)
   (setf 
     *f-apply* t   ;application
     *b-apply* t
@@ -549,13 +545,12 @@
     *fx3-comp* nil
     *bx3-comp* nil))
 
-(defun exp-ccg (&key (nf-parse t) (lf t) (beam nil) (oov nil) (type-raise nil))
+(defun exp-ccg (&key (nf-parse t) (lf t) (beam nil) (oov nil))
   "experimental rules are turned on too"
   (nf-parse nf-parse)
   (lf lf)
   (beam beam)
   (oov oov)
-  (type-raise type-raise)
   (setf 
     *f-apply* t   ;application
     *b-apply* t
@@ -673,7 +668,7 @@
   )
 
 (defun which-ccglab ()
-  "CCGlab, version 7.0.4")
+  "CCGlab, version 7.1")
 
 (defun set-lisp-system (lispsys)
   (case lispsys
@@ -690,12 +685,8 @@
 
 (defun flash-news (&optional (report t))
   (cond (report 
-	  (format t "~%Gradient extrapolation available.")
-	  (format t "~%Type-raising compiler available.")
-	  (format t "~%.ded and .ind file types deprecated.")
-	  (format t "~%Just rename legacy .ded/ind files as .ccg.lisp")
-	  (format t "~%All loadable grammars are .ccg.lisp")
-	  (format t "~%save-grammar needs no suffix.")
+	  (format t "~%Type-raising algorithms G2 and P2 available as G2P2.")
+	  (format t "~%  S0 is essentially use of a G2P2'd grammar.")
 	  )))
 
 (defun welcome (&optional (lispsys *lispsys*))
@@ -740,14 +731,6 @@
     (setf *oovp* t)
     (setf *oovp* nil)))
 
-(defun type-raise (on)
-  (if (or (eq on t) (equal on 'on))
-    (progn 
-      (setf *type-raised-p* t)
-      (or *type-raise-targets* 
-	  (format t "~%Your list of arguments to type raise is nil.~%Call type-raise-targets to set it.")))
-    (setf *type-raised-p* nil)))
-
 (defun lf (on)
   (if (or (eq on t) (equal on 'on))
     (setf *lfflag* t)
@@ -773,13 +756,6 @@
 (defun oov-on ()
   (setf *oovp* t) (format t "OOV is set (OOV errors not reported)~%"))
 
-(defun type-raise-off ()
-  (setf *type-raised-p* nil))
-
-(defun type-raise-on ()
-  (setf *type-raised-p* t)
-  (or *type-raise-targets* (format t "~%Your list of arguments to type raise is nil.~%Call type-raise-targets to set it.")))
-
 (defun show-lf ()
   (setf *lfflag* t) (format t "All LFs will be shown~%"))
 
@@ -796,15 +772,9 @@
 
 ;; ==========================
 
-(defun type-raise-targets (targets)
-  "this function turns type-raising on and eliminates basic lower types in targets from applying because of the way apply functions work."
-  (setf *type-raise-targets* targets)
-  (type-raise-on))
-
 (defun beamer ()
   "use this to set beam only after a parse so that *cky-nparses* is known."
   (setf *beam* (ceiling (expt *cky-nparses* *beam-exp*))))
-
 
 ;;;; ==============================================
 ;;;; The lambda layer, whose syntax is given below.
@@ -1302,7 +1272,7 @@
      (and (> *singletons* 0) 
 	  (format t "~%=============================================================================~%*** CCGlab warning *** There are ~A string-constant categories in your grammar~% make sure NONE are void" *singletons*))
      (format t "~2%======================= c o m p i l i n g ===================================~%")
-     (format t "~%Project name: ~A~%  Input : (~A, ~A)~%  Output: ~A ~%** Check ~A for THE FIRST ERROR in ~A IF load fails." pname sfilename infilename ofilename ofilename sfilename)))
+     (format t "~%Project name: ~A~%  Input : (~A, ~A)~%  Output: ~A ~%** IF load fails, check ~A for THE FIRST ERROR in ~A." pname sfilename infilename ofilename ofilename sfilename)))
 
 (defun lispify-supervision (pname ofilename sourcefile infilename maker)
   (case maker ;; one of these will generate .suptokens
@@ -1339,7 +1309,7 @@
 	   (setf *loaded-grammar* gname)
 	   (dolist (l *ccg-grammar*)(and (not (lexp l)) (push-t (hash-lexrule l) *lex-rules-table*))) ; we get reversed list of rules
 	   (setf *lex-rules-table* (reverse *lex-rules-table*)) ; it is important that the rules apply in the order specified
-	   (format t "~%Project ~A files" pname)
+	   (format t "~%Project ~A file system (some optional, some system-generated)" pname)
            (format t "~%-----------------------------------------------------------------------------")
 	   (and sfile   (format t "~%  CCG grammar source       : ~A" sname))
 	   (and tfile   (format t "~%          token form       : ~A" tname))
@@ -2818,9 +2788,6 @@
 				     (copy-hashtable (machash 'SYN ht1))))
          newht)))
 
-(defmacro lowest-arg-type-p (synht)
-  `(member (machash 'BCAT 'SYN ,synht) *type-raise-targets*))
-
 (defun ccg-combine (ht1 ht2 lex1 lex2 coord1 coord2)
   "Short-circuit evaluates ccg rules one by one, to left term (ht1) and right term (ht2), which are hashtables.
   Returns the result as a hashtable.
@@ -2846,10 +2813,6 @@
 	      (eql (machash 'DIR 'SYN ht1) 'BS)
 	      (eql (machash 'DIR 'SYN ht2) 'FS)) ; the only functional case which no rule can combine 
 	 (return-from ccg-combine nil))
-	((and *type-raised-p* (basicp-hash (machash 'SYN ht1)) (lowest-arg-type-p ht1))
-	 (return-from ccg-combine nil))          ; if on, implements all args are type-raised idea, on ht1
-	((and *type-raised-p* (basicp-hash (machash 'SYN ht2)) (lowest-arg-type-p ht2))
-	 (return-from ccg-combine nil))          ; if on, implements all args are type-raised idea, on ht2
 	)
   (or (and *f-apply* (f-apply ht1 ht2 lex2 coord2)) ; application -- the only relevant case for lex slash
       (and *b-apply* (b-apply ht1 ht2 lex1 coord1))
@@ -3207,13 +3170,13 @@
 	 (sum-inner-product resultcell))
   t)
 
-(defun plugin-count-more-substructure (resultcell)
+(defun plugin-count-more-substructure (&optional resultcell)
   "Override this definition if you want to count more substructure in a derivational
   history recorded in the result CKY cell <resultcell>. It must return non-nil.
   Currently it does nothing.
-  Suggestion: do the override by defining function of same name in your project p's p.lisp code.
+  Suggestion: do the override by defining function of same name in your lisp code.
   Suggestion 2: make it additive so that you dont lose lexical weighted counts in resultcell."
-  resultcell t)
+  t)
 
 (defun count-feature (key cell &optional (sum 0.0) (flag nil) (lc 0))
   "if the feature/lex item with key is used, return the total count in the derivation, dynamic programming style.
@@ -3595,7 +3558,7 @@
       (format t "~%Currently loaded grammar is z-scored PER FORM."))))
 
 (defun merge-grammar (gname)
-  "merges grammar in file gname.ccg.lisp into currently loaded grammar without overriding the entries of current grammar.
+  "merges grammar gname into currently loaded grammar without overriding the entries of current grammar.
   It's best if you merge two grammars if their PARAMs are from same value space (eg. both z-scored or none, etc.)"
   (let* ((lg (copy-seq *ccg-grammar*)) ; will update currently loaded grammar
 	 (c 0))
@@ -3628,7 +3591,7 @@
   (setf *ccg-grammar*  nil)
   (setf *ccg-grammar-keys*  0)
   (basic-ccg :nf-parse t :lf t :beam nil 
-	     :oov nil :type-raise nil)) ; turn experimental rules off by default
+	     :oov nil)) ; turn experimental rules off by default
 
 (defun almost-eq (x y)
   (<= (abs (- x y)) *epsilon*))
@@ -3698,18 +3661,21 @@
 (abbrevs lg load-grammar 
 	 mlg make-and-load-grammar
 	 loads safely-load
-         savetr save-subsumption
 	 lm load-model
 	 cd ccg-deduce
-	 ci ccg-induce
 	 p  ccg-deduce
+	 ci ccg-induce
 	 pp ccg-induce
 	 rank ccg-induce
 	 switches onoff
 	 ders cky-show-deduction
+	 derivs cky-show-deduction
+	 derivations cky-show-deduction
+	 derivation cky-show-deduction
 	 csd cky-show-deduction
 	 csi cky-show-induction
 	 probs cky-show-induction
+	 ranks cky-show-induction
 	 csle cky-show-lf-eqv 
 	 um update-model
 	 umxp update-model-xp
@@ -3722,6 +3688,7 @@
 	 savet save-training
 	 savetxp save-training-xp
 	 z z-score-grammar
+	 z2 z-score-grammar-per-form
 	 beta beta-normalize-outer
 	 ms make-supervision
 	 help ab

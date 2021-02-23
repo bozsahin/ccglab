@@ -1,0 +1,8 @@
+(
+
+
+mur n  |:=|  N  |:|  !wall |;| 
+um aff  |:=|   |(|  |(| s |\\| np |[| case |=| nom |]|  |)|  |/|  |(|  |(| s |\\| np |[| case |=| nom |]|  |)|  |\\| np |[| case |=| acc |]|  |)|  |)|  |\\| n  |:|   |\\| x |\\| p |.| p x |;| 
+balb n  |:=|  N  |:|  !balb |;| 
+us aff  |:=|   |(| s |/|  |(| s |\\| np |[| case |=| nom |]|  |)|  |)|  |\\| n  |:|   |\\| x |\\| p |.| p x |;|    
+aedificat v  |:=|  s |\\| np |[| case |=| nom |]|  |\\| np |[| case |=| acc |]|   |:|   |\\| x |\\| y |.| !build x y |;| )
