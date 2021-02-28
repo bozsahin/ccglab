@@ -686,7 +686,7 @@
 (defun flash-news (&optional (report t))
   (cond (report 
 	  (format t "~%Type-raising algorithms G2 and P2 available as G2P2.")
-	  (format t "~%  S0 is essentially use of a G2P2'd grammar.")
+	  (format t "~%  S0 is essentially use of a G2P2'd grammar in~%  parsing and ranking.")
 	  )))
 
 (defun welcome (&optional (lispsys *lispsys*))
