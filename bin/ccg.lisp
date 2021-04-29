@@ -117,6 +117,7 @@
              (division-by-zero (c) (progn (format t "Warning! Antilimit in MPE because of ~a~%" c)
 					  (/ most-positive-short-float 2.0)))))
 
+
 (defun make-dummy-lex-entries (phon)
   "two dummy entries-- @X/*@X and @X\*@X"
   (let ((k1 (gensym))
@@ -158,6 +159,12 @@
   `(nv-list-val ,key ,nvpl))  ; short macros for long ones
 
 ;; macros for cky cell's key type (len pos analysis)
+(defmacro cell-len (cell)
+  `(first ,cell))
+(defmacro cell-pos (cell)
+  `(second ,cell))
+(defmacro cell-ana (cell)
+  `(third ,cell))
 (defmacro cell-len (cell)
   `(first ,cell))
 (defmacro cell-pos (cell)
@@ -668,7 +675,7 @@
   )
 
 (defun which-ccglab ()
-  "CCGlab, version 7.1")
+  "CCGlab, version 7.2.1")
 
 (defun set-lisp-system (lispsys)
   (case lispsys
@@ -687,6 +694,7 @@
   (cond (report 
 	  (format t "~%Type-raising algorithms G2 and P2 available as G2P2.")
 	  (format t "~%  S0 is essentially use of a G2P2'd grammar in~%  parsing and ranking.")
+	  (format t "~%Kullback-Leibler test soon to be available.")
 	  )))
 
 (defun welcome (&optional (lispsys *lispsys*))
@@ -3595,6 +3603,7 @@
 
 (defun almost-eq (x y)
   (<= (abs (- x y)) *epsilon*))
+  "writes one lisp object to file fn in one fell swoop"
 
 (defun read1 (fn)
   "reads one lisp object from file fn in one fell swoop"
@@ -3626,6 +3635,18 @@
 	     ; 1st: defparameter 2nd:grammar name 3rd: (quote grammar)
 	     #'(lambda (m) (second (third (read1 m)))) 
 	     models)))))
+
+(defun kl-prepare (g)
+  (load-model g)
+  (let* ((ght (make-training-hashtable (length *ccg-grammar*))))
+    (dolist (el *ccg-grammar*)
+      (setf (machash (nv-list-val 'KEY el) ght) (nv-list-val 'PARAM el)))
+    (z-score-grammar) ; z-scoring changes values of currently loaded parameters to z scores
+    (dolist (el *ccg-grammar*)
+      (setf (machash (nv-list-val 'KEY el) ght) (cons (machash (nv-list-val 'KEY el) ght)
+						      (nv-list-val 'PARAM el))))
+    (pprint-hashtable ght)
+    ))
 
 ;; ======================================
 ;; some shortcuts for top-level functions
