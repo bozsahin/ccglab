@@ -3636,6 +3636,12 @@
 	     #'(lambda (m) (second (third (read1 m)))) 
 	     models)))))
 
+(defconstant +sqrt-of-two-pi+ (sqrt (* 2.0 pi)))
+
+(defun normal-pdf (x)
+  "given zscore x, returns value of standard normal pdf at x"
+  (/ (exp (/ (* x x) -2.0)) +sqrt-of-two-pi+))
+
 (defun kl-prepare (g)
   (load-model g)
   (let* ((ght (make-training-hashtable (length *ccg-grammar*))))
@@ -3643,8 +3649,9 @@
       (setf (machash (nv-list-val 'KEY el) ght) (nv-list-val 'PARAM el)))
     (z-score-grammar) ; z-scoring changes values of currently loaded parameters to z scores
     (dolist (el *ccg-grammar*)
-      (setf (machash (nv-list-val 'KEY el) ght) (cons (machash (nv-list-val 'KEY el) ght)
-						      (nv-list-val 'PARAM el))))
+      (setf (machash (nv-list-val 'KEY el) ght) (list (machash (nv-list-val 'KEY el) ght)
+						      (nv-list-val 'PARAM el)
+						      (normal-pdf (nv-list-val 'PARAM el)))))
     (pprint-hashtable ght)
     ))
 
