@@ -3483,8 +3483,8 @@
 	    (setf (nv-list-val 'PARAM item) (/ (- (nv-list-val 'PARAM item) mean) std))
 	    (if (> (nv-list-val 'PARAM item) maxw) (setf maxw (nv-list-val 'PARAM item)))
 	    (if (< (nv-list-val 'PARAM item) minw) (setf minw (nv-list-val 'PARAM item))))
-	  (format t "~%Currently loaded grammar is z-scored.")
-	  (format t "~%Max z-score = ~A, Min z-score = ~A" maxw minw))))))
+	  (format t "~%Currently loaded grammar is z-scored to N(0,1).")
+	  (format t "~%Max z-scored = ~A, Min z-scored = ~A" maxw minw))))))
 
 (defun max-lf-span ()
   "find the spanned elements of the currently loaded grammar, 
@@ -3643,8 +3643,10 @@
   (/ (exp (/ (* z z) -2.0)) +sqrt-of-two-pi+))
 
 (defun kl-prepare (g)
+  "z score grammar g, then hash item key to (param z-score prob)"
   (load-model g)
-  (let* ((ght (make-training-hashtable (length *ccg-grammar*))))
+  (let ((ght (make-training-hashtable (length *ccg-grammar*)))
+	(errlog nil))
     (dolist (el *ccg-grammar*)
       (setf (machash (nv-list-val 'KEY el) ght) (nv-list-val 'PARAM el)))
     (z-score-grammar) ; z-scoring changes values of currently loaded parameters to z scores
@@ -3652,8 +3654,25 @@
       (setf (machash (nv-list-val 'KEY el) ght) (list (machash (nv-list-val 'KEY el) ght)
 						      (nv-list-val 'PARAM el)
 						      (standard-normal-pdf (nv-list-val 'PARAM el)))))
-    (pprint-hashtable ght)
+    (maphash #'(lambda (k v) (if (or (> (third v) 1.0) (< (third v) 0.0)) (push (list k v) errlog)))
+	     ght)
+    (values ght (reverse errlog))
     ))
+
+(defun klz (g keypairs)
+  "KL divergence from N(0,1) probs for pairs of keys in grammar"
+  (multiple-value-bind (h err) (kl-prepare g)
+    (cond (err (format t "~%Out of range probabilities for keys ~A" err)
+	       (pprint-hashtable h)
+	       (return-from klz nil))
+	  (t (apply #'+ (mapcar #'(lambda (pair)
+				    (if (= (third (machash (second pair) h)) 0.0)
+				      0.0
+				      (* (third (machash (first pair) h))
+					 (log (/ (third (machash (first pair) h))
+						 (third (machash (second pair) h)))))))
+				keypairs))))))
+
 
 ;; ======================================
 ;; some shortcuts for top-level functions
