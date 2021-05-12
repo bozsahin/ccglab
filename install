@@ -3,6 +3,8 @@
 #  also sets PATH and lisp execs so that ccglab is available from anywhere
 # brew does not allow sudo anymore-- $SUDO controls that
 # cem bozsahin 2015-2021
+echo "\nIn case the installer asks for superuser password,\n it will be ONLY for installing sbcl and rlwrap\n"
+echo " "
 LOG="\n=================================================\nCCGlab install and set up `date`\n=================================================" # installers can be very verbose, accumulate all deeds to report at end
 # check to see if there is already a ccglab
 LOGFILE='/tmp/log.ccglab-install'
