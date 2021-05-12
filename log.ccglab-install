@@ -1,0 +1,18 @@
+
+=================================================
+CCGlab install and set up
+=================================================
+-LALR parser freshly installed at 
+-You have an installer (apt-get) for standard packages
+-Installing SBCL and rlwrap from standard repositories
+-rlwrap not found. It is very annoying NOT to have it when you run ccglab
+-If rlwrap is installed later, change the RLWRAP variable in ~/.bashrc
+-Your .bashrc and .bash_profile have been updated for CCGlab
+-Just do "git pull" in ccglab home for updates from now on.
+-I wouldnt do updates in standard files of /home/bozsahin/myrepos/ccglab.
+-They will be overridden by next git pull
+-The manual has some pointers for grammar and model development workflows
+-To run, first open a fresh terminal, or logout and login. Then do
+ ccglab
+-CCGlab install: completed.
+-This log is saved in file log.ccglab-install

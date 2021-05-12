@@ -23,7 +23,7 @@ ccglabdir=`pwd`
 if [ ! "$LALR_HOME" ]; then
   lalr=$ccglabdir
   wget -v --no-check-certificate --backups=3 http://web.science.mq.edu.au/~mjohnson/code/lalrparser.lisp
-  LOG+="\n-LALR parser freshly installed at $LALR_HOME"
+  LOG+="\n-LALR parser freshly installed at $lalr"
 else
   lalr=$LALR_HOME
   LOG+="\n-LALR parser taken from $LALR_HOME"
