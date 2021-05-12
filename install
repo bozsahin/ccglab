@@ -3,9 +3,9 @@
 #  also sets PATH and lisp execs so that ccglab is available from anywhere
 # brew does not allow sudo anymore-- $SUDO controls that
 # cem bozsahin 2015-2021
-LOG="\n=================================================\nCCGlab install and set up\n=================================================" # installers can be very verbose, accumulate all deeds to report at end
+LOG="\n=================================================\nCCGlab install and set up `date`\n=================================================" # installers can be very verbose, accumulate all deeds to report at end
 # check to see if there is already a ccglab
-LOGFILE='log.ccglab-install'
+LOGFILE='/tmp/log.ccglab-install'
 if [ ! `which wget` ] || [ ! `which awk` ] || [ ! `which git` ] || [ ! `which sed` ]; then
   echo "Your system is missing some install and CCGlab command-line basics.\nMake sure you have awk, sed, wget and git"
   echo 'Use "which x" to check them, x being wget, sed, awk or git'
@@ -19,9 +19,10 @@ if [ "$CCGLAB_HOME" ]; then
 fi
 SUDO=sudo
 ccglabdir=`pwd`
+lalrdir='/usr/local/bin'
 # check to see if lalr has been installed before
 if [ ! "$LALR_HOME" ]; then
-  lalr=$ccglabdir
+  lalr=$lalrdir
   wget -v --no-check-certificate --backups=3 http://web.science.mq.edu.au/~mjohnson/code/lalrparser.lisp
   LOG+="\n-LALR parser freshly installed at $lalr"
 else
@@ -61,15 +62,13 @@ if [ ! "$locallisp" ]; then
   fi
   if [ "$packager" ]; then
 	LOG+="\n-You have an installer ($packager) for standard packages"
-	LOG+="\n-Installing SBCL and rlwrap from standard repositories"
-	echo 'WARNING: you need install and write access now'
+	LOG+="\n-Installing SBCL Lisp and rlwrap from standard repositories"
 	$SUDO $packager install sbcl
 	locallisp="`which sbcl` --noinform"
 	if [ -x /usr/local/bin/rlwrap ] || [ -x /usr/bin/rlwrap ] || [ -x /sw/bin/rlwrap ] || [ -x /sw/local/bin/rlwrap ]; then
 		LOG+="\n-Using local rlwrap"
 	else 
 		LOG+="\n-rlwrap not found. It is very annoying NOT to have it when you run ccglab"
-		echo ' :  WARNING: you need install and write access now'
 		$SUDO $packager install rlwrap
         fi
   else
@@ -92,10 +91,11 @@ LOG+='\n-Your .bashrc and .bash_profile have been updated for CCGlab'
 LOG+='\n-Just do "git pull" in ccglab home for updates from now on.'
 LOG+="\n-I wouldnt do updates in standard files of $ccglabdir."
 LOG+="\n-They will be overridden by next git pull"
-LOG+="\n-The manual has some pointers for grammar and model development workflows"
+LOG+="\n-CCGlab manual has some pointers for grammar and model development workflows"
 LOG+="\n-To run, first open a fresh terminal, or logout and login. Then do"
 LOG+="\n  ccglab"
 LOG+='\n-CCGlab install: completed.'
 LOG+="\n-This log is saved in file $LOGFILE"
+LOG+="\n`date`\n================================================="
 echo -e $LOG > $LOGFILE
 echo -e $LOG
