@@ -1,11 +1,13 @@
 #!/bin/bash
 # ccl takes form of --eval from by read-to-string
 lispbinary=`basename $CCGLAB_LISP|head -n1`   # local variable. use of head is for cases where you defined some options to base binary
+QUIET=
 P=
 R=
 if [ $lispbinary ] && [ $lispbinary = sbcl ]; then
 	load='--load'
 	eval='--eval'
+	QUIET='--noinform'
 elif [ $lispbinary ] && [ $lispbinary = ccl ]; then
 	load='--load'
 	eval='--eval'
@@ -18,4 +20,4 @@ else
 	load='-l'
 	eval='-e'
 fi
-$RLWRAP $CCGLAB_LISP $load $CCGLAB_HOME/bin/suppress-style-warnings.lisp $eval "$P(silent-load \"$LALR_HOME/lalrparser.lisp\")$R" $eval "$P(silent-load \"$CCGLAB_HOME/bin/ccg.lisp\")$R" $eval "$P(silent-load \"$CCGLAB_HOME/bin/tr-compiler.lisp\")$R" $eval "$P(reset-globals)$R"  $eval "$P(welcome (quote $lispbinary))$R" $load $CCGLAB_HOME/bin/init-$lispbinary.lisp $load $CCGLAB_HOME/bin/init-user.lisp 
+$RLWRAP $CCGLAB_LISP $QUIET $load $CCGLAB_HOME/bin/suppress-style-warnings.lisp $eval "$P(silent-load \"$LALR_HOME/lalrparser.lisp\")$R" $eval "$P(silent-load \"$CCGLAB_HOME/bin/ccg.lisp\")$R" $eval "$P(silent-load \"$CCGLAB_HOME/bin/tr-compiler.lisp\")$R" $eval "$P(reset-globals)$R"  $eval "$P(welcome (quote $lispbinary))$R" $load $CCGLAB_HOME/bin/init-$lispbinary.lisp $load $CCGLAB_HOME/bin/init-user.lisp 

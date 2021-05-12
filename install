@@ -3,9 +3,6 @@
 #  also sets PATH and lisp execs so that ccglab is available from anywhere
 # brew does not allow sudo anymore-- $SUDO controls that
 # cem bozsahin 2015-2021
-echo "In case the installer asks for superuser password,"
-echo "it will be ONLY for installing sbcl and rlwrap"
-echo " "
 LOG="\n=================================================\nCCGlab install and set up, `date`\n=================================================" # installers can be very verbose, accumulate all deeds to report at end
 # check to see if there is already a ccglab
 LOGFILE='/tmp/log.ccglab-install'
@@ -20,6 +17,10 @@ if [ "$CCGLAB_HOME" ]; then
   echo "There is no need to reinstall. Just do git pull at $CCGLAB_HOME for the latest."
   exit -1
 fi
+echo " "
+echo "In case the installer asks for superuser password,"
+echo "it will be ONLY for installing sbcl and rlwrap"
+echo " "
 SUDO=sudo
 ccglabdir=`pwd`
 lalrdir='/usr/local/bin'
@@ -40,7 +41,7 @@ if [ -x /usr/local/bin/sbcl ] || [ -x /usr/bin/sbcl ] || [ -x /usr/local/bin/ccl
 	LOG+="\n-ccl Lisp found at $locallisp"
   fi
   if [ `which sbcl` ]; then
-	locallisp="`which sbcl` --noinform"
+	locallisp=`which sbcl`
 	LOG+="\n-sbcl Lisp found at `which sbcl`"
   fi
   LOG+="\n-Using $locallisp as Lisp for ccglab" 
