@@ -1,5 +1,5 @@
 # ccglab
-Combinatory Categorial Grammar (CCG): CCG and probabilistic CCG, with all combinators and their powers.
+Combinatory Categorial Grammar (CCG): CCG and probabilistic CCG, with full set of  combinators and their powers.
 
 <code>CCGlab</code> needs a linux, a native one or one in macosphere or windowsphere. 
 
@@ -40,38 +40,6 @@ You won't have to do all of the above over and over.
 depending on your linux. This one is for experienced users. This option is becoming easier too.
 </ol>
 
-<b>Preliminaries for MACOS</b>
-
-<ol>
-<li> Open the <code>terminal</code> app.
-<li> get brew by executing these from the command line:
-           <br> <code>/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"</code>
-<li> <code>brew install git</code>
-<li> <code>brew install wget</code>
-</ol>
-
-
-<b>Preliminaries for UBUNTU/DEBIAN/MINT</b>
-
-<ol>
-<li> <code>sudo apt-get install git</code>
-
-<li> <code>sudo apt-get install wget</code>
-</ol>
-
-
-<b>Preliminaries for FEDORA/RedHat</b>
-
-
-<ol>
-<li> <code>sudo yum install git</code>
-<li> <code>sudo yum install wget</code>
-</ol>
-
-<b>For other linuxes</b>
-
-Arch and Suse do not seem to have the peculiar Ubuntu and RedHat/Fedora caste of packages,
-so everything should be fine to run the CCGlab installer.
 
 <a name="install">
            
@@ -87,12 +55,6 @@ so everything should be fine to run the CCGlab installer.
 <li> Open a new bash terminal and run <code>ccglab</code> script from anywhere.
 </ol>
 
-<b>NO REINSTALL:</b> If you already have a git-installed up-and-running CCGlab, just do the following for updates:
-
-<ol>
-<li><code>cd $CCGLAB_HOME</code>
-<li><code>git pull</code>
-</ol>
 
 Latest release is shown by <code>(which-ccglab).</code> Announced git releases may be slightly behind the latest,
 which is always this copy. Just clone this repo rather than download the release if you want the latest.
