@@ -3,9 +3,10 @@
 #  also sets PATH and lisp execs so that ccglab is available from anywhere
 # brew does not allow sudo anymore-- $SUDO controls that
 # cem bozsahin 2015-2021
-echo "\nIn case the installer asks for superuser password,\n it will be ONLY for installing sbcl and rlwrap\n"
+echo "In case the installer asks for superuser password,"
+echo "it will be ONLY for installing sbcl and rlwrap"
 echo " "
-LOG="\n=================================================\nCCGlab install and set up `date`\n=================================================" # installers can be very verbose, accumulate all deeds to report at end
+LOG="\n=================================================\nCCGlab install and set up, `date`\n=================================================" # installers can be very verbose, accumulate all deeds to report at end
 # check to see if there is already a ccglab
 LOGFILE='/tmp/log.ccglab-install'
 if [ ! `which wget` ] || [ ! `which awk` ] || [ ! `which git` ] || [ ! `which sed` ]; then
@@ -27,6 +28,7 @@ if [ ! "$LALR_HOME" ]; then
   lalr=$lalrdir
   wget -v --no-check-certificate --backups=3 http://web.science.mq.edu.au/~mjohnson/code/lalrparser.lisp
   LOG+="\n-LALR parser freshly installed at $lalr"
+  mv lalrparser.lisp $lalrdir  # -o option of wget is unpredictable
 else
   lalr=$LALR_HOME
   LOG+="\n-LALR parser taken from $LALR_HOME"
