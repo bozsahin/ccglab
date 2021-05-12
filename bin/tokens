@@ -1,10 +1,33 @@
 #!/bin/bash
-# Lisp readers do funny things with CCG symbols; we encapsulate them for the 
-# reader. This script creates one lisp list for reader to read the whole thing in one go.
-# First wraps in special symbols for Lisp, then rewraps :=, then unwraps up to 2 
-# comma/period within a string constant, then wraps all in ()
-# this version leaves input file and output file names to caller.
-# -Cem Bozsahin 2015, Ankara, Lisboa
+# Common Lisp readers could do funny things with CCG symbols; we encapsulate them for the CL reader. 
+# This script creates one lisp list for CL reader to read the whole input in one fell swoop.
+# First it avoids translating lines starting with double quote assuming it is a phonological string constant
+#   on a separate line,
+#   then wraps in special symbols for Lisp in |x|, then rewraps :=, eliminates empty lines, and wraps all in ().
+# This version leaves input file and output file names to caller.
+# -Cem Bozsahin 2015-2021, Ankara, Lisboa
 if [ -f $1 ]; then
-	sed -e 's/\%.*$//g' -e 's/:/ |:| /g' -e 's/=/ |=| /g' -e 's/\./ |\.| /g' -e ' s/\\/ |\\\\| /g' -e 's/\// |\/| /g' -e 's/\;/ |;| /g' -e 's/\,/ |\,| /g' -e 's/-->/ |-->| /g' -e 's/(/ |(| /g' -e 's/)/ |)| /g' -e 's/\^/ |\^| /g' -e 's/\*/ |*| /g' -e 's/\+/ |+| /g' -e 's/\[/ |\[| /g' -e 's/\]/ |\]| /g' -e 's/\&i/ (LAM x x) /g' $1|sed -e 's/ |:|[ ]*|=| / |:=| /g'|sed -e 's/"\(.*\) |\([,\.]\)| \(.*\)"/"\1\2\3"/g' -e 's/"\(.*\) |\([,\.]\)| \(.*\)"/"\1\2\3"/g'|sed -e '1,1s/^/(/' -e '$s/$/)/' > $2
+	awk 'BEGIN {print "("}
+            {if (match($0,/^"/) > 0) {print $0; next};
+	     gsub(/%.*$/,""); 
+             gsub(/:/," |:| "); 
+	     gsub(/=/," |=| "); 
+	     gsub(/\./," |.| "); 
+	     gsub(/\\/," |\\\\| "); 
+	     gsub(/\//," |\/| "); 
+	     gsub(/\;/," |;| "); 
+	     gsub(/\,/," |,| "); 
+	     gsub(/-->/," |-->| "); 
+	     gsub(/\(/," |(| "); 
+	     gsub(/\)/," |)| "); 
+	     gsub(/\^/," |^| "); 
+	     gsub(/\*/," |*| "); 
+	     gsub(/\+/," |+| "); 
+	     gsub(/\[/," |[| "); 
+	     gsub(/\]/," |]| "); 
+	     gsub(/\&i/," (LAM x x) ");
+	     gsub(/ \|:\|[ ]*\|=\| /," |:=| "); 
+	     print $0} 
+	     END  {print ")" }' $1 | 
+        sed -e '/^$/d' > $2
 fi

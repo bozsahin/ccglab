@@ -675,7 +675,7 @@
   )
 
 (defun which-ccglab ()
-  "CCGlab, version 7.2.1")
+  "CCGlab, version 7.2.2")
 
 (defun set-lisp-system (lispsys)
   (case lispsys
@@ -694,7 +694,8 @@
   (cond (report 
 	  (format t "~%Type-raising algorithms G2 and P2 available as G2P2.")
 	  (format t "~%  S0 is essentially use of a G2P2'd grammar in~%  parsing and ranking.")
-	  (format t "~%Kullback-Leibler test soon to be available.")
+	  (format t "~%Kullback-Leibler test available.")
+	  (format t "~%awk tokenization installed.")
 	  )))
 
 (defun welcome (&optional (lispsys *lispsys*))

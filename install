@@ -1,15 +1,20 @@
 #!/bin/bash
-# installs CCGlab externals, to go with git ccglab repo.   -cem bozsahin
+# installs CCGlab externals, to go with git ccglab repo. 
 #  also sets PATH and lisp execs so that ccglab is available from anywhere
 # brew does not allow sudo anymore-- $SUDO controls that
-
-echo '================================================='
-echo 'CCGlab external resources install and path set up'
-echo '================================================='
+# cem bozsahin 2015-2021
+LOG="\n=================================================\nCCGlab install and set up\n=================================================" # installers can be very verbose, accumulate all deeds to report at end
 # check to see if there is already a ccglab
+LOGFILE='log.ccglab-install'
+if [ ! `which wget` ] || [ ! `which awk` ] || [ ! `which git` ] || [ ! `which sed` ]; then
+  echo "Your system is missing some install and CCGlab command-line basics.\nMake sure you have awk, sed, wget and git"
+  echo 'Use "which x" to check them, x being wget, sed, awk or git'
+  echo 'Install the missing one in your system before CCGlab install'
+  exit -1
+fi
 if [ "$CCGLAB_HOME" ]; then
-  echo " : You have a CCGlab installed at $CCGLAB_HOME."
-  echo ' : There is no need to reinstall. Just do "git pull" for the latest.'
+  echo "You have a CCGlab installed at $CCGLAB_HOME."
+  echo "There is no need to reinstall. Just do git pull at $CCGLAB_HOME for the latest."
   exit -1
 fi
 SUDO=sudo
@@ -17,24 +22,24 @@ ccglabdir=`pwd`
 # check to see if lalr has been installed before
 if [ ! "$LALR_HOME" ]; then
   lalr=$ccglabdir
-  echo " : lalrparser.lisp package is external to CCGlab and required; putting it in $lalr"
   wget -v --no-check-certificate --backups=3 http://web.science.mq.edu.au/~mjohnson/code/lalrparser.lisp
+  LOG+="\n-LALR parser freshly installed at $LALR_HOME"
 else
   lalr=$LALR_HOME
+  LOG+="\n-LALR parser taken from $LALR_HOME"
 fi
 # check to see if a Lisp for ccglab has been installed before
 if [ -x /usr/local/bin/sbcl ] || [ -x /usr/bin/sbcl ] || [ -x /usr/local/bin/ccl ] || [ -x /usr/bin/ccl ]; then
-  echo ' : An installed ANSI Common Lisp has been found'
   if [ `which ccl` ]; then
-  	echo " : You have `which ccl`"
 	locallisp=`which ccl`
+	LOG+="\n-ccl Lisp found at $locallisp"
   fi
   if [ `which sbcl` ]; then
-  	echo " : You have `which sbcl`"
 	locallisp="`which sbcl` --noinform"
+	LOG+="\n-sbcl Lisp found at `which sbcl`"
   fi
-  echo      " : using $locallisp as Lisp" 
-  echo      '   you can change that in .bashrc file'
+  LOG+="\n-Using $locallisp as Lisp for ccglab" 
+  LOH+="\n-You can change that in .bashrc file"
 fi
 #check if lisp needs installing
 if [ ! "$locallisp" ]; then
@@ -55,21 +60,21 @@ if [ ! "$locallisp" ]; then
 	SUDO=
   fi
   if [ "$packager" ]; then
-	echo ' : you have an installer for standard packages'
-	echo '   Installing SBCL and rlwrap from standard repositories'
-	echo ' : WARNING: you need install and write access now'
+	LOG+="\n-You have an installer ($packager) for standard packages"
+	LOG+="\n-Installing SBCL and rlwrap from standard repositories"
+	echo 'WARNING: you need install and write access now'
 	$SUDO $packager install sbcl
 	locallisp="`which sbcl` --noinform"
 	if [ -x /usr/local/bin/rlwrap ] || [ -x /usr/bin/rlwrap ] || [ -x /sw/bin/rlwrap ] || [ -x /sw/local/bin/rlwrap ]; then
-		echo ' : Using local rlwrap'
+		LOG+="\n-Using local rlwrap"
 	else 
-		echo ' :  rlwrap not found. It is very annoying NOT to have it when you run ccglab'
+		LOG+="\n-rlwrap not found. It is very annoying NOT to have it when you run ccglab"
 		echo ' :  WARNING: you need install and write access now'
 		$SUDO $packager install rlwrap
         fi
   else
-	echo ' : apt-get, yum or brew not found. I leave Common Lisp and rlwrap handling to you.'
-	echo '   The README.md in the git repo shows how you can set them manually.'
+	LOG+="\n-apt-get, yum or brew not found. I leave Common Lisp and rlwrap handling to you."
+	LOG+="\n-The README.md in the git repo shows how you can set them manually."
   fi
 fi
 printf '%s\n' '# stuff added by CCGlab installer' >> ~/.bashrc
@@ -77,17 +82,20 @@ if [ -x /usr/local/bin/rlwrap ] || [ -x /usr/bin/rlwrap ] || [ -x /sw/bin/rlwrap
   printf '%s\n' 'export RLWRAP=rlwrap' >> ~/.bashrc
 else
   printf '%s\n' 'export RLWRAP=' >> ~/.bashrc
-  echo ' : If rlwrap is installed later, change the RLWRAP variable in ~/.bashrc'
+  LOG+='\n-If rlwrap is installed later, change the RLWRAP variable in ~/.bashrc'
 fi
 printf '%s\n%s\n%s\n%s\n' "export CCGLAB_HOME=$ccglabdir" "export CCGLAB_LISP=$locallisp" "export LALR_HOME=$lalr" "export PATH=:.:\$CCGLAB_HOME/bin:\$PATH" >> ~/.bashrc
 printf '%s\n' '# end of stuff added by CCGlab installer' >> ~/.bashrc
 printf '%s\n' '# stuff added by CCGlab installer' >> ~/.bash_profile
 printf '%s\n' 'if [ -f ~/.bashrc ]; then source ~/.bashrc; fi' >> ~/.bash_profile
-echo ' : Just do "git pull" in ccglab home for updates from now on.'
-echo " : I wouldnt do updates in standard files of $ccglabdir."
-echo "   They will be overridden by next git pull"
-echo '   The manual has some pointers for grammar and model development workflows'
-echo ' : To run, first open a fresh terminal, or logout and login. Then do'
-echo ' : ccglab'
-echo 'CCGlab install: completed.'
-echo '================================================='
+LOG+='\n-Your .bashrc and .bash_profile have been updated for CCGlab'
+LOG+='\n-Just do "git pull" in ccglab home for updates from now on.'
+LOG+="\n-I wouldnt do updates in standard files of $ccglabdir."
+LOG+="\n-They will be overridden by next git pull"
+LOG+="\n-The manual has some pointers for grammar and model development workflows"
+LOG+="\n-To run, first open a fresh terminal, or logout and login. Then do"
+LOG+="\n  ccglab"
+LOG+='\n-CCGlab install: completed.'
+LOG+="\n-This log is saved in file $LOGFILE"
+echo -e $LOG > $LOGFILE
+echo -e $LOG
