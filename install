@@ -23,7 +23,11 @@ echo "it will be ONLY for installing sbcl and rlwrap"
 echo " "
 SUDO=sudo
 ccglabdir=`pwd`
-lalrdir='/usr/local/bin'
+if [ -d /usr/local/bin ]; then
+  lalrdir='/usr/local/bin'
+else
+  lalrdir='/tmp'
+fi
 # check to see if lalr has been installed before
 if [ ! "$LALR_HOME" ]; then
   lalr=$lalrdir
@@ -42,7 +46,7 @@ if [ -x /usr/local/bin/sbcl ] || [ -x /usr/bin/sbcl ] || [ -x /usr/local/bin/ccl
   fi
   if [ `which sbcl` ]; then
 	locallisp=`which sbcl`
-	LOG+="\n-sbcl Lisp found at `which sbcl`"
+	LOG+="\n-sbcl Lisp found at $locallisp"
   fi
   LOG+="\n-Using $locallisp as Lisp for ccglab" 
   LOH+="\n-You can change that in .bashrc file"
@@ -69,7 +73,7 @@ if [ ! "$locallisp" ]; then
 	LOG+="\n-You have an installer ($packager) for standard packages"
 	LOG+="\n-Installing SBCL Lisp and rlwrap from standard repositories"
 	$SUDO $packager install sbcl
-	locallisp="`which sbcl` --noinform"
+	locallisp=`which sbcl`
 	if [ -x /usr/local/bin/rlwrap ] || [ -x /usr/bin/rlwrap ] || [ -x /sw/bin/rlwrap ] || [ -x /sw/local/bin/rlwrap ]; then
 		LOG+="\n-Using local rlwrap"
 	else 
