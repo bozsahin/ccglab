@@ -5,16 +5,15 @@
 # cem bozsahin 2015-2021
 # check to see if there is already a ccglab
 if [ "$CCGLAB_HOME" ]; then
-  echo "You have a CCGlab installed at $CCGLAB_HOME."
-  echo "There is no need to reinstall. Just do 'git pull' at $CCGLAB_HOME for the latest."
+  echo "You have a CCGlab installed at:\n $CCGLAB_HOME."
+  echo "There is no need to reinstall.\n Just do 'git pull' at $CCGLAB_HOME for the latest."
   exit -1
 fi
-LOG="\n=================================================\nCCGlab install and set up, `date`\n=================================================" # installers can be very verbose, accumulate all deeds to report at end
+LOG="=======================================================\nCCGlab install and set up, `date`\n=======================================================" # installers can be very verbose, accumulate all deeds to report at end
 LOGFILE='/tmp/log.ccglab-install'
-LOG+="\n-CCGlab install and use resources:"
+LOG+="\n-CCGlab install and use command-line resources:"
 LOG+="\n  wget=`which wget`"
 LOG+="\n  git=`which git`"
-LOG+="\n  cut=`which cut`"
 LOG+="\n  awk=`which awk`"
 LOG+="\n  sed=`which sed`"
 if [ ! `which wget` ] || [ ! `which awk` ] || [ ! `which git` ] || [ ! `which sed` ]; then
@@ -44,7 +43,7 @@ else
   LOG+="\n-LALR parser taken from $LALR_HOME"
 fi
 # check to see if a Lisp for ccglab has been installed before
-if [ -x /usr/local/bin/sbcl ] || [ -x /usr/bin/sbcl ] || [ -x /usr/local/bin/ccl ] || [ -x /usr/bin/ccl ]; then
+if [ `which ccl` ] || [ `which ccl` ]; then
   if [ `which ccl` ]; then
 	locallisp=`which ccl`
 	LOG+="\n-ccl Lisp found at $locallisp"
@@ -54,23 +53,23 @@ if [ -x /usr/local/bin/sbcl ] || [ -x /usr/bin/sbcl ] || [ -x /usr/local/bin/ccl
 	LOG+="\n-sbcl Lisp found at $locallisp"
   fi
   LOG+="\n-Using $locallisp as Lisp for ccglab" 
-  LOH+="\n-You can change that in .bashrc file"
+  LOG+="\n-You can change that in .bashrc file"
 fi
 #check if lisp needs installing
 if [ ! "$locallisp" ]; then
-  if [ -x /usr/bin/yum ] || [ -x /usr/local/bin/yum ]; then
+  if [ `which yum` ]; then
 	  packager=yum   
 	  # open library space of yum
 	  $SUDO yum install yum-utils
 	  $SUDO yum-config-manager --enable \*
   fi
-  if [ -x /usr/bin/apt-get ] || [ -x /usr/local/bin/apt-get ]; then
+  if [ `which apt-get` ]; then
 	packager=apt-get
 	# open library space of apt-get and refresh
 	$SUDO add-apt-repository universe
 	$SUDO apt-get update
   fi
-  if [ -x /usr/local/bin/brew ] || [ -x /sw/bin/brew ] || [ -x /sw/local/bin/brew ]; then
+  if [ `which brew` ]; then
     	packager=brew
 	SUDO=
   fi
@@ -79,7 +78,7 @@ if [ ! "$locallisp" ]; then
 	LOG+="\n-Installing SBCL Lisp and rlwrap from standard repositories"
 	$SUDO $packager install sbcl
 	locallisp=`which sbcl`
-	if [ -x /usr/local/bin/rlwrap ] || [ -x /usr/bin/rlwrap ] || [ -x /sw/bin/rlwrap ] || [ -x /sw/local/bin/rlwrap ]; then
+	if [ `which rlwrap` ]; then
 		LOG+="\n-Using local rlwrap"
 	else 
 		LOG+="\n-rlwrap not found. It is very annoying NOT to have it when you run ccglab"
@@ -91,7 +90,7 @@ if [ ! "$locallisp" ]; then
   fi
 fi
 printf '%s\n' '# stuff added by CCGlab installer' >> ~/.bashrc
-if [ -x /usr/local/bin/rlwrap ] || [ -x /usr/bin/rlwrap ] || [ -x /sw/bin/rlwrap ] || [ -x /sw/local/bin/rlwrap ]; then
+if [ `which rlwrap` ]; then
   printf '%s\n' 'export RLWRAP=rlwrap' >> ~/.bashrc
 else
   printf '%s\n' 'export RLWRAP=' >> ~/.bashrc
@@ -111,6 +110,6 @@ LOG+="\n  ccglab"
 LOG+="\n-CCGlab install: COMPLETED"
 fi
 LOG+="\n-This log is saved in file $LOGFILE"
-LOG+="\n`date`\n================================================="
+LOG+="\n`date`\n======================================================="
 echo -e $LOG > $LOGFILE
 echo -e $LOG
