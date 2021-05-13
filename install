@@ -12,11 +12,11 @@ fi
 LOG="=======================================================\nCCGlab install and set up, `date`\n=======================================================" # installers can be very verbose, accumulate all deeds to report at end
 LOGFILE='/tmp/ccglab-install.log'
 LOG+="\n-CCGlab command-line resources for install and use:"
-LOG+="\n  wget=`which wget`"
-LOG+="\n  git=`which git`"
-LOG+="\n  awk=`which awk`"
-LOG+="\n  sed=`which sed`"
-if [ ! `which wget` ] || [ ! `which awk` ] || [ ! `which git` ] || [ ! `which sed` ]; then
+LOG+="\n  wget=`command -v wget`"
+LOG+="\n  git=`command -v git`"
+LOG+="\n  awk=`command -v awk`"
+LOG+="\n  sed=`command -v sed`"
+if [ ! `command -v wget` ] || [ ! `command -v awk` ] || [ ! `command -v git` ] || [ ! `command -v sed` ]; then
   LOG+="\n-Your system is missing some install and CCGlab command-line basics."
   LOG+="\n-Check the top of this log file to find out which one is missing"
   LOG+="\n-Install the missing one in your system before CCGlab install and use"
@@ -36,11 +36,12 @@ fi
 # dont wget if its already here but not set
 if [ -f "$lalrdir/lalrparser.lisp" ] && [ ! "$LALR_HOME" ]; then
   LALR_HOME=$lalrdir
+  LOG+="\n-LALR parser: no download; local one set for CCGlab"
 fi
 # check to see if lalr has been set and installed before
 if [ ! "$LALR_HOME" ]; then
   wget -v --no-check-certificate --backups=3 http://web.science.mq.edu.au/~mjohnson/code/lalrparser.lisp
-  LOG+="\n-LALR parser freshly installed at $lalrdir"
+  LOG+="\n-LALR parser downloaded and installed at $lalrdir"
   mv lalrparser.lisp $lalrdir  # -o option of wget is unpredictable
 else
   lalrdir=$LALR_HOME
@@ -49,19 +50,19 @@ fi
 #check if SBCL and rlwrap need installing-- SBCL is the standard CCGlab lisp
 #there is a pecking order of packagers, in case you have more than one
 packager=
-if [ `which yum` ]; then
+if [ `command -v yum` ]; then
 	  packager=yum   
 	  # open library space of yum
 	  $SUDO yum install yum-utils
 	  $SUDO yum-config-manager --enable \*
 fi
-if [ `which apt-get` ]; then
+if [ `command -v apt-get` ]; then
 	packager=apt-get
 	# open library space of apt-get and refresh
 	$SUDO add-apt-repository universe
 	$SUDO apt-get update
 fi
-if [ `which brew` ]; then
+if [ `command -v brew` ]; then
     	packager=brew
 	SUDO=
 fi
@@ -71,29 +72,29 @@ else
 	LOG+="\n-apt-get, yum or brew not found. I leave Common Lisp and rlwrap handling to you."
 	LOG+="\n-The README.md in the git repo shows how you can set them manually."
 fi
-if [ ! `which sbcl` ]; then
+if [ ! `command -v sbcl` ]; then
   if [ "$packager" ]; then
 	$SUDO $packager install sbcl
-	LOG+="\n-sbcl is now installed"
+	LOG+="\n-sbcl is downloaded and installed"
   fi
 else
   LOG+="\n-Local sbcl is set for CCGlab"
 fi
-locallisp=`which sbcl`
-if [ `which rlwrap` ]; then
-	LOG+="\n-Local rlwrap set for CCGlab"
+locallisp=`command -v sbcl`
+if [ `command -v rlwrap` ]; then
+	LOG+="\n-Local rlwrap is set for CCGlab"
 else 
   if [ "$packager" ]; then
-	LOG+="\n-rlwrap not found. Installing"
+	LOG+="\n-rlwrap downloaded and installed"
 	$SUDO $packager install rlwrap
   fi
 fi
 printf '%s\n' '# stuff added by CCGlab installer' >> ~/.bashrc
-if [ `which rlwrap` ]; then
+if [ `command -v rlwrap` ]; then
   printf '%s\n' 'export RLWRAP=rlwrap' >> ~/.bashrc
 else
   printf '%s\n' 'export RLWRAP=' >> ~/.bashrc
-  LOG+='\n-If rlwrap is installed later, change the RLWRAP variable in ~/.bashrc'
+  LOG+='\n-Change the RLWRAP variable in ~/.bashrc if you have rlwrap somewhere'
 fi
 printf '%s\n%s\n%s\n%s\n' "export CCGLAB_HOME=$ccglabdir" "export CCGLAB_LISP=$locallisp" "export LALR_HOME=$lalrdir" "export PATH=:.:\$CCGLAB_HOME/bin:\$PATH" >> ~/.bashrc
 printf '%s\n' '# end of stuff added by CCGlab installer' >> ~/.bashrc
@@ -104,9 +105,9 @@ LOG+='\n-Just do "git pull" in ccglab home for updates from now on.'
 LOG+="\n-I wouldnt do updates in standard files of $ccglabdir."
 LOG+="\n-They will be overridden by next git pull"
 LOG+="\n-CCGlab manual has some pointers for grammar and model development workflows"
-LOG+="\n-To run, first open a fresh terminal, or logout and login. Then do"
+LOG+="\n\n-To run, first open a fresh terminal, or logout and login. Then do"
 LOG+="\n  ccglab"
-LOG+="\n-CCGlab install: COMPLETED"
+LOG+="\n\n-CCGlab install: COMPLETED"
 fi
 LOG+="\n-This log is saved in file $LOGFILE"
 LOG+="\n`date`\n======================================================="
