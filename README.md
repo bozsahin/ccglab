@@ -3,11 +3,12 @@ Combinatory Categorial Grammar (CCG): CCG and probabilistic CCG, with full set o
 
 <code>CCGlab</code> needs a linux, a native one or one in macosphere or windowsphere. 
 
-Install instructions if you have a linux/macos are in this README, <a href="#install">here</a>. There are certain things you need to do depending
+Install instructions (if you have a linux/macos) are in this README, <a href="#install">here</a>. 
+
+There are certain things you need to do depending
 on your OS, so please follow the install AFTER reading this README.
 
 The Windows install section explains how to get a linux in windowsphere, then ccglab.
-
 
 <code>CCGlab</code> is Common Lisp code with some <code>bash</code> scripts for install and run-time tokenization. 
 
