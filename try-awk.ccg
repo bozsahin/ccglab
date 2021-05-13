@@ -1,0 +1,14 @@
+%
+% testing new tokeniser
+%
+
+a x := (s\np)/np/np/np :\x\y\z\w.&i (x y z w);
+b y := (s\.np)/^np/*np/+np :\x\y\z\w.&i (x y z w);
+c x := (s\np)/np/np/"up" :\x\y\z\w.&i (x y z w);
+d x := (s\np)/np/np/"up>" :\x\y\z\w.&i (x y z w);  % a comment gone to wste
+e x := (s\np)/np[f=?x]/np/"up>" :\x\y\z\w.&i (x y z w);
+f x := (s\np)/np[f=x]/np/"up" :\x\y\z\w.&i (x y z w) !somecons;
+"a constant. more dots ... and . > -->" 
+n := np : !np;
+"a CONSTANT. more dots ... and . > -->" n 
+  := np : !np;
