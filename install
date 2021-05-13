@@ -11,7 +11,7 @@ if [ "$CCGLAB_HOME" ]; then
 fi
 LOG="=======================================================\nCCGlab install and set up, `date`\n=======================================================" # installers can be very verbose, accumulate all deeds to report at end
 LOGFILE='/tmp/ccglab-install.log'
-LOG+="\n-CCGlab install-and-use command-line resources:"
+LOG+="\n-CCGlab command-line resources for install and use:"
 LOG+="\n  wget=`which wget`"
 LOG+="\n  git=`which git`"
 LOG+="\n  awk=`which awk`"
@@ -33,7 +33,11 @@ if [ -d /usr/local/bin ]; then
 else
   lalrdir='/tmp'
 fi
-# check to see if lalr has been installed before
+# dont wget if its already here but not set
+if [ -f "$lalrdir/lalrparser.lisp" ] && [ ! "$LALR_HOME" ]; then
+  LALR_HOME=$lalrdir
+fi
+# check to see if lalr has been set and installed before
 if [ ! "$LALR_HOME" ]; then
   wget -v --no-check-certificate --backups=3 http://web.science.mq.edu.au/~mjohnson/code/lalrparser.lisp
   LOG+="\n-LALR parser freshly installed at $lalrdir"
@@ -63,7 +67,6 @@ if [ `which brew` ]; then
 fi
 if [ "$packager" ]; then
 	LOG+="\n-You have an installer ($packager) for standard packages"
-	LOG+="\n-Installing SBCL Lisp and rlwrap from standard repositories"
 else
 	LOG+="\n-apt-get, yum or brew not found. I leave Common Lisp and rlwrap handling to you."
 	LOG+="\n-The README.md in the git repo shows how you can set them manually."
@@ -71,11 +74,14 @@ fi
 if [ ! `which sbcl` ]; then
   if [ "$packager" ]; then
 	$SUDO $packager install sbcl
+	LOG+="\n-sbcl is now installed"
   fi
+else
+  LOG+="\n-Local sbcl is set for CCGlab"
 fi
 locallisp=`which sbcl`
 if [ `which rlwrap` ]; then
-	LOG+="\n-Using local rlwrap"
+	LOG+="\n-Local rlwrap set for CCGlab"
 else 
   if [ "$packager" ]; then
 	LOG+="\n-rlwrap not found. Installing"
