@@ -5,26 +5,26 @@
 # cem bozsahin 2015-2021
 # check to see if there is already a ccglab
 if [ "$CCGLAB_HOME" ]; then
-  echo "You have a CCGlab installed at:\n $CCGLAB_HOME."
-  echo "There is no need to reinstall.\n Just do 'git pull' at $CCGLAB_HOME for the latest."
+  echo "You have a CCGlab installed at: $CCGLAB_HOME."
+  echo "There is no need to reinstall. Just do 'git pull' at $CCGLAB_HOME for the latest."
   exit -1
 fi
 LOG="=======================================================\nCCGlab install and set up, `date`\n=======================================================" # installers can be very verbose, accumulate all deeds to report at end
-LOGFILE='/tmp/log.ccglab-install'
-LOG+="\n-CCGlab install and use command-line resources:"
+LOGFILE='/tmp/ccglab-install.log'
+LOG+="\n-CCGlab install-and-use command-line resources:"
 LOG+="\n  wget=`which wget`"
 LOG+="\n  git=`which git`"
 LOG+="\n  awk=`which awk`"
 LOG+="\n  sed=`which sed`"
 if [ ! `which wget` ] || [ ! `which awk` ] || [ ! `which git` ] || [ ! `which sed` ]; then
-  LOG+="\n-Your system is missing some install and CCGlab command-line basics.\n-Make sure you have awk, sed, wget and git"
+  LOG+="\n-Your system is missing some install and CCGlab command-line basics."
   LOG+="\n-Check the top of this log file to find out which one is missing"
   LOG+="\n-Install the missing one in your system before CCGlab install and use"
   LOG+="\n-CCGlab install: ABORTED"
 else
 echo "PLEASE NOTE:"
 echo "  IN CASE THE INSTALLER ASKS FOR superuser PASSWORD,"
-echo "  It will be ONLY for installing sbcl and rlwrap"
+echo "  It will be ONLY for installing sbcl and rlwrap THRU safe installers"
 echo " "
 SUDO=sudo
 ccglabdir=`pwd`
@@ -42,51 +42,44 @@ else
   lalrdir=$LALR_HOME
   LOG+="\n-LALR parser taken from $LALR_HOME"
 fi
-# check to see if a Lisp for ccglab has been installed before
-if [ `which ccl` ] || [ `which ccl` ]; then
-  if [ `which ccl` ]; then
-	locallisp=`which ccl`
-	LOG+="\n-ccl Lisp found at $locallisp"
-  fi
-  if [ `which sbcl` ]; then
-	locallisp=`which sbcl`
-	LOG+="\n-sbcl Lisp found at $locallisp"
-  fi
-  LOG+="\n-Using $locallisp as Lisp for ccglab" 
-  LOG+="\n-You can change that in .bashrc file"
-fi
-#check if lisp needs installing
-if [ ! "$locallisp" ]; then
-  if [ `which yum` ]; then
+#check if SBCL and rlwrap need installing-- SBCL is the standard CCGlab lisp
+#there is a pecking order of packagers, in case you have more than one
+packager=
+if [ `which yum` ]; then
 	  packager=yum   
 	  # open library space of yum
 	  $SUDO yum install yum-utils
 	  $SUDO yum-config-manager --enable \*
-  fi
-  if [ `which apt-get` ]; then
+fi
+if [ `which apt-get` ]; then
 	packager=apt-get
 	# open library space of apt-get and refresh
 	$SUDO add-apt-repository universe
 	$SUDO apt-get update
-  fi
-  if [ `which brew` ]; then
+fi
+if [ `which brew` ]; then
     	packager=brew
 	SUDO=
-  fi
-  if [ "$packager" ]; then
+fi
+if [ "$packager" ]; then
 	LOG+="\n-You have an installer ($packager) for standard packages"
 	LOG+="\n-Installing SBCL Lisp and rlwrap from standard repositories"
-	$SUDO $packager install sbcl
-	locallisp=`which sbcl`
-	if [ `which rlwrap` ]; then
-		LOG+="\n-Using local rlwrap"
-	else 
-		LOG+="\n-rlwrap not found. It is very annoying NOT to have it when you run ccglab"
-		$SUDO $packager install rlwrap
-        fi
-  else
+else
 	LOG+="\n-apt-get, yum or brew not found. I leave Common Lisp and rlwrap handling to you."
 	LOG+="\n-The README.md in the git repo shows how you can set them manually."
+fi
+if [ ! `which sbcl` ]; then
+  if [ "$packager" ]; then
+	$SUDO $packager install sbcl
+  fi
+fi
+locallisp=`which sbcl`
+if [ `which rlwrap` ]; then
+	LOG+="\n-Using local rlwrap"
+else 
+  if [ "$packager" ]; then
+	LOG+="\n-rlwrap not found. Installing"
+	$SUDO $packager install rlwrap
   fi
 fi
 printf '%s\n' '# stuff added by CCGlab installer' >> ~/.bashrc
