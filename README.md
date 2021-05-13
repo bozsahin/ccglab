@@ -6,7 +6,7 @@ Combinatory Categorial Grammar (CCG): CCG and probabilistic CCG, with full set o
 Install instructions (if you have a linux/macos) are in this README, <a href="#install">here</a>. 
 
 There are certain things you need to do depending
-on your OS, so please follow the install AFTER reading this README.
+on your OS, <b>so please follow the install AFTER reading this README.</b>
 
 The Windows install section explains how to get a linux in windowsphere, then ccglab.
 
