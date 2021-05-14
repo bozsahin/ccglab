@@ -50,7 +50,7 @@ depending on your linux. This one is for experienced users. This option is becom
 Latest release is shown by <code>(which-ccglab).</code> Announced git releases may be slightly behind the latest,
 which is always this copy. Just clone this repo rather than download the release if you want the latest.
 
-<B>MANUAL INSTALL:</B>
+<B>MANUAL INSTALL</B>
 
 If you're tired of weird defaults of linux installers, try the safe and longer way:
 
