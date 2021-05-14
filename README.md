@@ -16,8 +16,10 @@ Combinatory Categorial Grammar (CCG): CCG and probabilistic CCG, with full set o
 <br>This is your ccglab home.
 <li> <code>cd ccglab</code>
 <li> Execute <code>./install</code> bash script in the repo to get the extras needed, and to set up the paths so that CCGlab is usable from anywhere in your user account. <br>
-<li> Open a new bash terminal and run <code>ccglab</code> script from anywhere.
+
 </ol>
+
+You can <code>ccglab</code> script from anywhere after install.
 
 Latest release is shown by <code>(which-ccglab).</code> Announced git releases may be slightly behind the latest,
 which is always this copy. Just clone this repo rather than download the release if you want the latest.
