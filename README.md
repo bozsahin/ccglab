@@ -18,7 +18,7 @@ Combinatory Categorial Grammar (CCG): CCG and probabilistic CCG, with full set o
 
 </ol>
 
-You can <code>ccglab</code> script from anywhere after install.
+You can run the <code>ccglab</code> script from anywhere after install.
 
 Latest release is shown by <code>(which-ccglab).</code> Announced git releases may be slightly behind the latest,
 which is always this copy. Just clone this repo rather than download the release if you want the latest.
