@@ -1,23 +1,35 @@
 # ccglab
 Combinatory Categorial Grammar (CCG): CCG and probabilistic CCG, with full set of  combinators and their powers.
 
+<code>CCGlab</code> is <code>Common Lisp</code> code with some <code>bash</code> scripts for install and run-time tokenization. 
+
 <code>CCGlab</code> needs a linux, a native one or one in macosphere or windowsphere. 
 
-Install instructions (if you have a linux/macos) are in this README, <a href="#install">here</a>. 
+<b>FOR LINUXSPHERE AND MACOSPHERE</b>
 
-There are certain things you need to do depending
-on your OS, <b>so please follow the install AFTER reading this README.</b>
+<a name="install">
+           
+<ol>
+<li> <code>cd h</code>, where <code>h</code> is your chosen parent directory for CCGlab.
+<li> <code>git clone https://github.com/bozsahin/ccglab</code>
+<br>This will create the repository in <code>h/ccglab</code>
+<br>This is your ccglab home.
+<li> <code>cd ccglab</code>
+<li> Execute <code>./install</code> bash script in the repo to get the extras needed, and to set up the paths so that CCGlab is usable from anywhere in your user account. <br>
+<li> Open a new bash terminal and run <code>ccglab</code> script from anywhere.
+</ol>
 
-The Windows install section explains how to get a linux in windowsphere, then ccglab.
-
-<code>CCGlab</code> is Common Lisp code with some <code>bash</code> scripts for install and run-time tokenization. 
+Latest release is shown by <code>(which-ccglab).</code> Announced git releases may be slightly behind the latest,
+which is always this copy. Just clone this repo rather than download the release if you want the latest.
 
 <b>FOR WINDOWS</b>
 
-You need a linux system for CCGlab. There are three options for windows (I recommend the first one):
+You need a linux system for CCGlab. Once you get that, follow the instructions for Linuxspehere for CCGlab install.
+
+There are three options for windows (I recommend the first one):
 
 <ol>
-           <li> For windows 10 onwards: Follow these <a href="docs/windows10-directions.md">directions</a>. No partitions, no virtualbox, no hassles. You now have linux as a W10 app with ccglab in it.
+<li> For windows 10 onwards: Follow these <a href="docs/windows10-directions.md">directions</a>. No partitions, no virtualbox, no hassles. You now have linux as a W10 app with ccglab in it.
 <li> For windows earlier than W10: install a virtual box such as Oracle's: https://www.virtualbox.org/.
 
 Then follow one of the advices below for linuxes for ccglab install, depending on your virtual machine.
@@ -31,24 +43,6 @@ You won't have to do all of the above over and over.
 depending on your linux. This one is for experienced users. This option is becoming easier too.
 </ol>
 
-
-<a name="install">
-           
-<B>INSTALLING CCGLAB</B>
-
-<ol>
-<li> <code>cd h</code>, where <code>h</code> is your chosen parent directory for CCGlab.
-<li> <code>git clone https://github.com/bozsahin/ccglab</code>
-<br>This will create the repository in <code>h/ccglab</code>
-<br>This is your ccglab home.
-<li> <code>cd ccglab</code>
-<li> Execute <code>./install</code> bash script in the repo to get the extras needed, and to set up the paths so that CCGlab is usable from anywhere in your user account. <br>
-<li> Open a new bash terminal and run <code>ccglab</code> script from anywhere.
-</ol>
-
-
-Latest release is shown by <code>(which-ccglab).</code> Announced git releases may be slightly behind the latest,
-which is always this copy. Just clone this repo rather than download the release if you want the latest.
 
 <B>MANUAL INSTALL</B>
 
