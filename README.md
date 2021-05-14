@@ -25,7 +25,7 @@ which is always this copy. Just clone this repo rather than download the release
 
 <b>INSTALL FOR WINDOWS</b>
 
-You need a linux system for CCGlab. Once you get that, follow the instructions for Linuxspehere for CCGlab install.
+You need a linux system for CCGlab. Once you get that, follow the instructions for Linuxsphere for CCGlab install.
 
 There are three options for windows (I recommend the first one):
 
@@ -89,6 +89,8 @@ for the Lisp reader needs methods, therefore not usable in GCL/Clisp out of the 
 I added Allegro CL support for CCGlab (for calling bash scripts etc.), but somewhat reluctantly. Its free versions are so cryptic about heap control 
 you will avoid it, and spend most of your time garbage-collecting rather than doing useful work. Not worth it, folks.
 
-Design and development of CCGlab continues to be in SBCL, then checked with CCL. 
+Design and development of CCGlab continues to be in SBCL, then occasionally checked with CCL. 
 
-enjoy.--Cem Bozsahin
+enjoy.
+
+--Cem Bozsahin
