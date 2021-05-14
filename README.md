@@ -5,7 +5,7 @@ Combinatory Categorial Grammar (CCG): CCG and probabilistic CCG, with full set o
 
 <code>CCGlab</code> needs a linux, a native one or one in macosphere or windowsphere. 
 
-<b>FOR LINUXSPHERE AND MACOSPHERE</b>
+<b>INSTALL FOR LINUXSPHERE AND MACOSPHERE</b>
 
 <a name="install">
            
@@ -22,7 +22,7 @@ Combinatory Categorial Grammar (CCG): CCG and probabilistic CCG, with full set o
 Latest release is shown by <code>(which-ccglab).</code> Announced git releases may be slightly behind the latest,
 which is always this copy. Just clone this repo rather than download the release if you want the latest.
 
-<b>FOR WINDOWS</b>
+<b>INSTALL FOR WINDOWS</b>
 
 You need a linux system for CCGlab. Once you get that, follow the instructions for Linuxspehere for CCGlab install.
 
