@@ -12,16 +12,6 @@ The Windows install section explains how to get a linux in windowsphere, then cc
 
 <code>CCGlab</code> is Common Lisp code with some <code>bash</code> scripts for install and run-time tokenization. 
 
-SBCL and CCL Common Lisps are usable out of the box for CCGlab. The <code>install</code> script sets up SBCL for CCGlab if you haven't got one already. If you have an ANSI Common Lisp, it can work with it too.
-
-GCL and CLisp are ANSI but the first one does not come with CLOS, and CLisp has weird locks on standard package files to turn them on. This is unfortunate because some CCGlab macros
-for the Lisp reader needs methods, therefore not usable in GCL/Clisp out of the box.
-
-I added Allegro CL support for CCGlab (for calling bash scripts etc.), but somewhat reluctantly. Its free versions are so cryptic about heap control 
-you will avoid it, and spend most of your time garbage-collecting rather than doing useful work. Not worth it, folks.
-
-Design and development of CCGlab continues to be in SBCL, then checked with CCL. 
-
 <b>FOR WINDOWS</b>
 
 You need a linux system for CCGlab. There are three options for windows (I recommend the first one):
@@ -93,5 +83,17 @@ And here is my <code>~/.bash_profile</code> file (create one if you don't have i
 The installer fetches the relevant sources (lalrparser, sbcl, rlwrap) and does the manual install automatically, and saves it in the files <code>.bash_profile, .bashrc</code> at your home.
 
 Also have a look at the companion repo called <a href="https://github.com/bozsahin/ccglab-database">ccglab-database</a>, which contains grammars and models developed in CCGlab
+
+<B>Common Lisp for CCGlab:</B>
+
+SBCL and CCL Common Lisps are usable out of the box for CCGlab. The <code>install</code> script sets up SBCL for CCGlab if you haven't got one already. If you have an ANSI Common Lisp, it can work with it too.
+
+GCL and CLisp are ANSI but the first one does not come with CLOS, and CLisp has weird locks on standard package files to turn them on. This is unfortunate because some CCGlab macros
+for the Lisp reader needs methods, therefore not usable in GCL/Clisp out of the box.
+
+I added Allegro CL support for CCGlab (for calling bash scripts etc.), but somewhat reluctantly. Its free versions are so cryptic about heap control 
+you will avoid it, and spend most of your time garbage-collecting rather than doing useful work. Not worth it, folks.
+
+Design and development of CCGlab continues to be in SBCL, then checked with CCL. 
 
 enjoy.--Cem Bozsahin
