@@ -10,9 +10,8 @@ Combinatory Categorial Grammar (CCG): CCG and probabilistic CCG, with full set o
 <a name="install">
            
 <ol>
-<li> <code>cd h</code>, where <code>h</code> is your chosen parent directory for CCGlab.
 <li> <code>git clone https://github.com/bozsahin/ccglab</code>
-<br>This will create the repository in <code>h/ccglab</code>
+<br>This will create the repository <code>ccglab</code> under you current directory.
 <br>This is your ccglab home.
 <li> <code>cd ccglab</code>
 <li> Execute <code>./install</code> bash script in the repo to get the extras needed, and to set up the paths so that CCGlab is usable from anywhere in your user account. <br>
