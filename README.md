@@ -84,7 +84,7 @@ The installer fetches the relevant sources (lalrparser, sbcl, rlwrap) and does t
 
 Also have a look at the companion repo called <a href="https://github.com/bozsahin/ccglab-database">ccglab-database</a>, which contains grammars and models developed in CCGlab
 
-<B>Common Lisp for CCGlab:</B>
+<B>COMMON LISPs FOR CCGLAB</B>
 
 SBCL and CCL Common Lisps are usable out of the box for CCGlab. The <code>install</code> script sets up SBCL for CCGlab if you haven't got one already. If you have an ANSI Common Lisp, it can work with it too.
 
