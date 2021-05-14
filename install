@@ -28,11 +28,7 @@ echo "  It will be ONLY for installing sbcl and rlwrap THRU safe installers"
 echo " "
 SUDO=sudo
 ccglabdir=`pwd`
-if [ -d /usr/local/lib ]; then
-  lalrdir='/usr/local/lib'
-else
-  lalrdir='/tmp'
-fi
+lalrdir=~
 # dont wget if its already here but not set
 if [ -f "$lalrdir/lalrparser.lisp" ] && [ ! "$LALR_HOME" ]; then
   LALR_HOME=$lalrdir
