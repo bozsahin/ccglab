@@ -8,7 +8,7 @@
 # -Cem Bozsahin 2015-2021, Ankara, Lisboa
 if [ -f $1 ]; then
 	awk 'BEGIN {print "("}
-            {if (match($0,/^"/) > 0) {print $0; next};
+            {if (match($0,/^[ ]*"/) > 0) {print $0; next};
 	     gsub(/%.*$/,""); 
              gsub(/:/," |:| "); 
 	     gsub(/=/," |=| "); 
