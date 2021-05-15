@@ -73,7 +73,7 @@ fi
 if [ "$packager" ]; then
 	LOG+="\n-You have an installer ($packager) for standard packages"
 else
-	LOG+="\n-apt-get, yum or brew not found. I leave Common Lisp and rlwrap handling to you."
+	LOG+="\n-apt-get, dnf, pacman, yum or brew not found. I leave Common Lisp and rlwrap handling to you."
 	LOG+="\n-The README.md in the git repo shows how you can set them manually."
 fi
 if [ ! `command -v sbcl` ]; then
