@@ -93,6 +93,10 @@ you will avoid it, and spend most of your time garbage-collecting rather than do
 
 Design and development of CCGlab continues to be in SBCL, then occasionally checked with CCL. 
 
+<B>THE WRAPPER</B>
+
+I hope you will appreciate the peace and comfort of <code>rlwrap</code> when you use a command-line tool like CCGlab.
+
 enjoy.
 
 --Cem Bozsahin
