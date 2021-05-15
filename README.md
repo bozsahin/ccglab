@@ -15,10 +15,12 @@ Combinatory Categorial Grammar (CCG): CCG and probabilistic CCG, with full set o
 <br>This is your ccglab home.
 <li> <code>cd ccglab</code>
 <li> Execute <code>./install</code> bash script in the repo to get the extras needed, and to set up the paths so that CCGlab is usable from anywhere in your user account. <br>
-
 </ol>
 
-You can run the <code>ccglab</code> script from anywhere after install.
+Depending on your package manager, which is assumed to be either <code>apt-get, yum, brew</code> in this pecking order, if all are present in your system,
+or some, it will fetch (if not already present in your system) <code>sbcl</code> and <code>rlwrap</code> as well. All linuxsphere (rolling and nonrolling distros, Macos) have standard packages for these tools. 
+
+You can then run the <code>ccglab</code> script from anywhere after install.
 
 Latest release is shown by <code>(which-ccglab).</code> Announced git releases may be slightly behind the latest,
 which is always this copy. Just clone this repo rather than download the release if you want the latest.
