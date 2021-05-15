@@ -17,7 +17,7 @@ Combinatory Categorial Grammar (CCG): CCG and probabilistic CCG, with full set o
 <li> Execute <code>./install</code> bash script in the repo to get the extras needed, and to set up the paths so that CCGlab is usable from anywhere in your user account. <br>
 </ol>
 
-Depending on your package manager, which is assumed to be either <code>pacman, dnf, yum, apt-get, brew</code> (in this pecking order if all are present in your system),
+Depending on your package manager, which is assumed to be either <code>dnf, yum, apt-get, pacman, brew</code> (in this pecking order if all are present in your system),
 it will fetch (if not already present in your system) <code>sbcl</code> and <code>rlwrap</code>. All linuxsphere (rolling and nonrolling distros, MACOS) have standard packages for these tools. 
 
 You can then run the <code>ccglab</code> script from anywhere after install.
