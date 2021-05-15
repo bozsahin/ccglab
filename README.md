@@ -100,7 +100,7 @@ I hope you appreciate the peace and comfort of <code>rlwrap</code> when you use 
 <B>THE CCG WRAPPER</B>
 
 Steedman-notation for CCG is probably not SLR-parsable. I remember getting shift-reduce and reduce-reduce conflicts in SLR which I didn't know
-to eliminate without changing the notation. So thanks to Mark Johnson, for the LALR parser, which is sufficient for CCG.
+how to eliminate without changing the notation. So thanks to Mark Johnson, for the LALR parser, which is sufficient for CCG.
 
 enjoy.
 
