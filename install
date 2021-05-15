@@ -46,10 +46,14 @@ fi
 #check if SBCL and rlwrap need installing-- SBCL is the standard CCGlab lisp
 #there is a pecking order of packagers, in case you have more than one
 packager=
+install=install
+if [ `command -v dnf` ]; then
+	packager=dnf
+fi
 if [ `command -v yum` ]; then
 	  packager=yum   
 	  # open library space of yum
-	  $SUDO yum install yum-utils
+	  $SUDO yum $install yum-utils
 	  $SUDO yum-config-manager --enable \*
 fi
 if [ `command -v apt-get` ]; then
@@ -57,6 +61,10 @@ if [ `command -v apt-get` ]; then
 	# open library space of apt-get and refresh
 	$SUDO add-apt-repository universe
 	$SUDO apt-get update
+fi
+if [ `command -v pacman` ]; then
+	packager=pacman
+	install='-S'
 fi
 if [ `command -v brew` ]; then
     	packager=brew
@@ -70,7 +78,7 @@ else
 fi
 if [ ! `command -v sbcl` ]; then
   if [ "$packager" ]; then
-	$SUDO $packager install sbcl
+	$SUDO $packager $install sbcl
 	LOG+="\n-sbcl is downloaded and installed"
   fi
 else
@@ -81,8 +89,8 @@ if [ `command -v rlwrap` ]; then
 	LOG+="\n-Local rlwrap is set for CCGlab"
 else 
   if [ "$packager" ]; then
-	LOG+="\n-rlwrap downloaded and installed"
-	$SUDO $packager install rlwrap
+	LOG+="\n-rlwrap is downloaded and installed"
+	$SUDO $packager $install rlwrap
   fi
 fi
 printf '%s\n' '# stuff added by CCGlab installer' >> ~/.bashrc
