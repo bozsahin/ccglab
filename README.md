@@ -91,7 +91,7 @@ for the Lisp reader needs methods, therefore not usable in GCL/Clisp out of the 
 I added Allegro CL support for CCGlab (for calling bash scripts etc.), but somewhat reluctantly. Its free versions are so cryptic about heap control 
 you will avoid it, and spend most of your time garbage-collecting rather than doing useful work. Not worth it, folks.
 
-Design and development of CCGlab continues to be in SBCL, then occasionally checked with CCL. 
+Design and development of CCGlab continues to be in SBCL, then occasionally checked with CCL. SBCL developers, you are my heros.
 
 <B>THE WRAPPER</B>
 
