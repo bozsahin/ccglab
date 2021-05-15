@@ -97,6 +97,10 @@ Design and development of CCGlab continues to be in SBCL, then occasionally chec
 
 I hope you appreciate the peace and comfort of <code>rlwrap</code> when you use a command-line tool like CCGlab. I am eternally grateful to its developers.
 
+<B>THE CCG WRAPPER</B>
+
+Steedman-notation for CCG is probably not SLR-parsable. I remember getting shift-reduce and reduce-reduce conflicts in SLR which I didn't know
+to eliminate without changing the notation. So thanks to Mark Johnson, for the LALR parser, which is sufficient for CCG.
 
 enjoy.
 
