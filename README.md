@@ -18,7 +18,7 @@ Combinatory Categorial Grammar (CCG): CCG and probabilistic CCG, with full set o
 </ol>
 
 Depending on your package manager, which is assumed to be either <code>dnf, yum, apt-get, pacman, brew</code> (in this pecking order if all are present in your system),
-it will fetch (if not already present in your system) <code>sbcl</code> and <code>rlwrap</code>. All linuxsphere (rolling and nonrolling distros, MACOS, Windows's WSL linux distros) have standard packages for these tools. 
+it will fetch  <code>sbcl</code> and <code>rlwrap</code>  (if not already present in your system). All linuxsphere (rolling and nonrolling distros, MACOS, Windows's WSL linux distros) have standard packages for these tools. 
 
 You can then run the <code>ccglab</code> script from anywhere after install.
 
@@ -95,12 +95,12 @@ Design and development of CCGlab continues to be in SBCL, then occasionally chec
 
 <B>THE WRAPPER</B>
 
-I hope you appreciate the peace and comfort of <code>rlwrap</code> when you use a command-line tool like CCGlab. I am eternally grateful to its developers.
+I hope you appreciate the peace and comfort of command-recaller <code>rlwrap</code> when you use a command-line tool like CCGlab. I am eternally grateful to its developers.
 
 <B>THE CCG WRAPPER</B>
 
-Steedman-notation for CCG is probably not SLR-parsable. I remember getting shift-reduce and reduce-reduce conflicts in SLR which I didn't know
-how to eliminate without changing the notation. So thanks to Mark Johnson for the LALR parser, which is sufficient for CCG lexical entry and rule recognition.
+Steedman-notation for CCG is probably not SLR-parsable. I remember getting reduce-reduce conflicts in SLR which I didn't know
+how to eliminate without changing the notation. Thanks to Mark Johnson for the LALR parser, which is sufficient for CCG lexical entry and rule recognition.
 
 enjoy.
 
