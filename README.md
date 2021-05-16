@@ -95,7 +95,7 @@ Design and development of CCGlab continues to be in SBCL, then occasionally chec
 
 <B>THE WRAPPER</B>
 
-I hope you appreciate the peace and comfort of command-recaller <code>rlwrap</code> when you use a command-line tool like CCGlab. I am eternally grateful to its developers.
+You will appreciate the peace and comfort of the command-recaller <code>rlwrap</code> when you use a command-line tool like CCGlab. I am personally eternally grateful to its developers.
 
 <B>THE CCG WRAPPER</B>
 
