@@ -675,7 +675,7 @@
   )
 
 (defun which-ccglab ()
-  "CCGlab, version 7.2.2")
+  "CCGlab, version 7.2.3")
 
 (defun set-lisp-system (lispsys)
   (case lispsys
@@ -3728,6 +3728,7 @@
 	 um update-model
 	 umxp update-model-xp
 	 st show-training
+	 klz klz 
 	 stxp show-training-xp
 	 csnf cky-show-normal-forms
 	 crs cky-reveal-cell
