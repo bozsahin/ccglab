@@ -3666,13 +3666,17 @@
     (cond (err (format t "~%Out of range probabilities for keys ~A" err)
 	       (pprint-hashtable h)
 	       (return-from klz nil))
-	  (t (apply #'+ (mapcar #'(lambda (pair)
-				    (if (= (third (machash (second pair) h)) 0.0)
-				      0.0
-				      (* (third (machash (first pair) h))
-					 (log (/ (third (machash (first pair) h))
-						 (third (machash (second pair) h)))))))
-				keypairs))))))
+	  (t (let ((total 0.0))
+	       (dolist (pair keypairs)
+		 (let  
+		   ((pv2 (third (machash (second pair) h))) ; probability values
+		    (pv1 (third (machash (first pair) h))))
+		   (cond ((and pv1 pv2)
+			  (if (/= pv2 0.0) 
+			    (setf total (+ total (* pv1 (log (/ pv1 pv2)))))))
+			 (t (format t "Invalid index pair: ~A  values: ~A" pair (list pv1 pv2))
+			    (return-from klz)))))
+	       total)))))
 
 
 ;; ======================================
