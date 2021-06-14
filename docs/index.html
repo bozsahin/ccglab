@@ -18,8 +18,7 @@
 
  
 <p> 
-It is designed with linguists, cognitive scientists, and computational linguists
-in mind. 
+It is for linguists, cognitive scientists, and computational linguists.
 It can be used for quick check of analyses, or for large-scale development
 of grammars and models.
 <p> <big><code>CCGlab</code></big> grammars are written much like in CCG papers. The output is in papers format (well, almost).  
@@ -27,7 +26,7 @@ of grammars and models.
 <p> 
 It implements all established combinators of CCG, also, experimental ones, in all variants and powers.
 Unary rules, slash modalities,
-and meta-categories such as (X\X)/X have been implemented. The manual
+and meta-categories such as (X\X)/X have been implemented. The manual below
 describes the range of possible <big><code>CCGlab</code></big> grammars.
 
 <p>It also implements probabilistic CCG, aka. pCCG. In the plain vanilla version, only lexical features are used, which you can amend.
@@ -35,13 +34,13 @@ Parameter estimation and update are provided with or without extrapolation.
 Therefore model training is possible.
 Models and grammars use the same format.
 
-<p> In `deduction' mode, <code>CCGlab</code> 
+<p> In `parsing' mode, <code>CCGlab</code> 
 delivers all logical forms that are derivable for the given string.
-In `induction' mode, it gives the most likely logical form for a string, given training from data so far, its most likely derivation, and the most likely derivation for any LF
+In `ranking' mode, it gives the most likely logical form for a string, given training from data so far, its most likely derivation, and the most likely derivation for any LF
 for the string. Lower-ranking parsers are available too, if demanded.
 Both modes are based on the same CKY parse engine and the same CCG grammar format.
 
-<p> The main features of <code>CCGlab</code> which distinguish it from other publicly available CCG code:
+<p> The main features of <code>CCGlab</code> are:
 <ul>
 <li> The logical form is associated with the entire category, via self-contained and lisp-free lambda-calculus.
 <li> Structural unification plays no linguistic role; basic categories and their atomic features are matched for term consistency only.
@@ -49,7 +48,7 @@ Both modes are based on the same CKY parse engine and the same CCG grammar forma
  They all have on/off switches for experimentation.
 <li> Type-raising is not built-in, because it does not combine. Facilities are provided for it, such as 
 unary rules and morpholexical generalizations. There is a compiler for it.
-<li> Deduction is possible in a statistically-trained grammar, and induction on a linguistically-motivated grammar.
+<li> Parsing is possible in a statistically-trained grammar, and ranking in a linguistically-motivated grammar.
 The grammar 
 format is the same, and feature counts are always calculated by CKY independent of mode of use. 
 <br>
