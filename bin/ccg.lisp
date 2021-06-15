@@ -3662,7 +3662,7 @@
 
 (defun klz (g keypairs)
   "KL divergence from N(0,1) probs for pairs of keys in grammar.
-  Return KL value and number of pairs if succesfull, nil otherwise"
+  Return KL value"
   (multiple-value-bind (h err) (kl-prepare g)
     (cond (err (format t "~%Out of range probabilities for keys ~A" err)
 	       (pprint-hashtable h)
@@ -3677,7 +3677,7 @@
 			    (setf total (+ total (* pv1 (log (/ pv1 pv2)))))))
 			 (t (format t "Invalid index pair: ~A  values: ~A" pair (list pv1 pv2))
 			    (return-from klz)))))
-	       (values total (length keypairs)))))))
+	       total)))))
 
 
 ;; ======================================
