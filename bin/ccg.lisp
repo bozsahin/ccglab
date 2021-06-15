@@ -3732,7 +3732,7 @@
 	 um update-model
 	 umxp update-model-xp
 	 st show-training
-	 klz klz 
+	 kl klz 
 	 stxp show-training-xp
 	 csnf cky-show-normal-forms
 	 crs cky-reveal-cell
