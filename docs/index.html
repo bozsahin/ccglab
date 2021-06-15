@@ -48,11 +48,12 @@ Both modes are based on the same CKY parse engine and the same CCG grammar forma
  They all have on/off switches for experimentation.
 <li> Type-raising is not built-in, because it does not combine. Facilities are provided for it, such as 
 unary rules and morpholexical generalizations. There is a compiler for it.
-<li> Parsing is possible in a statistically-trained grammar, and ranking in a linguistically-motivated grammar.
+<li> Parsing mode is designed for linguistically-motivated grammars, and ranking
+	mode for statistically-trained grammars. 
+Parsing mode is possible in a statistically-trained grammar, and ranking mode in a linguistically-motivated grammar.
 The grammar 
 format is the same, and feature counts are always calculated by CKY independent of mode of use. 
-<br>
-The first use is helpful in fine-tuning a model. The second use might be helpful in prioritizing lexical assumptions.
+The first one is helpful in fine-tuning a model. The second use is  helpful in prioritizing lexical assumptions.
 </ul>
 
 <hr>
