@@ -46,13 +46,14 @@ Both modes are based on the same CKY parse engine and the same CCG grammar forma
 <li> Structural unification plays no linguistic role; basic categories and their atomic features are matched for term consistency only.
 <li> By default standard combinators are available all the time, in their powers (linear, quadratic, cubic). 
  They all have on/off switches for experimentation.
-<li> Type-raising is not built-in, because it does not combine. Facilities are provided for it, such as 
+<li> Facilities are provided for type-raising, such as 
 unary rules and morpholexical generalizations. There is a compiler for it.
 <li> Parsing mode is designed for linguistically-motivated grammars, and ranking
 	mode for statistically-trained grammars. 
-Parsing mode is possible in a statistically-trained grammar, and ranking mode in a linguistically-motivated grammar.
 The grammar 
 format is the same, and feature counts are always calculated by CKY independent of mode of use. 
+<li>
+Parsing mode is also possible in a statistically-trained grammar, and ranking mode in a linguistically-motivated grammar.
 The first one is helpful in fine-tuning a model. The second use is  helpful in prioritizing lexical assumptions.
 </ul>
 
