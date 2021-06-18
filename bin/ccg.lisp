@@ -3485,7 +3485,8 @@
 	    (if (> (nv-list-val 'PARAM item) maxw) (setf maxw (nv-list-val 'PARAM item)))
 	    (if (< (nv-list-val 'PARAM item) minw) (setf minw (nv-list-val 'PARAM item))))
 	  (format t "~%Currently loaded grammar is z-scored to N(0,1).")
-	  (format t "~%Max z-scored = ~A, Min z-scored = ~A" maxw minw))))))
+	  (format t "~%Max z-scored = ~A, Min z-scored = ~A" maxw minw)
+	  (list minw maxw))))))
 
 (defun max-lf-span ()
   "find the spanned elements of the currently loaded grammar, 
