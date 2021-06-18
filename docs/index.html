@@ -37,13 +37,13 @@ Parameter estimation and update are provided with or without extrapolation.
 Therefore model training is possible.
 Models and grammars use the same format.
 
-<p> In `parsing' mode, <code>CCGlab</code> 
+<p> In `parsing' mode, <code<big>>CCGlab</code></big> 
 delivers all logical forms that are derivable for the given string.
 In `ranking' mode, it gives the most likely logical form for a string, given training from data so far, its most likely derivation, and the most likely derivation for any LF
 for the string. Lower-ranking parsers are available too, if demanded.
 Both modes are based on the same CKY parse engine and the same CCG grammar format.
 
-<p> The main features of <code>CCGlab</code> are:
+<p> The main features of <big><code>CCGlab</code></big> are:
 <ul>
 <li> The logical form is associated with the entire category, via self-contained and lisp-free lambda-calculus.
 <li> Structural unification plays no linguistic role; basic categories and their atomic features are matched for term consistency only.
@@ -53,8 +53,8 @@ Both modes are based on the same CKY parse engine and the same CCG grammar forma
 unary rules and morpholexical generalizations. There is a compiler for it.
 <li> Parsing mode is designed for linguistically-motivated grammars, and ranking
 	mode for statistically-trained grammars. 
-The grammar 
-format is the same, and feature counts are always calculated by CKY independent of mode of use. 
+	Competence and performance grammars have the same shape but different function.
+Feature counts are always calculated by CKY independent of mode of use. 
 <li>
 Parsing mode is also possible in a statistically-trained grammar, and ranking mode in a linguistically-motivated grammar.
 The first one is helpful in fine-tuning a model. The second use is  helpful in prioritizing lexical assumptions.
