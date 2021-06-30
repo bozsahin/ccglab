@@ -18,11 +18,11 @@
 quick check of a linguistic analysis in CCG, to large-scale development
 of  grammars and models.
 
-<p>
-<big><code>CCGlab</code></big> grammars are written much like in CCG papers. The output is in papers format (well, almost).  It is written in Common Lisp.
+<p>-Cem Bozsahin
+
+<p><big><code>CCGlab</code></big> grammars are written much like in CCG papers. The output is in papers format (well, almost).  It is written in Common Lisp.
 There is an installer in the repo below to get everything needed to set it up.
 
-<p>-Cem Bozsahin
 
 
 <p> 
@@ -34,12 +34,14 @@ describes the range of possible <big><code>CCGlab</code></big> grammars.
 <p>It also implements probabilistic CCG, aka. pCCG. In the plain vanilla version, only lexical features are used, which you can amend.
 Parameter estimation and update are provided with or without extrapolation.
 Therefore model training is possible.
-Models and grammars use the same format.
 
 <p> In `parsing' mode, <code><big>CCGlab</code></big> 
 delivers all logical forms that are derivable for the given string.
-In `ranking' mode, it gives the most likely logical form for a string, given training from data so far, its most likely derivation, and the most likely derivation for any LF
+
+<p> In `ranking' mode, it gives (1) the most likely logical form for a string, given training from data so far, (2) its most likely derivation, and (3) the most likely derivation for any LF
 for the string. Lower-ranking parsers are available too, if demanded.
+
+<p>
 Both modes are based on the same CKY parse engine and the same CCG grammar format.
 
 <p> The main features of <big><code>CCGlab</code></big> are:
