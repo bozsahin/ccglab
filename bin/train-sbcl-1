@@ -29,6 +29,7 @@ fi
 echo '======= Log file ============'  >> $8.log
 echo "I am called as: $0 $@" >> $8.log
 echo "            at: `date`" >> $8.log
+echo "            in: `hostname`" >> $8.log
 echo "Log goes to   : $8.log" >> $8.log
 echo "I will call sbcl as: $CCGLAB_LISP" >> $8.log
 TRAINER="$TRAIN \"$3\" $2 $4 \"$8.$N.$6a.$7c\" $N $6 $7"   # passes one less argument if $N is empty string
