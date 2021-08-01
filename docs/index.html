@@ -36,10 +36,9 @@ Parameter estimation and update are provided with or without extrapolation.
 Therefore model training is possible.
 
 <p> In `parsing' mode, <code><big>CCGlab</code></big> 
-delivers all logical forms that are derivable for the given string.
+delivers all logical forms that are derivable for an expression.
 
-<p> In `ranking' mode, it gives (1) the most likely logical form for a string, given training from data so far, (2) its most likely derivation, and (3) the most likely derivation for any LF
-for the string. Lower-ranking parsers are available too, if demanded.
+<p> In `ranking' mode, for an expression, it gives (1) the most likely logical form, given training from earlier data, (2) its most likely derivation, and (3) the most likely derivation for any LF for the expression. Lower-ranking parsers are available too, if demanded.
 
 <p>
 Both modes are based on the same CKY parse engine and the same CCG grammar format.
