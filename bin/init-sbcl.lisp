@@ -21,4 +21,7 @@
     (and savep (save-training-xp out))  ; this is to save the grammar---session output always to names with nohup.out when called by ccglab.nohup
     ))
 
+(defun nf-and-beam ()
+  (basic-ccg :nf-parse t :beam t))
+
 (format t "~%init-sbcl.lisp loaded")
