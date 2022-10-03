@@ -5,10 +5,10 @@
 #   on a separate line,
 #   then wraps in special symbols for Lisp in |x|, then rewraps :=, eliminates empty lines, and wraps all in ().
 # This version leaves input file and output file names to caller.
-# -Cem Bozsahin 2015-2021, Ankara, Lisboa
+# -Cem Bozsahin 2022, Ankara
 if [ -f $1 ]; then
 	awk 'BEGIN {print "("}
-            {if (match($0,/^[ ]*"/) > 0) {print $0; next};
+            {
 	     gsub(/%.*$/,""); 
              gsub(/:/," |:| "); 
 	     gsub(/=/," |=| "); 
