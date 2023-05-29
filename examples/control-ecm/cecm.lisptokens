@@ -1,11 +1,4 @@
 (
-
-
-
-
-
-
-
 it         n  |:=|  xp              |:|  !it |;| 
 john       n  |:=|  np              |:|  !john |;| 
 mary       n  |:=|  np              |:|  !mary |;| 
@@ -24,4 +17,5 @@ bought     v  |:=|   |(| s |\\| np |)|  |/| np       |:|   |\\| x |\\| y |.| !bu
 bought     v  |:=|  iv |/| np           |:|   |\\| x |\\| y |.| !buy x y |;| 
 the      det  |:=|  np |/|  |*| n           |:|  !def |;| 
 car        n  |:=|  n               |:|  !car |;| 
-handsome   p  |:=|  propp           |:|   |\\| x |.| !handsome x |;| )
+handsome   p  |:=|  propp           |:|   |\\| x |.| !handsome x |;| 
+)

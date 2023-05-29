@@ -675,7 +675,7 @@
   )
 
 (defun which-ccglab ()
-  "CCGlab, version 7.2.3")
+  "CCGlab, version 7.3")
 
 (defun set-lisp-system (lispsys)
   (case lispsys
@@ -2225,6 +2225,10 @@
 		      (realize-binds (machash 'ARG 'ARG 'SYN ht2) b2))
 			     newht)))))
 
+; the commented line below is eliminated because
+; in B^n and S^n for n>1, only one argument must be checked
+; for modality and directionality, not more than one, according to CL book.
+; Thanks to Christopher Stone for pointing this out to me.
 (defun f2-comp (ht1 ht2) 
   ">B^2"
   (and (complexp-hash (machash 'SYN ht1))
@@ -2234,7 +2238,7 @@
        (machash 'DIR 'RESULT 'SYN ht2) ; ht2 must have complex result
        (eql (machash 'DIR 'RESULT 'SYN ht2) 'FS)
        (member (machash 'MODAL 'SYN ht1) '(ALL HARMONIC))
-       (not (eql (machash 'MODAL 'SYN ht2) 'STAR)) ; main functor must allow composition
+      ;(not (eql (machash 'MODAL 'SYN ht2) 'STAR)) ; main functor must allow composition
        (member (machash 'MODAL 'RESULT 'SYN ht2) '(ALL HARMONIC))
        (multiple-value-bind (match b1 b2)
 	 (cat-match (machash 'ARG 'SYN ht1) (machash 'RESULT 'RESULT 'SYN ht2))
@@ -2269,7 +2273,6 @@
        (machash 'DIR 'RESULT 'SYN ht1) ; ht1 must have complex result
        (eql (machash 'DIR 'RESULT 'SYN ht1) 'BS)
        (member (machash 'MODAL 'SYN ht2) '(ALL HARMONIC))
-       (not (eql (machash 'MODAL 'SYN ht1) 'STAR)) ; main functor must allow composition
        (member (machash 'MODAL 'RESULT 'SYN ht1) '(ALL HARMONIC))
        (multiple-value-bind (match b1 b2)
 	 (cat-match (machash 'RESULT 'RESULT 'SYN ht1)
@@ -2305,7 +2308,6 @@
        (machash 'DIR 'RESULT 'SYN ht2) ; ht2 must have complex result
        (eql (machash 'DIR 'RESULT 'SYN ht2) 'BS)
        (member (machash 'MODAL 'SYN ht1) '(ALL CROSS))
-       (not (eql (machash 'MODAL 'SYN ht2) 'STAR)) ; main functor must allow composition
        (member (machash 'MODAL 'RESULT 'SYN ht2) '(ALL CROSS))
        (multiple-value-bind (match b1 b2)
 	 (cat-match (machash 'ARG 'SYN ht1) (machash 'RESULT 'RESULT 'SYN ht2))
@@ -2340,7 +2342,6 @@
        (machash 'DIR 'RESULT 'SYN ht1) ; ht1 must have complex result
        (eql (machash 'DIR 'RESULT 'SYN ht1) 'FS)
        (member (machash 'MODAL 'SYN ht2) '(ALL CROSS))
-       (not (eql (machash 'MODAL 'SYN ht1) 'STAR)) ; main functor must allow composition
        (member (machash 'MODAL 'RESULT 'SYN ht1) '(ALL CROSS))
        (multiple-value-bind (match b1 b2)
 	 (cat-match (machash 'RESULT 'RESULT 'SYN ht1)
@@ -2377,7 +2378,6 @@
        (machash 'DIR 'RESULT 'SYN ht2) ; result must be functor too
        (eql (machash 'DIR 'RESULT 'SYN ht1) 'FS)
        (eql (machash 'DIR 'RESULT 'SYN ht2) 'FS)
-       (not (eql (machash 'MODAL 'SYN ht2) 'STAR)) ; main functor must allow composition
        (member (machash 'MODAL 'RESULT 'SYN ht1) '(ALL HARMONIC))
        (member (machash 'MODAL 'RESULT 'SYN ht2) '(ALL HARMONIC))
        (multiple-value-bind (match b1 b2)
@@ -2421,7 +2421,6 @@
        (machash 'DIR 'RESULT 'SYN ht1) ; result must be functor too
        (eql (machash 'DIR 'RESULT 'SYN ht2) 'BS)
        (eql (machash 'DIR 'RESULT 'SYN ht1) 'BS)
-       (not (eql (machash 'MODAL 'SYN ht1) 'STAR)) ; main functor must allow composition
        (member (machash 'MODAL 'RESULT 'SYN ht2) '(ALL HARMONIC))
        (member (machash 'MODAL 'RESULT 'SYN ht1) '(ALL HARMONIC))
        (multiple-value-bind (match b1 b2)
@@ -2466,7 +2465,6 @@
        (machash 'DIR 'RESULT 'SYN ht2) ; result must be functor too
        (eql (machash 'DIR 'RESULT 'SYN ht1) 'FS)
        (eql (machash 'DIR 'RESULT 'SYN ht2) 'BS)
-       (not (eql (machash 'MODAL 'SYN ht2) 'STAR)) ; main functor must allow composition
        (member (machash 'MODAL 'RESULT 'SYN ht1) '(ALL CROSS))
        (member (machash 'MODAL 'RESULT 'SYN ht2) '(ALL CROSS))
        (multiple-value-bind (match b1 b2)
@@ -2510,7 +2508,6 @@
        (machash 'DIR 'RESULT 'SYN ht1) ; result must be functor too
        (eql (machash 'DIR 'RESULT 'SYN ht2) 'BS)
        (eql (machash 'DIR 'RESULT 'SYN ht1) 'FS)
-       (not (eql (machash 'MODAL 'SYN ht1) 'STAR)) ; main functor must allow composition
        (member (machash 'MODAL 'RESULT 'SYN ht2) '(ALL CROSS))
        (member (machash 'MODAL 'RESULT 'SYN ht1) '(ALL CROSS))
        (multiple-value-bind (match b1 b2)
@@ -2597,7 +2594,6 @@
        (machash 'DIR 'RESULT 'SYN ht2) ; ht2 must have a really complex result
        (machash 'DIR 'RESULT 'RESULT 'SYN ht2)
        (eql (machash 'DIR 'RESULT 'RESULT 'SYN ht2) 'FS)
-       (not (eql (machash 'MODAL 'SYN ht2) 'STAR)) ; main functor must allow composition
        (member (machash 'MODAL 'RESULT 'RESULT 'SYN ht2) '(ALL HARMONIC))
        (multiple-value-bind (match b1 b2)
 	 (cat-match (machash 'ARG 'SYN ht1) 
@@ -2642,7 +2638,6 @@
        (machash 'DIR 'RESULT 'SYN ht2) ; ht2 must have a really complex result
        (machash 'DIR 'RESULT 'RESULT 'SYN ht2)
        (eql (machash 'DIR 'RESULT 'RESULT 'SYN ht2) 'BS)
-       (not (eql (machash 'MODAL 'SYN ht2) 'STAR)) ; main functor must allow composition
        (member (machash 'MODAL 'RESULT 'RESULT 'SYN ht2) '(ALL CROSS))
        (multiple-value-bind (match b1 b2)
 	 (cat-match (machash 'ARG 'SYN ht1) 
@@ -2687,7 +2682,6 @@
        (machash 'DIR 'RESULT 'SYN ht1) ; ht1 must have a really complex result
        (machash 'DIR 'RESULT 'RESULT 'SYN ht1)
        (eql (machash 'DIR 'RESULT 'RESULT 'SYN ht1) 'BS)
-       (not (eql (machash 'MODAL 'SYN ht1) 'STAR)) ; main functor must allow composition
        (member (machash 'MODAL 'RESULT 'RESULT 'SYN ht1) '(ALL HARMONIC))
        (multiple-value-bind (match b1 b2)
 	 (cat-match (machash 'RESULT 'RESULT 'RESULT 'SYN ht1)
@@ -2732,7 +2726,6 @@
        (machash 'DIR 'RESULT 'SYN ht1) ; ht1 must have a really complex result
        (machash 'DIR 'RESULT 'RESULT 'SYN ht1)
        (eql (machash 'DIR 'RESULT 'RESULT 'SYN ht1) 'FS)
-       (not (eql (machash 'MODAL 'SYN ht1) 'STAR)) ; main functor must allow composition
        (member (machash 'MODAL 'RESULT 'RESULT 'SYN ht1) '(ALL CROSS))
        (multiple-value-bind (match b1 b2)
 	 (cat-match (machash 'RESULT 'RESULT 'RESULT 'SYN ht1)
