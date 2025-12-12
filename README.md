@@ -1,6 +1,8 @@
 # ccglab
 Combinatory Categorial Grammar (CCG): CCG and probabilistic CCG, with full set of  combinators and their powers.
 
+<b>I DO NOT MAINTAIN CCGLAB ANYMORE, SINCE 2021. SORRY.</b>
+
 <code>CCGlab</code> is <code>Common Lisp</code> code with some <code>bash</code> scripts for install and run-time tokenization. 
 
 <code>CCGlab</code> needs a linux, a native one or one in macosphere or windowsphere. 
